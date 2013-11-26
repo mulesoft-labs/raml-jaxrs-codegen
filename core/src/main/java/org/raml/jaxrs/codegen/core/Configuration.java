@@ -21,7 +21,7 @@ import java.io.File;
 public class Configuration
 {
     private File outputDirectory;
-    private String packageName;
+    private String basePackageName;
 
     public File getOutputDirectory()
     {
@@ -33,13 +33,13 @@ public class Configuration
         this.outputDirectory = outputDirectory;
     }
 
-    public String getPackageName()
+    public String getBasePackageName()
     {
-        return packageName;
+        return basePackageName;
     }
 
-    public void setPackageName(final String packageName)
+    public void setBasePackageName(final String basePackageName)
     {
-        this.packageName = packageName;
+        this.basePackageName = basePackageName;
     }
 }

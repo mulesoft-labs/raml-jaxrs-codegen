@@ -114,3 +114,4 @@ protocols: [HTTP, HTTPS]
     head: !!null
     /{tagId}:
         head: !!null
+        patch: !!null
