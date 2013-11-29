@@ -9,8 +9,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -47,12 +49,16 @@ class Context
     private final Configuration configuration;
     private final JCodeModel codeModel;
 
+    private final Map<String, Set<String>> resourcesMethods;
+
     public Context(final Configuration configuration)
     {
         Validate.notNull(configuration, "configuration can't be null");
         this.configuration = configuration;
 
         codeModel = new JCodeModel();
+
+        resourcesMethods = new HashMap<String, Set<String>>();
     }
 
     public void generate() throws IOException
@@ -62,8 +68,20 @@ class Context
 
     public JDefinedClass createResourceInterface(final String name) throws Exception
     {
+        String actualName;
+        int i = -1;
+        while (true)
+        {
+            actualName = name + (++i == 0 ? "" : Integer.toString(i));
+            if (!resourcesMethods.containsKey(actualName))
+            {
+                resourcesMethods.put(actualName, new HashSet<String>());
+                break;
+            }
+        }
+
         final JPackage pkg = codeModel._package(configuration.getBasePackageName() + ".resource");
-        return pkg._interface(name);
+        return pkg._interface(actualName);
     }
 
     @SuppressWarnings("unchecked")

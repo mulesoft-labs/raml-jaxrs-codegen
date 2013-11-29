@@ -17,13 +17,14 @@
 package org.raml.jaxrs.codegen.core;
 
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.deleteWhitespace;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.replaceChars;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.apache.commons.lang.WordUtils.capitalizeFully;
+import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
 import java.io.File;
 import java.io.Reader;
@@ -133,6 +134,7 @@ public class Generator
             // TODO compute and add @PATH
             // TODO return correct type
             // TODO add query and path params
+            // TODO use JSR-303 annotations for constraints
             // TODO generate real name
             final JMethod method = resourceInterface.method(JMod.NONE, void.class,
                 "foo" + RandomStringUtils.randomAlphanumeric(20));
@@ -153,7 +155,13 @@ public class Generator
     {
         final String baseInterfaceName = defaultIfBlank(resource.getDisplayName(),
             replaceChars(resource.getRelativeUri(), '/', ' '));
-        final String resourceInterfaceName = deleteWhitespace(capitalizeFully(baseInterfaceName));
+
+        String resourceInterfaceName = capitalizeFully(baseInterfaceName).replaceAll("[\\W_]", "");
+        if (isDigits(left(resourceInterfaceName, 1)))
+        {
+            resourceInterfaceName = "_" + resourceInterfaceName;
+        }
+
         return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
     }
 }
