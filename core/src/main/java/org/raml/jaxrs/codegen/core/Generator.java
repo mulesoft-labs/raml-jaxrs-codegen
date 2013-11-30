@@ -168,36 +168,49 @@ public class Generator
             // TODO add headers
             // TODO add form params
             // TODO add plain body
-            for (final Entry<String, QueryParameter> namedQueryParameter : action.getQueryParameters()
-                .entrySet())
-            {
-                // TODO add default value
-                final String queryParameterName = namedQueryParameter.getKey();
-                final QueryParameter queryParameter = namedQueryParameter.getValue();
 
-                final String argumentName = buildVariableName(queryParameterName);
-
-                final JVar param = method.param(getJavaType(queryParameter), argumentName);
-
-                param.annotate(QueryParam.class).param("value", queryParameterName);
-
-                if (queryParameter.getDefaultValue() != null)
-                {
-                    param.annotate(DefaultValue.class).param("value", queryParameter.getDefaultValue());
-                }
-
-                final String example = isNotBlank(queryParameter.getExample())
-                                                                              ? " e.g. "
-                                                                                + queryParameter.getExample()
-                                                                              : "";
-                javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
-            }
+            addQueryParameters(action, method, javadoc);
         }
 
         for (final Resource childResource : resource.getResources().values())
         {
             addResourceMethods(childResource, resourceInterface, resourceInterfacePath);
         }
+    }
+
+    private void addQueryParameters(final Action action, final JMethod method, final JDocComment javadoc)
+    {
+        for (final Entry<String, QueryParameter> namedQueryParameter : action.getQueryParameters().entrySet())
+        {
+            final String queryParameterName = namedQueryParameter.getKey();
+            final QueryParameter queryParameter = namedQueryParameter.getValue();
+
+            addQueryParameter(queryParameterName, queryParameter, method, javadoc);
+        }
+    }
+
+    private void addQueryParameter(final String name,
+                                   final QueryParameter queryParameter,
+                                   final JMethod method,
+                                   final JDocComment javadoc)
+    {
+        final String argumentName = buildVariableName(name);
+
+        final JVar param = method.param(getJavaType(queryParameter), argumentName);
+
+        param.annotate(QueryParam.class).param("value", name);
+
+        if (queryParameter.getDefaultValue() != null)
+        {
+            param.annotate(DefaultValue.class).param("value", queryParameter.getDefaultValue());
+        }
+
+        final String example = isNotBlank(queryParameter.getExample())
+                                                                      ? " e.g. "
+                                                                        + queryParameter.getExample()
+                                                                      : "";
+
+        javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
     }
 
     private static String buildResourceInterfaceName(final Resource resource)
@@ -238,12 +251,12 @@ public class Generator
         // TODO wrap with generic list on repeats
         // TODO support enum
 
-        final boolean neverNull = queryParameter.isRequired() || isNotBlank(queryParameter.getDefaultValue());
-
         if (queryParameter.getType() == null)
         {
             return String.class;
         }
+
+        final boolean neverNull = queryParameter.isRequired() || isNotBlank(queryParameter.getDefaultValue());
 
         switch (queryParameter.getType())
         {
