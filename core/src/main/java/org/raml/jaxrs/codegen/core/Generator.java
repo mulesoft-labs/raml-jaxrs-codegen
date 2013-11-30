@@ -33,6 +33,7 @@ import java.util.List;
 import javax.ws.rs.Path;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.raml.model.Action;
 import org.raml.model.Raml;
@@ -119,41 +120,45 @@ public class Generator
         final String resourceInterfaceName = buildResourceInterfaceName(resource);
         final JDefinedClass resourceInterface = context.createResourceInterface(resourceInterfaceName);
 
-        resourceInterface.annotate(Path.class).param("value", strip(resource.getRelativeUri(), "/"));
+        final String path = strip(resource.getRelativeUri(), "/");
+        resourceInterface.annotate(Path.class).param("value", path);
 
         if (isNotBlank(resource.getDescription()))
         {
             resourceInterface.javadoc().add(resource.getDescription());
         }
 
-        addResourceMethods(resource, resourceInterface);
+        addResourceMethods(resource, resourceInterface, path);
     }
 
-    private void addResourceMethods(final Resource resource, final JDefinedClass resourceInterface)
-        throws Exception
+    private void addResourceMethods(final Resource resource,
+                                    final JDefinedClass resourceInterface,
+                                    final String resourceInterfacePath) throws Exception
     {
         for (final Action action : resource.getActions().values())
         {
-            // TODO return correct type
-            // TODO add query and path params
-            // TODO use JSR-303 annotations for constraints
             final String methodName = buildResourceMethodName(action);
-            final JMethod method = context.createResourceMethod(resourceInterface, methodName);
+
+            // TODO use correct return type
+            final JMethod method = context.createResourceMethod(resourceInterface, methodName, void.class);
+            // TODO add query and path params
 
             context.addHttpMethodAnnotation(action.getType().toString(), method);
 
-            // TODO compute and add @PATH
+            method.annotate(Path.class).param("value",
+                StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
+
+            // TODO add JSR-303 annotations for constraints
 
             if (isNotBlank(action.getDescription()))
             {
                 method.javadoc().add(action.getDescription());
             }
-
         }
 
         for (final Resource childResource : resource.getResources().values())
         {
-            addResourceMethods(childResource, resourceInterface);
+            addResourceMethods(childResource, resourceInterface, resourceInterfacePath);
         }
     }
 

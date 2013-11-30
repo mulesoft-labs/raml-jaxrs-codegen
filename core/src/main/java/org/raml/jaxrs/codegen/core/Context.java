@@ -86,7 +86,9 @@ class Context
         return pkg._interface(actualName);
     }
 
-    public JMethod createResourceMethod(final JDefinedClass resourceInterface, final String methodName)
+    public JMethod createResourceMethod(final JDefinedClass resourceInterface,
+                                        final String methodName,
+                                        final Class<?> returnClass)
     {
         final Set<String> existingMethodNames = resourcesMethods.get(resourceInterface.name());
 
@@ -102,7 +104,7 @@ class Context
             }
         }
 
-        return resourceInterface.method(JMod.NONE, void.class, actualMethodName);
+        return resourceInterface.method(JMod.NONE, returnClass, actualMethodName);
     }
 
     @SuppressWarnings("unchecked")
