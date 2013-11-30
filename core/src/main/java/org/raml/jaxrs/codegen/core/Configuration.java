@@ -22,6 +22,7 @@ public class Configuration
 {
     private File outputDirectory;
     private String basePackageName;
+    private boolean useJsr303Annotations = true;
 
     public File getOutputDirectory()
     {
@@ -41,5 +42,15 @@ public class Configuration
     public void setBasePackageName(final String basePackageName)
     {
         this.basePackageName = basePackageName;
+    }
+
+    public boolean isUseJsr303Annotations()
+    {
+        return useJsr303Annotations;
+    }
+
+    public void setUseJsr303Annotations(final boolean useJsr303Annotations)
+    {
+        this.useJsr303Annotations = useJsr303Annotations;
     }
 }
