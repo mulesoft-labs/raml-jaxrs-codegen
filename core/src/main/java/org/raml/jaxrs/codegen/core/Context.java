@@ -29,6 +29,8 @@ import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
+import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
 
 class Context
@@ -82,6 +84,25 @@ class Context
 
         final JPackage pkg = codeModel._package(configuration.getBasePackageName() + ".resource");
         return pkg._interface(actualName);
+    }
+
+    public JMethod createResourceMethod(final JDefinedClass resourceInterface, final String methodName)
+    {
+        final Set<String> existingMethodNames = resourcesMethods.get(resourceInterface.name());
+
+        String actualMethodName;
+        int i = -1;
+        while (true)
+        {
+            actualMethodName = methodName + (++i == 0 ? "" : Integer.toString(i));
+            if (!existingMethodNames.contains(actualMethodName))
+            {
+                existingMethodNames.add(actualMethodName);
+                break;
+            }
+        }
+
+        return resourceInterface.method(JMod.NONE, void.class, actualMethodName);
     }
 
     @SuppressWarnings("unchecked")

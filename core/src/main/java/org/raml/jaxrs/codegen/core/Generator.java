@@ -21,8 +21,8 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.left;
-import static org.apache.commons.lang.StringUtils.replaceChars;
 import static org.apache.commons.lang.StringUtils.strip;
+import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalizeFully;
 import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
@@ -33,7 +33,6 @@ import java.util.List;
 import javax.ws.rs.Path;
 
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.RandomStringUtils;
 import org.apache.commons.lang.Validate;
 import org.raml.model.Action;
 import org.raml.model.Raml;
@@ -48,7 +47,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
-import com.sun.codemodel.JMod;
 
 public class Generator
 {
@@ -119,7 +117,6 @@ public class Generator
     private void createResourceInterface(final Resource resource) throws Exception
     {
         final String resourceInterfaceName = buildResourceInterfaceName(resource);
-
         final JDefinedClass resourceInterface = context.createResourceInterface(resourceInterfaceName);
 
         resourceInterface.annotate(Path.class).param("value", strip(resource.getRelativeUri(), "/"));
@@ -129,16 +126,23 @@ public class Generator
             resourceInterface.javadoc().add(resource.getDescription());
         }
 
+        addResourceMethods(resource, resourceInterface);
+    }
+
+    private void addResourceMethods(final Resource resource, final JDefinedClass resourceInterface)
+        throws Exception
+    {
         for (final Action action : resource.getActions().values())
         {
-            // TODO compute and add @PATH
             // TODO return correct type
             // TODO add query and path params
             // TODO use JSR-303 annotations for constraints
-            // TODO generate real name
-            final JMethod method = resourceInterface.method(JMod.NONE, void.class,
-                "foo" + RandomStringUtils.randomAlphanumeric(20));
+            final String methodName = buildResourceMethodName(action);
+            final JMethod method = context.createResourceMethod(resourceInterface, methodName);
+
             context.addHttpMethodAnnotation(action.getType().toString(), method);
+
+            // TODO compute and add @PATH
 
             if (isNotBlank(action.getDescription()))
             {
@@ -147,14 +151,16 @@ public class Generator
 
         }
 
-        // TODO recurse in sub resources
-        System.err.println("  " + resource.getResources());
+        for (final Resource childResource : resource.getResources().values())
+        {
+            addResourceMethods(childResource, resourceInterface);
+        }
     }
 
     private static String buildResourceInterfaceName(final Resource resource)
     {
-        final String baseInterfaceName = defaultIfBlank(resource.getDisplayName(),
-            replaceChars(resource.getRelativeUri(), '/', ' '));
+        final String baseInterfaceName = defaultIfBlank(resource.getDisplayName(), resource.getRelativeUri()
+            .replaceAll("[\\W_]", " "));
 
         String resourceInterfaceName = capitalizeFully(baseInterfaceName).replaceAll("[\\W_]", "");
         if (isDigits(left(resourceInterfaceName, 1)))
@@ -163,5 +169,15 @@ public class Generator
         }
 
         return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
+    }
+
+    private static String buildResourceMethodName(final Action action)
+    {
+        final String baseMethodName = action.getType().toString()
+                                      + " "
+                                      + defaultIfBlank(action.getResource().getDisplayName(),
+                                          action.getResource().getRelativeUri().replaceAll("[\\W_]", " "));
+        final String methodName = capitalizeFully(baseMethodName).replaceAll("[\\W_]", "");
+        return isDigits(left(methodName, 1)) ? "_" + methodName : uncapitalize(methodName);
     }
 }
