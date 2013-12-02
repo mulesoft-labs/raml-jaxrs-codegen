@@ -32,6 +32,7 @@ import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JPackage;
+import com.sun.codemodel.JType;
 
 class Context
 {
@@ -132,6 +133,11 @@ class Context
         }
 
         return this;
+    }
+
+    public JType getGeneratorType(final Class<?> clazz)
+    {
+        return clazz.isPrimitive() ? JType.parse(codeModel, clazz.getSimpleName()) : codeModel.ref(clazz);
     }
 
     private JDefinedClass createCustomHttpMethodAnnotation(final String httpMethod)

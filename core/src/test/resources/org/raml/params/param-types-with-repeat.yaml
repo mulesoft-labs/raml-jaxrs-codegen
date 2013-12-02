@@ -32,6 +32,12 @@ title: param types
                 required: false
                 default: 3
 
+            selected_id:
+                displayName: selected ID
+                type: integer
+                repeat: true
+                required: false
+
             price:
                 displayName: price name
                 description: price description

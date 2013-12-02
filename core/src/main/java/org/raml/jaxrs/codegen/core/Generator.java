@@ -52,9 +52,11 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 
 public class Generator
@@ -196,7 +198,7 @@ public class Generator
     {
         final String argumentName = buildVariableName(name);
 
-        final JVar param = method.param(getJavaType(queryParameter), argumentName);
+        final JVar param = method.param(getType(queryParameter), argumentName);
 
         param.annotate(QueryParam.class).param("value", name);
 
@@ -209,6 +211,23 @@ public class Generator
                                                                          + queryParameter.getExample() : "";
 
         javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
+    }
+
+    private JType getType(final QueryParameter queryParameter)
+    {
+        // TODO support enum
+        // TODO support multi-types (form param only?)
+
+        final JType type = context.getGeneratorType(getJavaType(queryParameter));
+
+        if (queryParameter.isRepeat())
+        {
+            return ((JClass) context.getGeneratorType(List.class)).narrow(type);
+        }
+        else
+        {
+            return type;
+        }
     }
 
     private static String buildResourceInterfaceName(final Resource resource)
@@ -247,28 +266,26 @@ public class Generator
 
     private static Class<?> getJavaType(final QueryParameter queryParameter)
     {
-        // TODO wrap with generic list on repeats
-        // TODO support enum
-
         if (queryParameter.getType() == null)
         {
             return String.class;
         }
 
-        final boolean neverNull = queryParameter.isRequired() || isNotBlank(queryParameter.getDefaultValue());
+        final boolean usePrimitive = !queryParameter.isRepeat()
+                                     && (queryParameter.isRequired() || isNotBlank(queryParameter.getDefaultValue()));
 
         switch (queryParameter.getType())
         {
             case BOOLEAN :
-                return neverNull ? boolean.class : Boolean.class;
+                return usePrimitive ? boolean.class : Boolean.class;
             case DATE :
                 return Date.class;
             case FILE :
                 return File.class;
             case INTEGER :
-                return neverNull ? long.class : Long.class;
+                return usePrimitive ? long.class : Long.class;
             case NUMBER :
-                return neverNull ? double.class : Double.class;
+                return usePrimitive ? double.class : Double.class;
             case STRING :
                 return String.class;
             default :
