@@ -24,7 +24,7 @@ import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalizeFully;
+import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
 import java.io.File;
@@ -205,10 +205,8 @@ public class Generator
             param.annotate(DefaultValue.class).param("value", queryParameter.getDefaultValue());
         }
 
-        final String example = isNotBlank(queryParameter.getExample())
-                                                                      ? " e.g. "
-                                                                        + queryParameter.getExample()
-                                                                      : "";
+        final String example = isNotBlank(queryParameter.getExample()) ? " e.g. "
+                                                                         + queryParameter.getExample() : "";
 
         javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
     }
@@ -222,7 +220,8 @@ public class Generator
 
     private static String buildResourceMethodName(final Action action)
     {
-        return action.getType().toString().toLowerCase() + buildResourceInterfaceName(action.getResource());
+        return action.getType().toString().toLowerCase()
+               + buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
     }
 
     private static String buildVariableName(final String source)
@@ -236,7 +235,7 @@ public class Generator
     {
         final String baseInterfaceName = baseInterfaceName0.replaceAll("[\\W_]", " ");
 
-        String resourceInterfaceName = capitalizeFully(baseInterfaceName).replaceAll("[\\W_]", "");
+        String resourceInterfaceName = capitalize(baseInterfaceName).replaceAll("[\\W_]", "");
 
         if (isDigits(left(resourceInterfaceName, 1)))
         {
