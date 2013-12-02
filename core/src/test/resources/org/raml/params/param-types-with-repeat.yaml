@@ -32,7 +32,7 @@ title: param types
                 required: false
                 default: 3
 
-            selected_id:
+            selected-id:
                 displayName: selected ID
                 type: integer
                 repeat: true

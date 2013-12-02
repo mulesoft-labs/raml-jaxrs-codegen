@@ -51,6 +51,7 @@ class Context
 
     private final Configuration configuration;
     private final JCodeModel codeModel;
+    private JDefinedClass currentResourceInterface;
 
     private final Map<String, Set<String>> resourcesMethods;
 
@@ -62,6 +63,16 @@ class Context
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+    }
+
+    public JDefinedClass getCurrentResourceInterface()
+    {
+        return currentResourceInterface;
+    }
+
+    public void setCurrentResourceInterface(final JDefinedClass currentResourceInterface)
+    {
+        this.currentResourceInterface = currentResourceInterface;
     }
 
     public void generate() throws IOException
@@ -106,6 +117,20 @@ class Context
         }
 
         return resourceInterface.method(JMod.NONE, returnClass, actualMethodName);
+    }
+
+    public JDefinedClass createResourceEnum(final JDefinedClass resourceInterface,
+                                            final String name,
+                                            final List<String> values) throws Exception
+    {
+        final JDefinedClass _enum = resourceInterface._enum(name);
+
+        for (final String value : values)
+        {
+            _enum.enumConstant(value);
+        }
+
+        return _enum;
     }
 
     @SuppressWarnings("unchecked")

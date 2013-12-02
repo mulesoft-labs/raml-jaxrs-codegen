@@ -129,6 +129,7 @@ public class Generator
     {
         final String resourceInterfaceName = buildResourceInterfaceName(resource);
         final JDefinedClass resourceInterface = context.createResourceInterface(resourceInterfaceName);
+        context.setCurrentResourceInterface(resourceInterface);
 
         final String path = strip(resource.getRelativeUri(), "/");
         resourceInterface.annotate(Path.class).param("value", path);
@@ -181,6 +182,7 @@ public class Generator
     }
 
     private void addQueryParameters(final Action action, final JMethod method, final JDocComment javadoc)
+        throws Exception
     {
         for (final Entry<String, QueryParameter> namedQueryParameter : action.getQueryParameters().entrySet())
         {
@@ -194,11 +196,11 @@ public class Generator
     private void addQueryParameter(final String name,
                                    final QueryParameter queryParameter,
                                    final JMethod method,
-                                   final JDocComment javadoc)
+                                   final JDocComment javadoc) throws Exception
     {
         final String argumentName = buildVariableName(name);
 
-        final JVar param = method.param(getType(queryParameter), argumentName);
+        final JVar param = method.param(getType(queryParameter, argumentName), argumentName);
 
         param.annotate(QueryParam.class).param("value", name);
 
@@ -213,10 +215,15 @@ public class Generator
         javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
     }
 
-    private JType getType(final QueryParameter queryParameter)
+    private JType getType(final QueryParameter queryParameter, final String name) throws Exception
     {
-        // TODO support enum
         // TODO support multi-types (form param only?)
+
+        if ((queryParameter.getEnumeration() != null) && (!queryParameter.getEnumeration().isEmpty()))
+        {
+            return context.createResourceEnum(context.getCurrentResourceInterface(), capitalize(name),
+                queryParameter.getEnumeration());
+        }
 
         final JType type = context.getGeneratorType(getJavaType(queryParameter));
 
