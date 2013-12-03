@@ -29,12 +29,15 @@ import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
 import java.io.File;
 import java.io.Reader;
+import java.lang.annotation.Annotation;
 import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import org.apache.commons.io.IOUtils;
@@ -43,7 +46,10 @@ import org.apache.commons.lang.Validate;
 import org.raml.model.Action;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+import org.raml.model.parameter.AbstractParam;
+import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;
+import org.raml.model.parameter.UriParameter;
 import org.raml.parser.rule.ValidationResult;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.raml.parser.visitor.RamlValidationService;
@@ -167,12 +173,11 @@ public class Generator
             }
 
             // TODO add JSR-303 annotations for constraints if config.isUseJsr303Annotations
-            // TODO add path params
-            // TODO add headers
+            addPathParameters(action, method, javadoc);
+            addHeaderParameters(action, method, javadoc);
+            addQueryParameters(action, method, javadoc);
             // TODO add form params
             // TODO add plain body
-
-            addQueryParameters(action, method, javadoc);
         }
 
         for (final Resource childResource : resource.getResources().values())
@@ -181,59 +186,79 @@ public class Generator
         }
     }
 
+    private void addPathParameters(final Action action, final JMethod method, final JDocComment javadoc)
+        throws Exception
+    {
+        for (final Entry<String, UriParameter> namedUriParameter : action.getResource()
+            .getUriParameters()
+            .entrySet())
+        {
+            addParameter(namedUriParameter.getKey(), namedUriParameter.getValue(), PathParam.class, method,
+                javadoc);
+        }
+    }
+
+    private void addHeaderParameters(final Action action, final JMethod method, final JDocComment javadoc)
+        throws Exception
+    {
+        for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
+        {
+            addParameter(namedHeaderParameter.getKey(), namedHeaderParameter.getValue(), HeaderParam.class,
+                method, javadoc);
+        }
+    }
+
     private void addQueryParameters(final Action action, final JMethod method, final JDocComment javadoc)
         throws Exception
     {
         for (final Entry<String, QueryParameter> namedQueryParameter : action.getQueryParameters().entrySet())
         {
-            final String queryParameterName = namedQueryParameter.getKey();
-            final QueryParameter queryParameter = namedQueryParameter.getValue();
-
-            addQueryParameter(queryParameterName, queryParameter, method, javadoc);
+            addParameter(namedQueryParameter.getKey(), namedQueryParameter.getValue(), QueryParam.class,
+                method, javadoc);
         }
     }
 
-    private void addQueryParameter(final String name,
-                                   final QueryParameter queryParameter,
-                                   final JMethod method,
-                                   final JDocComment javadoc) throws Exception
+    private void addParameter(final String name,
+                              final AbstractParam parameter,
+                              final Class<? extends Annotation> annotationClass,
+                              final JMethod method,
+                              final JDocComment javadoc) throws Exception
     {
         final String argumentName = buildVariableName(name);
 
-        final JVar param = method.param(getType(queryParameter, argumentName), argumentName);
+        final JVar codegenParam = method.param(getType(parameter, argumentName), argumentName);
 
-        param.annotate(QueryParam.class).param("value", name);
+        codegenParam.annotate(annotationClass).param("value", name);
 
-        if (queryParameter.getDefaultValue() != null)
+        if (parameter.getDefaultValue() != null)
         {
-            param.annotate(DefaultValue.class).param("value", queryParameter.getDefaultValue());
+            codegenParam.annotate(DefaultValue.class).param("value", parameter.getDefaultValue());
         }
 
-        final String example = isNotBlank(queryParameter.getExample()) ? " e.g. "
-                                                                         + queryParameter.getExample() : "";
+        final String example = isNotBlank(parameter.getExample()) ? " e.g. " + parameter.getExample() : "";
 
-        javadoc.addParam(param).add(defaultString(queryParameter.getDescription()) + example);
+        javadoc.addParam(codegenParam).add(defaultString(parameter.getDescription()) + example);
     }
 
-    private JType getType(final QueryParameter queryParameter, final String name) throws Exception
+    private JType getType(final AbstractParam parameter, final String name) throws Exception
     {
         // TODO support multi-types (form param only?)
 
-        if ((queryParameter.getEnumeration() != null) && (!queryParameter.getEnumeration().isEmpty()))
+        if ((parameter.getEnumeration() != null) && (!parameter.getEnumeration().isEmpty()))
         {
             return context.createResourceEnum(context.getCurrentResourceInterface(), capitalize(name),
-                queryParameter.getEnumeration());
+                parameter.getEnumeration());
         }
 
-        final JType type = context.getGeneratorType(getJavaType(queryParameter));
+        final JType codegenType = context.getGeneratorType(getJavaType(parameter));
 
-        if (queryParameter.isRepeat())
+        if (parameter.isRepeat())
         {
-            return ((JClass) context.getGeneratorType(List.class)).narrow(type);
+            return ((JClass) context.getGeneratorType(List.class)).narrow(codegenType);
         }
         else
         {
-            return type;
+            return codegenType;
         }
     }
 
@@ -271,17 +296,17 @@ public class Generator
         return resourceInterfaceName;
     }
 
-    private static Class<?> getJavaType(final QueryParameter queryParameter)
+    private static Class<?> getJavaType(final AbstractParam parameter)
     {
-        if (queryParameter.getType() == null)
+        if (parameter.getType() == null)
         {
             return String.class;
         }
 
-        final boolean usePrimitive = !queryParameter.isRepeat()
-                                     && (queryParameter.isRequired() || isNotBlank(queryParameter.getDefaultValue()));
+        final boolean usePrimitive = !parameter.isRepeat()
+                                     && (parameter.isRequired() || isNotBlank(parameter.getDefaultValue()));
 
-        switch (queryParameter.getType())
+        switch (parameter.getType())
         {
             case BOOLEAN :
                 return usePrimitive ? boolean.class : Boolean.class;
@@ -296,7 +321,7 @@ public class Generator
             case STRING :
                 return String.class;
             default :
-                LOGGER.warn("Unsupported RAML type: " + queryParameter.getType().toString());
+                LOGGER.warn("Unsupported RAML type: " + parameter.getType().toString());
                 return Object.class;
         }
     }
