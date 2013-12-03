@@ -41,8 +41,8 @@ protocols: [HTTP, HTTPS]
         baseUriParameters:
             host:
                 enum: [ api2 ]
-    get:
-        description: retrieve media
+    post:
+        description: create media
         headers:
             api-key:
                 displayName: Api key

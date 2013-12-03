@@ -23,6 +23,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.strip;
+import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.apache.commons.lang.math.NumberUtils.isDigits;
@@ -34,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
@@ -44,6 +46,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.raml.model.Action;
+import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.parameter.AbstractParam;
@@ -154,36 +157,63 @@ public class Generator
     {
         for (final Action action : resource.getActions().values())
         {
-            final String methodName = buildResourceMethodName(action);
-
-            // TODO use correct return type
-            final JMethod method = context.createResourceMethod(resourceInterface, methodName, void.class);
-
-            context.addHttpMethodAnnotation(action.getType().toString(), method);
-
-            method.annotate(Path.class).param("value",
-                StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
-
-            // TODO add produce and consume annotations
-
-            final JDocComment javadoc = method.javadoc();
-            if (isNotBlank(action.getDescription()))
+            if (action.getBody().isEmpty())
             {
-                javadoc.add(action.getDescription());
+                addResourceMethod(resourceInterface, resourceInterfacePath, action, null);
             }
-
-            // TODO add JSR-303 annotations for constraints if config.isUseJsr303Annotations
-            addPathParameters(action, method, javadoc);
-            addHeaderParameters(action, method, javadoc);
-            addQueryParameters(action, method, javadoc);
-            // TODO add form params
-            // TODO add plain body
+            else
+            {
+                for (final MimeType bodyMimeType : action.getBody().values())
+                {
+                    addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType);
+                }
+            }
         }
 
         for (final Resource childResource : resource.getResources().values())
         {
             addResourceMethods(childResource, resourceInterface, resourceInterfacePath);
         }
+    }
+
+    private void addResourceMethod(final JDefinedClass resourceInterface,
+                                   final String resourceInterfacePath,
+                                   final Action action,
+                                   final MimeType bodyMimeType) throws Exception
+    {
+        final String methodBaseName = buildResourceMethodBaseName(action);
+        final String bodyTypeInfix = bodyMimeType != null ? buildJavaFriendlyName(substringAfter(
+            bodyMimeType.getType(), "/")) : "";
+        final String methodName = action.getType().toString().toLowerCase() + bodyTypeInfix + methodBaseName;
+
+        // TODO use correct return type
+        final JMethod method = context.createResourceMethod(resourceInterface, methodName, void.class);
+
+        context.addHttpMethodAnnotation(action.getType().toString(), method);
+
+        method.annotate(Path.class).param("value",
+            StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
+
+        // TODO add produce annotation
+        if (bodyMimeType != null)
+        {
+            method.annotate(Consumes.class).param("value", bodyMimeType.getType());
+        }
+
+        final JDocComment javadoc = method.javadoc();
+        if (isNotBlank(action.getDescription()))
+        {
+            javadoc.add(action.getDescription());
+        }
+
+        // TODO add JSR-303 annotations for constraints if config.isUseJsr303Annotations
+        addPathParameters(action, method, javadoc);
+        addHeaderParameters(action, method, javadoc);
+        addQueryParameters(action, method, javadoc);
+
+        // TODO add @FormParam for application/x-www-form-urlencoded
+        // TODO add javax.mail.internet.MimeMultipart param for multipart/form-data
+        // TODO add plain body for others
     }
 
     private void addPathParameters(final Action action, final JMethod method, final JDocComment javadoc)
@@ -269,10 +299,9 @@ public class Generator
         return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
     }
 
-    private static String buildResourceMethodName(final Action action)
+    private static String buildResourceMethodBaseName(final Action action)
     {
-        return action.getType().toString().toLowerCase()
-               + buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
+        return buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
     }
 
     private static String buildVariableName(final String source)
@@ -282,18 +311,18 @@ public class Generator
         return Constants.JAVA_KEYWORDS.contains(name) ? "$" + name : name;
     }
 
-    private static String buildJavaFriendlyName(final String baseInterfaceName0)
+    private static String buildJavaFriendlyName(final String source)
     {
-        final String baseInterfaceName = baseInterfaceName0.replaceAll("[\\W_]", " ");
+        final String baseName = source.replaceAll("[\\W_]", " ");
 
-        String resourceInterfaceName = capitalize(baseInterfaceName).replaceAll("[\\W_]", "");
+        String friendlyName = capitalize(baseName).replaceAll("[\\W_]", "");
 
-        if (isDigits(left(resourceInterfaceName, 1)))
+        if (isDigits(left(friendlyName, 1)))
         {
-            resourceInterfaceName = "_" + resourceInterfaceName;
+            friendlyName = "_" + friendlyName;
         }
 
-        return resourceInterfaceName;
+        return friendlyName;
     }
 
     private static Class<?> getJavaType(final AbstractParam parameter)
