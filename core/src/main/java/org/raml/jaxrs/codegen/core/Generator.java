@@ -35,6 +35,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
+import javax.mail.internet.MimeMultipart;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -217,15 +218,23 @@ public class Generator
         addHeaderParameters(action, method, javadoc);
         addQueryParameters(action, method, javadoc);
 
-        // MultivaluedMap<String, String> formParameters
-
-        if ((bodyMimeType != null) && (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType())))
+        if (bodyMimeType != null)
         {
-            addFormParameters(bodyMimeType, method, javadoc);
+            if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
+            {
+                addFormParameters(bodyMimeType, method, javadoc);
+            }
+            else if (MediaType.MULTIPART_FORM_DATA.equals(bodyMimeType.getType()))
+            {
+                // use a "catch all" javax.mail.internet.MimeMultipart parameter
+                final JType type = context.getGeneratorType(MimeMultipart.class);
+                addCatchAllFormParametersArgument(bodyMimeType, method, javadoc, type);
+            }
+            else
+            {
+                // TODO add plain body for others
+            }
         }
-
-        // TODO add javax.mail.internet.MimeMultipart param for multipart/form-data
-        // TODO add plain body for others
     }
 
     private void addPathParameters(final Action action, final JMethod method, final JDocComment javadoc)
@@ -270,29 +279,7 @@ public class Generator
             final JClass type = ((JClass) context.getGeneratorType(MultivaluedMap.class)).narrow(
                 String.class, String.class);
 
-            method.param(type, context.getConfiguration().getMultiTypedFormParameterArgumentName());
-
-            // build a javadoc text out of all the params
-            for (final Entry<String, List<FormParameter>> namedFormParameters : bodyMimeType.getFormParameters()
-                .entrySet())
-            {
-                final StringBuilder sb = new StringBuilder();
-                sb.append(namedFormParameters.getKey()).append(": ");
-
-                for (final FormParameter formParameter : namedFormParameters.getValue())
-                {
-                    sb.append(formParameter.getDescription());
-                    if (isNotBlank(formParameter.getExample()))
-                    {
-                        sb.append(EXAMPLE_PREFIX).append(formParameter.getExample());
-                    }
-
-                    sb.append("<br/>\n");
-                }
-
-                javadoc.addParam(context.getConfiguration().getMultiTypedFormParameterArgumentName()).add(
-                    sb.toString());
-            }
+            addCatchAllFormParametersArgument(bodyMimeType, method, javadoc, type);
         }
         else
         {
@@ -302,6 +289,36 @@ public class Generator
                 addParameter(namedFormParameters.getKey(), namedFormParameters.getValue().get(0),
                     FormParam.class, method, javadoc);
             }
+        }
+    }
+
+    private void addCatchAllFormParametersArgument(final MimeType bodyMimeType,
+                                                   final JMethod method,
+                                                   final JDocComment javadoc,
+                                                   final JType argumentType)
+    {
+        method.param(argumentType, context.getConfiguration().getMultiTypedFormParameterArgumentName());
+
+        // build a javadoc text out of all the params
+        for (final Entry<String, List<FormParameter>> namedFormParameters : bodyMimeType.getFormParameters()
+            .entrySet())
+        {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(namedFormParameters.getKey()).append(": ");
+
+            for (final FormParameter formParameter : namedFormParameters.getValue())
+            {
+                sb.append(formParameter.getDescription());
+                if (isNotBlank(formParameter.getExample()))
+                {
+                    sb.append(EXAMPLE_PREFIX).append(formParameter.getExample());
+                }
+
+                sb.append("<br/>\n");
+            }
+
+            javadoc.addParam(context.getConfiguration().getMultiTypedFormParameterArgumentName()).add(
+                sb.toString());
         }
     }
 
