@@ -1,10 +1,19 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import javax.ws.rs.DELETE;
+import javax.ws.rs.GET;
+import javax.ws.rs.HEAD;
+import javax.ws.rs.OPTIONS;
+import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 
 public abstract class Constants
 {
@@ -15,6 +24,10 @@ public abstract class Constants
             "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
             "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
             "throws", "transient", "true", "try", "void", "volatile", "while")));
+
+    @SuppressWarnings("unchecked")
+    public static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = Arrays.asList(DELETE.class,
+        GET.class, HEAD.class, OPTIONS.class, POST.class, PUT.class);
 
     private Constants()
     {

@@ -7,20 +7,13 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.HEAD;
 import javax.ws.rs.HttpMethod;
-import javax.ws.rs.OPTIONS;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
 
 import org.apache.commons.lang.Validate;
 
@@ -36,14 +29,10 @@ import com.sun.codemodel.JType;
 
 class Context
 {
-    @SuppressWarnings("unchecked")
-    private static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = Arrays.asList(DELETE.class,
-        GET.class, HEAD.class, OPTIONS.class, POST.class, PUT.class);
-
     private static final Map<String, Object> HTTP_METHOD_ANNOTATIONS = new HashMap<String, Object>();
     static
     {
-        for (final Class<? extends Annotation> clazz : JAXRS_HTTP_METHODS)
+        for (final Class<? extends Annotation> clazz : Constants.JAXRS_HTTP_METHODS)
         {
             HTTP_METHOD_ANNOTATIONS.put(clazz.getSimpleName(), clazz);
         }
@@ -63,6 +52,11 @@ class Context
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+    }
+
+    public Configuration getConfiguration()
+    {
+        return configuration;
     }
 
     public JDefinedClass getCurrentResourceInterface()

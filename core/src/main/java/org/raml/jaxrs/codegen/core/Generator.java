@@ -37,10 +37,13 @@ import java.util.Map.Entry;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
+import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -50,6 +53,7 @@ import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
 import org.raml.model.parameter.AbstractParam;
+import org.raml.model.parameter.FormParameter;
 import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;
 import org.raml.model.parameter.UriParameter;
@@ -71,6 +75,8 @@ import com.sun.codemodel.JVar;
 public class Generator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
+
+    private static final String EXAMPLE_PREFIX = " e.g. ";
 
     private Context context;
 
@@ -183,7 +189,7 @@ public class Generator
     {
         final String methodBaseName = buildResourceMethodBaseName(action);
         final String bodyTypeInfix = bodyMimeType != null ? buildJavaFriendlyName(substringAfter(
-            bodyMimeType.getType(), "/")) : "";
+            substringAfter(bodyMimeType.getType(), "/"), "x-www-")) : "";
         final String methodName = action.getType().toString().toLowerCase() + bodyTypeInfix + methodBaseName;
 
         // TODO use correct return type
@@ -211,7 +217,13 @@ public class Generator
         addHeaderParameters(action, method, javadoc);
         addQueryParameters(action, method, javadoc);
 
-        // TODO add @FormParam for application/x-www-form-urlencoded
+        // MultivaluedMap<String, String> formParameters
+
+        if ((bodyMimeType != null) && (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType())))
+        {
+            addFormParameters(bodyMimeType, method, javadoc);
+        }
+
         // TODO add javax.mail.internet.MimeMultipart param for multipart/form-data
         // TODO add plain body for others
     }
@@ -248,6 +260,63 @@ public class Generator
         }
     }
 
+    private void addFormParameters(final MimeType bodyMimeType,
+                                   final JMethod method,
+                                   final JDocComment javadoc) throws Exception
+    {
+        if (hasAMultiTypeFormParameter(bodyMimeType))
+        {
+            // use a "catch all" MultivaluedMap<String, String> parameter
+            final JClass type = ((JClass) context.getGeneratorType(MultivaluedMap.class)).narrow(
+                String.class, String.class);
+
+            method.param(type, context.getConfiguration().getMultiTypedFormParameterArgumentName());
+
+            // build a javadoc text out of all the params
+            for (final Entry<String, List<FormParameter>> namedFormParameters : bodyMimeType.getFormParameters()
+                .entrySet())
+            {
+                final StringBuilder sb = new StringBuilder();
+                sb.append(namedFormParameters.getKey()).append(": ");
+
+                for (final FormParameter formParameter : namedFormParameters.getValue())
+                {
+                    sb.append(formParameter.getDescription());
+                    if (isNotBlank(formParameter.getExample()))
+                    {
+                        sb.append(EXAMPLE_PREFIX).append(formParameter.getExample());
+                    }
+
+                    sb.append("<br/>\n");
+                }
+
+                javadoc.addParam(context.getConfiguration().getMultiTypedFormParameterArgumentName()).add(
+                    sb.toString());
+            }
+        }
+        else
+        {
+            for (final Entry<String, List<FormParameter>> namedFormParameters : bodyMimeType.getFormParameters()
+                .entrySet())
+            {
+                addParameter(namedFormParameters.getKey(), namedFormParameters.getValue().get(0),
+                    FormParam.class, method, javadoc);
+            }
+        }
+    }
+
+    private boolean hasAMultiTypeFormParameter(final MimeType bodyMimeType)
+    {
+        for (final List<FormParameter> formParameters : bodyMimeType.getFormParameters().values())
+        {
+            if (formParameters.size() > 1)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void addParameter(final String name,
                               final AbstractParam parameter,
                               final Class<? extends Annotation> annotationClass,
@@ -265,15 +334,15 @@ public class Generator
             codegenParam.annotate(DefaultValue.class).param("value", parameter.getDefaultValue());
         }
 
-        final String example = isNotBlank(parameter.getExample()) ? " e.g. " + parameter.getExample() : "";
+        final String example = isNotBlank(parameter.getExample())
+                                                                 ? EXAMPLE_PREFIX + parameter.getExample()
+                                                                 : "";
 
         javadoc.addParam(codegenParam).add(defaultString(parameter.getDescription()) + example);
     }
 
     private JType getType(final AbstractParam parameter, final String name) throws Exception
     {
-        // TODO support multi-types (form param only?)
-
         if ((parameter.getEnumeration() != null) && (!parameter.getEnumeration().isEmpty()))
         {
             return context.createResourceEnum(context.getCurrentResourceInterface(), capitalize(name),
