@@ -82,7 +82,7 @@ public class Generator
 
     private Context context;
 
-    public void run(final Reader ramlReader, final Configuration configuration) throws Exception
+    public List<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
     {
         final String ramlBuffer = IOUtils.toString(ramlReader);
 
@@ -90,7 +90,7 @@ public class Generator
 
         if (ValidationResult.areValid(results))
         {
-            run(new RamlDocumentBuilder().build(ramlBuffer), configuration);
+            return run(new RamlDocumentBuilder().build(ramlBuffer), configuration);
         }
         else
         {
@@ -128,7 +128,7 @@ public class Generator
         Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");
     }
 
-    private void run(final Raml raml, final Configuration configuration) throws Exception
+    private List<String> run(final Raml raml, final Configuration configuration) throws Exception
     {
         validate(configuration);
 
@@ -139,7 +139,7 @@ public class Generator
             createResourceInterface(resource);
         }
 
-        context.generate();
+        return context.generate();
     }
 
     private void createResourceInterface(final Resource resource) throws Exception

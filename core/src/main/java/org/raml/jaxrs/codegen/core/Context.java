@@ -2,11 +2,13 @@
 package org.raml.jaxrs.codegen.core;
 
 import java.io.IOException;
+import java.io.PrintStream;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -15,6 +17,8 @@ import java.util.Set;
 
 import javax.ws.rs.HttpMethod;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 
 import com.sun.codemodel.JAnnotatable;
@@ -69,9 +73,13 @@ class Context
         this.currentResourceInterface = currentResourceInterface;
     }
 
-    public void generate() throws IOException
+    public List<String> generate() throws IOException
     {
-        codeModel.build(configuration.getOutputDirectory());
+        final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        final PrintStream ps = new PrintStream(baos);
+        codeModel.build(configuration.getOutputDirectory(), ps);
+        ps.close();
+        return Arrays.asList(StringUtils.split(baos.toString()));
     }
 
     public JDefinedClass createResourceInterface(final String name) throws Exception
