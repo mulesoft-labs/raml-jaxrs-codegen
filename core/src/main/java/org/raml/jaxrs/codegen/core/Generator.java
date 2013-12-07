@@ -77,6 +77,7 @@ public class Generator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
+    private static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "payload";
     private static final String EXAMPLE_PREFIX = " e.g. ";
 
     private Context context;
@@ -220,20 +221,27 @@ public class Generator
 
         if (bodyMimeType != null)
         {
-            if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
-            {
-                addFormParameters(bodyMimeType, method, javadoc);
-            }
-            else if (MediaType.MULTIPART_FORM_DATA.equals(bodyMimeType.getType()))
-            {
-                // use a "catch all" javax.mail.internet.MimeMultipart parameter
-                final JType type = context.getGeneratorType(MimeMultipart.class);
-                addCatchAllFormParametersArgument(bodyMimeType, method, javadoc, type);
-            }
-            else
-            {
-                // TODO add plain body for others
-            }
+            addBodyParameters(bodyMimeType, method, javadoc);
+        }
+    }
+
+    private void addBodyParameters(final MimeType bodyMimeType,
+                                   final JMethod method,
+                                   final JDocComment javadoc) throws Exception
+    {
+        if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
+        {
+            addFormParameters(bodyMimeType, method, javadoc);
+        }
+        else if (MediaType.MULTIPART_FORM_DATA.equals(bodyMimeType.getType()))
+        {
+            // use a "catch all" javax.mail.internet.MimeMultipart parameter
+            addCatchAllFormParametersArgument(bodyMimeType, method, javadoc,
+                context.getGeneratorType(MimeMultipart.class));
+        }
+        else
+        {
+            addPlainBodyArgument(bodyMimeType, method, javadoc);
         }
     }
 
@@ -297,7 +305,7 @@ public class Generator
                                                    final JDocComment javadoc,
                                                    final JType argumentType)
     {
-        method.param(argumentType, context.getConfiguration().getMultiTypedFormParameterArgumentName());
+        method.param(argumentType, GENERIC_PAYLOAD_ARGUMENT_NAME);
 
         // build a javadoc text out of all the params
         for (final Entry<String, List<FormParameter>> namedFormParameters : bodyMimeType.getFormParameters()
@@ -317,9 +325,21 @@ public class Generator
                 sb.append("<br/>\n");
             }
 
-            javadoc.addParam(context.getConfiguration().getMultiTypedFormParameterArgumentName()).add(
-                sb.toString());
+            javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(sb.toString());
         }
+    }
+
+    private void addPlainBodyArgument(final MimeType bodyMimeType,
+                                      final JMethod method,
+                                      final JDocComment javadoc)
+    {
+        // TODO generate DTOs from XML/JSON schema and use them instead of generic Reader
+        method.param(context.getGeneratorType(Reader.class), GENERIC_PAYLOAD_ARGUMENT_NAME);
+
+        final String example = isNotBlank(bodyMimeType.getExample()) ? EXAMPLE_PREFIX
+                                                                       + bodyMimeType.getExample() : "";
+
+        javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(example);
     }
 
     private boolean hasAMultiTypeFormParameter(final MimeType bodyMimeType)

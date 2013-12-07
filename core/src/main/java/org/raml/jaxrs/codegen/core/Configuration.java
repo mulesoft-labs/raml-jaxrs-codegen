@@ -23,7 +23,6 @@ public class Configuration
     private File outputDirectory;
     private String basePackageName;
     private boolean useJsr303Annotations = false;
-    private String multiTypedFormParameterArgumentName = "formParameters";
 
     public File getOutputDirectory()
     {
@@ -53,15 +52,5 @@ public class Configuration
     public void setUseJsr303Annotations(final boolean useJsr303Annotations)
     {
         this.useJsr303Annotations = useJsr303Annotations;
-    }
-
-    public String getMultiTypedFormParameterArgumentName()
-    {
-        return multiTypedFormParameterArgumentName;
-    }
-
-    public void setMultiTypedFormParameterArgumentName(final String multiTypedFormParameterArgumentName)
-    {
-        this.multiTypedFormParameterArgumentName = multiTypedFormParameterArgumentName;
     }
 }

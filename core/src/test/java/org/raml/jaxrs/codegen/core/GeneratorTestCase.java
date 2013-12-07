@@ -45,5 +45,6 @@ public class GeneratorTestCase
             configuration);
 
         // TODO test compile the classes, add assertions
+        // TODO test load the classes with Jersey
     }
 }
