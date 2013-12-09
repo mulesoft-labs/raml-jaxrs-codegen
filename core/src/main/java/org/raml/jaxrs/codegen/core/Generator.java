@@ -16,22 +16,15 @@
 
 package org.raml.jaxrs.codegen.core;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.defaultString;
-import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.StringUtils.left;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.apache.commons.lang.StringUtils.substringAfter;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalize;
-import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
 import java.io.File;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
-import java.util.Date;
 import java.util.List;
 import java.util.Map.Entry;
 
@@ -81,6 +74,7 @@ public class Generator
     private static final String EXAMPLE_PREFIX = " e.g. ";
 
     private Context context;
+    private Types types;
 
     public List<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
     {
@@ -133,6 +127,7 @@ public class Generator
         validate(configuration);
 
         context = new Context(configuration);
+        types = new Types(context);
 
         for (final Resource resource : raml.getResources().values())
         {
@@ -144,7 +139,7 @@ public class Generator
 
     private void createResourceInterface(final Resource resource) throws Exception
     {
-        final String resourceInterfaceName = buildResourceInterfaceName(resource);
+        final String resourceInterfaceName = Names.buildResourceInterfaceName(resource);
         final JDefinedClass resourceInterface = context.createResourceInterface(resourceInterfaceName);
         context.setCurrentResourceInterface(resourceInterface);
 
@@ -189,8 +184,8 @@ public class Generator
                                    final Action action,
                                    final MimeType bodyMimeType) throws Exception
     {
-        final String methodBaseName = buildResourceMethodBaseName(action);
-        final String bodyTypeInfix = bodyMimeType != null ? buildJavaFriendlyName(substringAfter(
+        final String methodBaseName = Names.buildResourceMethodBaseName(action);
+        final String bodyTypeInfix = bodyMimeType != null ? Names.buildJavaFriendlyName(substringAfter(
             substringAfter(bodyMimeType.getType(), "/"), "x-www-")) : "";
         final String methodName = action.getType().toString().toLowerCase() + bodyTypeInfix + methodBaseName;
 
@@ -360,9 +355,9 @@ public class Generator
                               final JMethod method,
                               final JDocComment javadoc) throws Exception
     {
-        final String argumentName = buildVariableName(name);
+        final String argumentName = Names.buildVariableName(name);
 
-        final JVar codegenParam = method.param(getType(parameter, argumentName), argumentName);
+        final JVar codegenParam = method.param(types.buildParameterType(parameter, argumentName), argumentName);
 
         codegenParam.annotate(annotationClass).param("value", name);
 
@@ -376,88 +371,5 @@ public class Generator
                                                                  : "";
 
         javadoc.addParam(codegenParam).add(defaultString(parameter.getDescription()) + example);
-    }
-
-    private JType getType(final AbstractParam parameter, final String name) throws Exception
-    {
-        if ((parameter.getEnumeration() != null) && (!parameter.getEnumeration().isEmpty()))
-        {
-            return context.createResourceEnum(context.getCurrentResourceInterface(), capitalize(name),
-                parameter.getEnumeration());
-        }
-
-        final JType codegenType = context.getGeneratorType(getJavaType(parameter));
-
-        if (parameter.isRepeat())
-        {
-            return ((JClass) context.getGeneratorType(List.class)).narrow(codegenType);
-        }
-        else
-        {
-            return codegenType;
-        }
-    }
-
-    private static String buildResourceInterfaceName(final Resource resource)
-    {
-        final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
-            resource.getRelativeUri()));
-        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
-    }
-
-    private static String buildResourceMethodBaseName(final Action action)
-    {
-        return buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
-    }
-
-    private static String buildVariableName(final String source)
-    {
-        final String name = uncapitalize(buildJavaFriendlyName(source));
-
-        return Constants.JAVA_KEYWORDS.contains(name) ? "$" + name : name;
-    }
-
-    private static String buildJavaFriendlyName(final String source)
-    {
-        final String baseName = source.replaceAll("[\\W_]", " ");
-
-        String friendlyName = capitalize(baseName).replaceAll("[\\W_]", "");
-
-        if (isDigits(left(friendlyName, 1)))
-        {
-            friendlyName = "_" + friendlyName;
-        }
-
-        return friendlyName;
-    }
-
-    private static Class<?> getJavaType(final AbstractParam parameter)
-    {
-        if (parameter.getType() == null)
-        {
-            return String.class;
-        }
-
-        final boolean usePrimitive = !parameter.isRepeat()
-                                     && (parameter.isRequired() || isNotBlank(parameter.getDefaultValue()));
-
-        switch (parameter.getType())
-        {
-            case BOOLEAN :
-                return usePrimitive ? boolean.class : Boolean.class;
-            case DATE :
-                return Date.class;
-            case FILE :
-                return File.class;
-            case INTEGER :
-                return usePrimitive ? long.class : Long.class;
-            case NUMBER :
-                return usePrimitive ? double.class : Double.class;
-            case STRING :
-                return String.class;
-            default :
-                LOGGER.warn("Unsupported RAML type: " + parameter.getType().toString());
-                return Object.class;
-        }
     }
 }
