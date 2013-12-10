@@ -22,6 +22,7 @@ import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
+import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.StringUtils.strip;
 
 import java.io.File;
@@ -475,13 +476,31 @@ public class Generator
                                       final JMethod method,
                                       final JDocComment javadoc)
     {
-        // TODO generate DTOs from XML/JSON schema and use them instead of generic Reader
-        method.param(types.getGeneratorType(Reader.class), GENERIC_PAYLOAD_ARGUMENT_NAME);
+
+        method.param(types.getGeneratorType(getPlainBodyClass(bodyMimeType)), GENERIC_PAYLOAD_ARGUMENT_NAME);
 
         final String example = isNotBlank(bodyMimeType.getExample()) ? EXAMPLE_PREFIX
                                                                        + bodyMimeType.getExample() : "";
 
         javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(example);
+    }
+
+    private Class<?> getPlainBodyClass(final MimeType bodyMimeType)
+    {
+        if (isNotBlank(bodyMimeType.getSchema()))
+        {
+            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
+            return Object.class;
+        }
+        else if (startsWith(bodyMimeType.getType(), "text/"))
+        {
+            return String.class;
+        }
+        else
+        {
+            // fallback to a generic reader
+            return Reader.class;
+        }
     }
 
     private boolean hasAMultiTypeFormParameter(final MimeType bodyMimeType)
