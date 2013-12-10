@@ -68,10 +68,10 @@ import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JClass;
-import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
+import com.sun.codemodel.JInvocation;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
@@ -222,8 +222,7 @@ public class Generator
 
     private JType getResourceMethodReturnType(final String methodName,
                                               final Action action,
-                                              final JDefinedClass resourceInterface)
-        throws JClassAlreadyExistsException
+                                              final JDefinedClass resourceInterface) throws Exception
     {
         if (action.getResponses().isEmpty())
         {
@@ -263,12 +262,27 @@ public class Generator
                 // return new StuffResponse(Response.status(200).header("X-Custom-Header",
                 // xCustomHeader).build())
 
-                responseBuilderMethod.body()._return(
-                    JExpr._new(responseClass).arg(
-                        ((JClass) context.getGeneratorType(javax.ws.rs.core.Response.class)).staticInvoke(
-                            "status")
-                            .arg(JExpr.lit(statusCode))
-                            .invoke("build")));
+                JInvocation builderArgument = ((JClass) context.getGeneratorType(javax.ws.rs.core.Response.class)).staticInvoke(
+                    "status")
+                    .arg(JExpr.lit(statusCode));
+
+                for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
+                {
+                    final String argumentName = Names.buildVariableName(namedHeaderParameter.getKey());
+
+                    builderArgument = builderArgument.invoke("header")
+                        .arg(namedHeaderParameter.getKey())
+                        .arg(JExpr.ref(argumentName));
+
+                    addParameterJavaDoc(namedHeaderParameter.getValue(), argumentName, javadoc);
+
+                    responseBuilderMethod.param(
+                        types.buildParameterType(namedHeaderParameter.getValue(), argumentName), argumentName);
+                }
+
+                builderArgument = builderArgument.invoke("build");
+
+                responseBuilderMethod.body()._return(JExpr._new(responseClass).arg(builderArgument));
             }
         }
 
@@ -474,10 +488,17 @@ public class Generator
             codegenParam.annotate(DefaultValue.class).param("value", parameter.getDefaultValue());
         }
 
+        addParameterJavaDoc(parameter, codegenParam.name(), javadoc);
+    }
+
+    private void addParameterJavaDoc(final AbstractParam parameter,
+                                     final String parameterName,
+                                     final JDocComment javadoc)
+    {
         final String example = isNotBlank(parameter.getExample())
                                                                  ? EXAMPLE_PREFIX + parameter.getExample()
                                                                  : "";
 
-        javadoc.addParam(codegenParam).add(defaultString(parameter.getDescription()) + example);
+        javadoc.addParam(parameterName).add(defaultString(parameter.getDescription()) + example);
     }
 }
