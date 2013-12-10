@@ -2,13 +2,18 @@
 package org.raml.jaxrs.codegen.core;
 
 import static org.apache.commons.lang.StringUtils.isNotBlank;
+import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.WordUtils.capitalize;
 
 import java.io.File;
+import java.io.Reader;
 import java.util.Date;
 import java.util.List;
 
+import javax.ws.rs.core.StreamingOutput;
+
 import org.apache.commons.lang.Validate;
+import org.raml.model.MimeType;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -45,6 +50,42 @@ public class Types
         else
         {
             return codegenType;
+        }
+    }
+
+    public JType getRequestEntityClass(final MimeType mimeType)
+    {
+        if (isNotBlank(mimeType.getSchema()))
+        {
+            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
+            return getGeneratorType(Object.class);
+        }
+        else if (startsWith(mimeType.getType(), "text/"))
+        {
+            return getGeneratorType(String.class);
+        }
+        else
+        {
+            // fallback to a generic reader
+            return getGeneratorType(Reader.class);
+        }
+    }
+
+    public JType getResponseEntityClass(final MimeType mimeType)
+    {
+        if (isNotBlank(mimeType.getSchema()))
+        {
+            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
+            return getGeneratorType(Object.class);
+        }
+        else if (startsWith(mimeType.getType(), "text/"))
+        {
+            return getGeneratorType(String.class);
+        }
+        else
+        {
+            // fallback to a streaming output
+            return getGeneratorType(StreamingOutput.class);
         }
     }
 

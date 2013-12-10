@@ -22,14 +22,15 @@ import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.StringUtils.strip;
 
 import java.io.File;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
 
@@ -45,7 +46,6 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -69,7 +69,6 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
-import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
@@ -176,13 +175,13 @@ public class Generator
         {
             if (action.getBody().isEmpty())
             {
-                addResourceMethod(resourceInterface, resourceInterfacePath, action, null);
+                addResourceMethods(resourceInterface, resourceInterfacePath, action, null);
             }
             else
             {
                 for (final MimeType bodyMimeType : action.getBody().values())
                 {
-                    addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType);
+                    addResourceMethods(resourceInterface, resourceInterfacePath, action, bodyMimeType);
                 }
             }
         }
@@ -193,18 +192,39 @@ public class Generator
         }
     }
 
+    private void addResourceMethods(final JDefinedClass resourceInterface,
+                                    final String resourceInterfacePath,
+                                    final Action action,
+                                    final MimeType bodyMimeType) throws Exception
+    {
+        final Collection<MimeType> uniqueResponseMimeTypes = getUniqueResponseMimeTypes(action);
+        if (uniqueResponseMimeTypes.isEmpty())
+        {
+            addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType, null);
+        }
+        else
+        {
+            for (final MimeType responseMimeType : uniqueResponseMimeTypes)
+            {
+                addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
+                    responseMimeType);
+            }
+        }
+    }
+
     private void addResourceMethod(final JDefinedClass resourceInterface,
                                    final String resourceInterfacePath,
                                    final Action action,
-                                   final MimeType bodyMimeType) throws Exception
+                                   final MimeType bodyMimeType,
+                                   final MimeType responseMimeType) throws Exception
     {
-        final String methodName = Names.buildResourceMethodName(action, bodyMimeType);
+        final String methodName = Names.buildResourceMethodName(action, bodyMimeType, responseMimeType);
 
         final JType resourceMethodReturnType = getResourceMethodReturnType(methodName, action,
-            resourceInterface);
+            responseMimeType, resourceInterface);
 
-        // the actually created unique method name should be needed in the previous method but no
-        // way of doing this :(
+        // the actually created unique method name should be needed in the previous method but
+        // no way of doing this :(
         final JMethod method = context.createResourceMethod(resourceInterface, methodName,
             resourceMethodReturnType);
 
@@ -212,7 +232,7 @@ public class Generator
 
         addParamAnnotation(resourceInterfacePath, action, method);
         addConsumesAnnotation(bodyMimeType, method);
-        addProducesAnnotation(action, method);
+        addProducesAnnotation(responseMimeType, method);
 
         final JDocComment javadoc = addBaseJavaDoc(action, method);
 
@@ -226,18 +246,22 @@ public class Generator
 
     private JType getResourceMethodReturnType(final String methodName,
                                               final Action action,
+                                              final MimeType responseMimeType,
                                               final JDefinedClass resourceInterface) throws Exception
     {
-        if (action.getResponses().isEmpty())
+        if (responseMimeType == null)
         {
             return types.getGeneratorType(void.class);
         }
-
-        return createResourceMethodReturnType(methodName, action, resourceInterface);
+        else
+        {
+            return createResourceMethodReturnType(methodName, action, responseMimeType, resourceInterface);
+        }
     }
 
     private JDefinedClass createResourceMethodReturnType(final String methodName,
                                                          final Action action,
+                                                         final MimeType responseMimeType,
                                                          final JDefinedClass resourceInterface)
         throws Exception
     {
@@ -250,13 +274,15 @@ public class Generator
 
         for (final Entry<String, Response> statusCodeAndResponse : action.getResponses().entrySet())
         {
-            createResponseBuilderInResourceMethodReturnType(action, responseClass, statusCodeAndResponse);
+            createResponseBuilderInResourceMethodReturnType(action, responseMimeType, responseClass,
+                statusCodeAndResponse);
         }
 
         return responseClass;
     }
 
     private void createResponseBuilderInResourceMethodReturnType(final Action action,
+                                                                 final MimeType responseMimeType,
                                                                  final JDefinedClass responseClass,
                                                                  final Entry<String, Response> statusCodeAndResponse)
         throws Exception
@@ -264,10 +290,14 @@ public class Generator
         final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
         final Response response = statusCodeAndResponse.getValue();
 
-        for (final MimeType responseMimeType : response.getBody().values())
+        for (final MimeType mimeType : response.getBody().values())
         {
-            final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode,
-                responseMimeType);
+            if (!mimeType.getType().equals(responseMimeType.getType()))
+            {
+                continue;
+            }
+
+            final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode);
 
             final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
                 responseBuilderMethodName);
@@ -290,6 +320,7 @@ public class Generator
                 .arg(HttpHeaders.CONTENT_TYPE)
                 .arg(responseMimeType.getType());
 
+            // TODO support {?} in headers (accept a map and generate code to call header)
             for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
             {
                 final String argumentName = Names.buildVariableName(namedHeaderParameter.getKey());
@@ -304,10 +335,9 @@ public class Generator
                     types.buildParameterType(namedHeaderParameter.getValue(), argumentName), argumentName);
             }
 
-            // TODO generate DTOs from XML/JSON schema and use them instead of generic
-            // StreamingOutput
             builderArgument = builderArgument.invoke("entity").arg(JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
-            responseBuilderMethod.param(StreamingOutput.class, GENERIC_PAYLOAD_ARGUMENT_NAME);
+            responseBuilderMethod.param(types.getResponseEntityClass(responseMimeType),
+                GENERIC_PAYLOAD_ARGUMENT_NAME);
 
             builderArgument = builderArgument.invoke("build");
 
@@ -341,27 +371,28 @@ public class Generator
         }
     }
 
-    private void addProducesAnnotation(final Action action, final JMethod method)
+    private void addProducesAnnotation(final MimeType responseMimeType, final JMethod method)
     {
-        final Set<String> responseMimeTypes = new HashSet<String>();
+        if (responseMimeType != null)
+        {
+            method.annotate(Produces.class).param("value", responseMimeType.getType());
+        }
+    }
+
+    private Collection<MimeType> getUniqueResponseMimeTypes(final Action action)
+    {
+        final Map<String, MimeType> responseMimeTypes = new HashMap<String, MimeType>();
         for (final Response response : action.getResponses().values())
         {
             for (final MimeType responseMimeType : response.getBody().values())
             {
                 if (responseMimeType != null)
                 {
-                    responseMimeTypes.add(responseMimeType.getType());
+                    responseMimeTypes.put(responseMimeType.getType(), responseMimeType);
                 }
             }
         }
-        if (!responseMimeTypes.isEmpty())
-        {
-            final JAnnotationArrayMember paramArray = method.annotate(Produces.class).paramArray("value");
-            for (final String responseMimeType : responseMimeTypes)
-            {
-                paramArray.param(responseMimeType);
-            }
-        }
+        return responseMimeTypes.values();
     }
 
     private void addBodyParameters(final MimeType bodyMimeType,
@@ -477,30 +508,12 @@ public class Generator
                                       final JDocComment javadoc)
     {
 
-        method.param(types.getGeneratorType(getPlainBodyClass(bodyMimeType)), GENERIC_PAYLOAD_ARGUMENT_NAME);
+        method.param(types.getRequestEntityClass(bodyMimeType), GENERIC_PAYLOAD_ARGUMENT_NAME);
 
         final String example = isNotBlank(bodyMimeType.getExample()) ? EXAMPLE_PREFIX
                                                                        + bodyMimeType.getExample() : "";
 
         javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(example);
-    }
-
-    private Class<?> getPlainBodyClass(final MimeType bodyMimeType)
-    {
-        if (isNotBlank(bodyMimeType.getSchema()))
-        {
-            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
-            return Object.class;
-        }
-        else if (startsWith(bodyMimeType.getType(), "text/"))
-        {
-            return String.class;
-        }
-        else
-        {
-            // fallback to a generic reader
-            return Reader.class;
-        }
     }
 
     private boolean hasAMultiTypeFormParameter(final MimeType bodyMimeType)

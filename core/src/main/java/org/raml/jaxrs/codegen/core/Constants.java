@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import javax.ws.rs.DELETE;
@@ -28,6 +29,8 @@ public abstract class Constants
     @SuppressWarnings("unchecked")
     public static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = Arrays.asList(DELETE.class,
         GET.class, HEAD.class, OPTIONS.class, POST.class, PUT.class);
+
+    public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     private Constants()
     {
