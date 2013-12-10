@@ -78,7 +78,8 @@ public class Names
             return "";
         }
 
-        return remove(bodyMimeType.getType().toLowerCase(DEFAULT_LOCALE), "x-www-");
+        return remove(StringUtils.substringAfter(bodyMimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
+            "x-www-");
     }
 
     private Names()
