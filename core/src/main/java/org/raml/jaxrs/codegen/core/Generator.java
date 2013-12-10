@@ -16,17 +16,19 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.strip;
-import static org.apache.commons.lang.StringUtils.substringAfter;
 
 import java.io.File;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import javax.mail.internet.MimeMultipart;
 import javax.ws.rs.Consumes;
@@ -35,6 +37,7 @@ import javax.ws.rs.FormParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
+import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
@@ -46,6 +49,7 @@ import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
 import org.raml.model.Resource;
+import org.raml.model.Response;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.FormParameter;
 import org.raml.model.parameter.Header;
@@ -59,10 +63,14 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JClass;
+import com.sun.codemodel.JClassAlreadyExistsException;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
+import com.sun.codemodel.JExpr;
 import com.sun.codemodel.JMethod;
+import com.sun.codemodel.JMod;
 import com.sun.codemodel.JType;
 import com.sun.codemodel.JVar;
 
@@ -76,7 +84,7 @@ public class Generator
     private Context context;
     private Types types;
 
-    public List<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
+    public Set<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
     {
         final String ramlBuffer = IOUtils.toString(ramlReader);
 
@@ -122,7 +130,7 @@ public class Generator
         Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");
     }
 
-    private List<String> run(final Raml raml, final Configuration configuration) throws Exception
+    private Set<String> run(final Raml raml, final Configuration configuration) throws Exception
     {
         validate(configuration);
 
@@ -184,39 +192,100 @@ public class Generator
                                    final Action action,
                                    final MimeType bodyMimeType) throws Exception
     {
-        final String methodBaseName = Names.buildResourceMethodBaseName(action);
-        final String bodyTypeInfix = bodyMimeType != null ? Names.buildJavaFriendlyName(substringAfter(
-            substringAfter(bodyMimeType.getType(), "/"), "x-www-")) : "";
-        final String methodName = action.getType().toString().toLowerCase() + bodyTypeInfix + methodBaseName;
+        final String methodName = Names.buildResourceMethodName(action, bodyMimeType);
 
-        // TODO use correct return type
-        final JMethod method = context.createResourceMethod(resourceInterface, methodName, void.class);
+        final JType resourceMethodReturnType = getResourceMethodReturnType(methodName, action,
+            resourceInterface);
+
+        // the actually created unique method name should be needed in the previous method but no
+        // way of doing this :(
+        final JMethod method = context.createResourceMethod(resourceInterface, methodName,
+            resourceMethodReturnType);
 
         context.addHttpMethodAnnotation(action.getType().toString(), method);
 
-        method.annotate(Path.class).param("value",
-            StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
+        addParamAnnotation(resourceInterfacePath, action, method);
+        addConsumesAndProducesAnnotations(action, bodyMimeType, method);
 
-        // TODO add produce annotation
-        if (bodyMimeType != null)
-        {
-            method.annotate(Consumes.class).param("value", bodyMimeType.getType());
-        }
-
-        final JDocComment javadoc = method.javadoc();
-        if (isNotBlank(action.getDescription()))
-        {
-            javadoc.add(action.getDescription());
-        }
+        final JDocComment javadoc = addBaseJavaDoc(action, method);
 
         // TODO add JSR-303 annotations for constraints if config.isUseJsr303Annotations
         addPathParameters(action, method, javadoc);
         addHeaderParameters(action, method, javadoc);
         addQueryParameters(action, method, javadoc);
+        addBodyParameters(bodyMimeType, method, javadoc);
+    }
 
+    private JType getResourceMethodReturnType(final String methodName,
+                                              final Action action,
+                                              final JDefinedClass resourceInterface)
+        throws JClassAlreadyExistsException
+    {
+        if (action.getResponses().isEmpty())
+        {
+            return context.getGeneratorType(void.class);
+        }
+
+        final JDefinedClass responseClass = resourceInterface._class(capitalize(methodName) + "Response")
+            ._extends(context.getResponseWrapperType());
+
+        final JMethod responseClassConstructor = responseClass.constructor(JMod.PRIVATE);
+        responseClassConstructor.param(javax.ws.rs.core.Response.class, "delegate");
+        responseClassConstructor.body().invoke("super").arg(JExpr.ref("delegate"));
+
+        for (final Response response : action.getResponses().values())
+        {
+
+        }
+
+        return responseClass;
+    }
+
+    private JDocComment addBaseJavaDoc(final Action action, final JMethod method)
+    {
+        final JDocComment javadoc = method.javadoc();
+        if (isNotBlank(action.getDescription()))
+        {
+            javadoc.add(action.getDescription());
+        }
+        return javadoc;
+    }
+
+    private void addParamAnnotation(final String resourceInterfacePath,
+                                    final Action action,
+                                    final JMethod method)
+    {
+        method.annotate(Path.class).param("value",
+            StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
+    }
+
+    private void addConsumesAndProducesAnnotations(final Action action,
+                                                   final MimeType bodyMimeType,
+                                                   final JMethod method)
+    {
         if (bodyMimeType != null)
         {
-            addBodyParameters(bodyMimeType, method, javadoc);
+            method.annotate(Consumes.class).param("value", bodyMimeType.getType());
+        }
+
+        final Set<String> responseMimeTypes = new HashSet<String>();
+        for (final Response response : action.getResponses().values())
+        {
+            for (final MimeType responseMimeType : response.getBody().values())
+            {
+                if (responseMimeType != null)
+                {
+                    responseMimeTypes.add(responseMimeType.getType());
+                }
+            }
+        }
+        if (!responseMimeTypes.isEmpty())
+        {
+            final JAnnotationArrayMember paramArray = method.annotate(Produces.class).paramArray("value");
+            for (final String responseMimeType : responseMimeTypes)
+            {
+                paramArray.param(responseMimeType);
+            }
         }
     }
 
@@ -224,7 +293,11 @@ public class Generator
                                    final JMethod method,
                                    final JDocComment javadoc) throws Exception
     {
-        if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
+        if (bodyMimeType == null)
+        {
+            return;
+        }
+        else if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
         {
             addFormParameters(bodyMimeType, method, javadoc);
         }
@@ -357,7 +430,8 @@ public class Generator
     {
         final String argumentName = Names.buildVariableName(name);
 
-        final JVar codegenParam = method.param(types.buildParameterType(parameter, argumentName), argumentName);
+        final JVar codegenParam = method.param(types.buildParameterType(parameter, argumentName),
+            argumentName);
 
         codegenParam.annotate(annotationClass).param("value", name);
 

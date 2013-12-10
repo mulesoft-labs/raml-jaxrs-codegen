@@ -4,11 +4,14 @@ package org.raml.jaxrs.codegen.core;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.left;
+import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
+import org.apache.commons.lang.StringUtils;
 import org.raml.model.Action;
+import org.raml.model.MimeType;
 import org.raml.model.Resource;
 
 public class Names
@@ -17,12 +20,8 @@ public class Names
     {
         final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
             resource.getRelativeUri()));
-        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
-    }
 
-    public static String buildResourceMethodBaseName(final Action action)
-    {
-        return buildJavaFriendlyName(action.getResource().getUri().replace("{", " By "));
+        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
     }
 
     public static String buildVariableName(final String source)
@@ -44,6 +43,30 @@ public class Names
         }
 
         return friendlyName;
+    }
+
+    public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType)
+    {
+        final String methodBaseName = buildJavaFriendlyName(action.getResource()
+            .getUri()
+            .replace("{", " By "));
+
+        return action.getType().toString().toLowerCase() + buildBodyTypeInfix(bodyMimeType) + methodBaseName;
+    }
+
+    private static String buildBodyTypeInfix(final MimeType bodyMimeType)
+    {
+        return bodyMimeType != null ? buildJavaFriendlyName(getShortMimeType(bodyMimeType)) : "";
+    }
+
+    private static String getShortMimeType(final MimeType bodyMimeType)
+    {
+        if (bodyMimeType == null)
+        {
+            return "";
+        }
+
+        return StringUtils.remove(substringAfter(bodyMimeType.getType(), "/").toLowerCase(), "x-www-");
     }
 
     private Names()

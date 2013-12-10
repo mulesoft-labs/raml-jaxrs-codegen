@@ -20,7 +20,13 @@ import java.io.File;
 
 public class Configuration
 {
+    public enum JaxrsVersion
+    {
+        JAXRS_1_1, JAXRS_2_0
+    };
+
     private File outputDirectory;
+    private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
     private boolean useJsr303Annotations = false;
 
@@ -32,6 +38,16 @@ public class Configuration
     public void setOutputDirectory(final File outputDirectory)
     {
         this.outputDirectory = outputDirectory;
+    }
+
+    public JaxrsVersion getJaxrsVersion()
+    {
+        return jaxrsVersion;
+    }
+
+    public void setJaxrsVersion(final JaxrsVersion jaxrsVersion)
+    {
+        this.jaxrsVersion = jaxrsVersion;
     }
 
     public String getBasePackageName()

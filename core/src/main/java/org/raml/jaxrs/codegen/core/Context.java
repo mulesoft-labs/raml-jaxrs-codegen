@@ -1,6 +1,8 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.annotation.Annotation;
@@ -17,6 +19,7 @@ import java.util.Set;
 
 import javax.ws.rs.HttpMethod;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
@@ -44,9 +47,10 @@ class Context
 
     private final Configuration configuration;
     private final JCodeModel codeModel;
-    private JDefinedClass currentResourceInterface;
-
     private final Map<String, Set<String>> resourcesMethods;
+
+    private boolean shouldGenerateResponseWrapper = false;
+    private JDefinedClass currentResourceInterface;
 
     public Context(final Configuration configuration)
     {
@@ -73,13 +77,48 @@ class Context
         this.currentResourceInterface = currentResourceInterface;
     }
 
-    public List<String> generate() throws IOException
+    public Set<String> generate() throws IOException
     {
         final ByteArrayOutputStream baos = new ByteArrayOutputStream();
         final PrintStream ps = new PrintStream(baos);
         codeModel.build(configuration.getOutputDirectory(), ps);
         ps.close();
-        return Arrays.asList(StringUtils.split(baos.toString()));
+
+        final Set<String> generatedFiles = new HashSet<String>();
+        if (shouldGenerateResponseWrapper)
+        {
+            generatedFiles.add(generateResponseWrapper());
+        }
+        generatedFiles.addAll(Arrays.asList(StringUtils.split(baos.toString())));
+
+        return generatedFiles;
+    }
+
+    private String generateResponseWrapper() throws IOException
+    {
+        final String template = IOUtils.toString(getClass().getResourceAsStream(
+            "/org/raml/templates/ResponseWrapper." + configuration.getJaxrsVersion().toString().toLowerCase()
+                            + ".template"));
+
+        final File supportPackageOutputDirectory = new File(configuration.getOutputDirectory(),
+            getSupportPackage().replace('.', File.separatorChar));
+
+        supportPackageOutputDirectory.mkdirs();
+
+        final File sourceOutputFile = new File(supportPackageOutputDirectory, "ResponseWrapper.java");
+        final String source = template.replace("${codegen.support.package}", getSupportPackage());
+        final FileWriter fileWriter = new FileWriter(sourceOutputFile);
+        IOUtils.write(source, fileWriter);
+        IOUtils.closeQuietly(fileWriter);
+
+        return getSupportPackage().replace('.', '/') + "/ResponseWrapper.java";
+    }
+
+    public JClass getResponseWrapperType()
+    {
+        shouldGenerateResponseWrapper = true;
+
+        return codeModel.directClass(getSupportPackage() + ".ResponseWrapper");
     }
 
     public JDefinedClass createResourceInterface(final String name) throws Exception
@@ -102,7 +141,7 @@ class Context
 
     public JMethod createResourceMethod(final JDefinedClass resourceInterface,
                                         final String methodName,
-                                        final Class<?> returnClass)
+                                        final JType returnType)
     {
         final Set<String> existingMethodNames = resourcesMethods.get(resourceInterface.name());
 
@@ -118,7 +157,7 @@ class Context
             }
         }
 
-        return resourceInterface.method(JMod.NONE, returnClass, actualMethodName);
+        return resourceInterface.method(JMod.NONE, returnType, actualMethodName);
     }
 
     public JDefinedClass createResourceEnum(final JDefinedClass resourceInterface,
@@ -170,7 +209,7 @@ class Context
     private JDefinedClass createCustomHttpMethodAnnotation(final String httpMethod)
         throws JClassAlreadyExistsException
     {
-        final JPackage pkg = codeModel._package(configuration.getBasePackageName() + ".support");
+        final JPackage pkg = codeModel._package(getSupportPackage());
         final JDefinedClass annotationClazz = pkg._annotationTypeDeclaration(httpMethod);
         annotationClazz.annotate(Target.class).param("value", ElementType.METHOD);
         annotationClazz.annotate(Retention.class).param("value", RetentionPolicy.RUNTIME);
@@ -178,5 +217,10 @@ class Context
         annotationClazz.javadoc().add("Custom JAX-RS support for HTTP " + httpMethod + ".");
         HTTP_METHOD_ANNOTATIONS.put(httpMethod.toUpperCase(), annotationClazz);
         return annotationClazz;
+    }
+
+    private String getSupportPackage()
+    {
+        return configuration.getBasePackageName() + ".support";
     }
 }
