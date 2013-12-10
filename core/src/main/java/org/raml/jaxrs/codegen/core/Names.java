@@ -54,7 +54,8 @@ public class Names
             .getUri()
             .replace("{", " By "));
 
-        return action.getType().toString().toLowerCase() + buildBodyTypeInfix(bodyMimeType) + methodBaseName;
+        return "handle" + StringUtils.capitalize(action.getType().toString().toLowerCase())
+               + buildBodyTypeInfix(bodyMimeType) + methodBaseName;
     }
 
     public static String buildResponseMethodName(final int statusCode, final MimeType responseMimeType)

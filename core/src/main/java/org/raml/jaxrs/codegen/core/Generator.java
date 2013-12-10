@@ -210,7 +210,8 @@ public class Generator
         context.addHttpMethodAnnotation(action.getType().toString(), method);
 
         addParamAnnotation(resourceInterfacePath, action, method);
-        addConsumesAndProducesAnnotations(action, bodyMimeType, method);
+        addConsumesAnnotation(bodyMimeType, method);
+        addProducesAnnotation(action, method);
 
         final JDocComment javadoc = addBaseJavaDoc(action, method);
 
@@ -331,15 +332,16 @@ public class Generator
             StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
     }
 
-    private void addConsumesAndProducesAnnotations(final Action action,
-                                                   final MimeType bodyMimeType,
-                                                   final JMethod method)
+    private void addConsumesAnnotation(final MimeType bodyMimeType, final JMethod method)
     {
         if (bodyMimeType != null)
         {
             method.annotate(Consumes.class).param("value", bodyMimeType.getType());
         }
+    }
 
+    private void addProducesAnnotation(final Action action, final JMethod method)
+    {
         final Set<String> responseMimeTypes = new HashSet<String>();
         for (final Response response : action.getResponses().values())
         {
