@@ -16,6 +16,8 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static com.sun.codemodel.JMod.PUBLIC;
+import static com.sun.codemodel.JMod.STATIC;
 import static org.apache.commons.lang.StringUtils.capitalize;
 import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -45,6 +47,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.math.NumberUtils;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Raml;
@@ -209,7 +212,8 @@ public class Generator
 
         final JDocComment javadoc = addBaseJavaDoc(action, method);
 
-        // TODO add JSR-303 annotations for constraints if config.isUseJsr303Annotations
+        // TODO add JSR-303 request/response @constraints if config.isUseJsr303Annotations
+
         addPathParameters(action, method, javadoc);
         addHeaderParameters(action, method, javadoc);
         addQueryParameters(action, method, javadoc);
@@ -233,9 +237,39 @@ public class Generator
         responseClassConstructor.param(javax.ws.rs.core.Response.class, "delegate");
         responseClassConstructor.body().invoke("super").arg(JExpr.ref("delegate"));
 
-        for (final Response response : action.getResponses().values())
+        for (final Entry<String, Response> statusCodeAndResponse : action.getResponses().entrySet())
         {
+            final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
+            final Response response = statusCodeAndResponse.getValue();
 
+            for (final MimeType responseMimeType : response.getBody().values())
+            {
+                final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode,
+                    responseMimeType);
+
+                final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
+                    responseBuilderMethodName);
+
+                final JDocComment javadoc = responseBuilderMethod.javadoc();
+                if (isNotBlank(response.getDescription()))
+                {
+                    javadoc.add(response.getDescription());
+                }
+                if (isNotBlank(responseMimeType.getExample()))
+                {
+                    javadoc.add(EXAMPLE_PREFIX + responseMimeType.getExample());
+                }
+
+                // return new StuffResponse(Response.status(200).header("X-Custom-Header",
+                // xCustomHeader).build())
+
+                responseBuilderMethod.body()._return(
+                    JExpr._new(responseClass).arg(
+                        ((JClass) context.getGeneratorType(javax.ws.rs.core.Response.class)).staticInvoke(
+                            "status")
+                            .arg(JExpr.lit(statusCode))
+                            .invoke("build")));
+            }
         }
 
         return responseClass;

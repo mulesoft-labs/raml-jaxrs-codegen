@@ -25,6 +25,12 @@
         </dependency>
 
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
+            <version>4.3</version>
+        </dependency>
+
+        <dependency>
             <groupId>org.raml</groupId>
             <artifactId>raml-parser</artifactId>
             <version>0.8.1</version>

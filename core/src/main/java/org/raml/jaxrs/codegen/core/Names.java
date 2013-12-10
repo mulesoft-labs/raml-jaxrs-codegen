@@ -9,7 +9,10 @@ import static org.apache.commons.lang.StringUtils.uncapitalize;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.apache.commons.lang.math.NumberUtils.isDigits;
 
+import java.util.Locale;
+
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
@@ -52,6 +55,14 @@ public class Names
             .replace("{", " By "));
 
         return action.getType().toString().toLowerCase() + buildBodyTypeInfix(bodyMimeType) + methodBaseName;
+    }
+
+    public static String buildResponseMethodName(final int statusCode, final MimeType responseMimeType)
+    {
+        final String status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, Locale.ENGLISH);
+
+        return getShortMimeType(responseMimeType)
+               + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode));
     }
 
     private static String buildBodyTypeInfix(final MimeType bodyMimeType)
