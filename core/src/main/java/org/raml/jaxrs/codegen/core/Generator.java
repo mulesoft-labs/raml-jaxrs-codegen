@@ -41,8 +41,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -81,7 +83,7 @@ public class Generator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
-    private static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "payload";
+    private static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
     private static final String EXAMPLE_PREFIX = " e.g. ";
 
     private Context context;
@@ -226,9 +228,17 @@ public class Generator
     {
         if (action.getResponses().isEmpty())
         {
-            return context.getGeneratorType(void.class);
+            return types.getGeneratorType(void.class);
         }
 
+        return createResourceMethodReturnType(methodName, action, resourceInterface);
+    }
+
+    private JDefinedClass createResourceMethodReturnType(final String methodName,
+                                                         final Action action,
+                                                         final JDefinedClass resourceInterface)
+        throws Exception
+    {
         final JDefinedClass responseClass = resourceInterface._class(capitalize(methodName) + "Response")
             ._extends(context.getResponseWrapperType());
 
@@ -238,55 +248,69 @@ public class Generator
 
         for (final Entry<String, Response> statusCodeAndResponse : action.getResponses().entrySet())
         {
-            final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
-            final Response response = statusCodeAndResponse.getValue();
-
-            for (final MimeType responseMimeType : response.getBody().values())
-            {
-                final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode,
-                    responseMimeType);
-
-                final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
-                    responseBuilderMethodName);
-
-                final JDocComment javadoc = responseBuilderMethod.javadoc();
-                if (isNotBlank(response.getDescription()))
-                {
-                    javadoc.add(response.getDescription());
-                }
-                if (isNotBlank(responseMimeType.getExample()))
-                {
-                    javadoc.add(EXAMPLE_PREFIX + responseMimeType.getExample());
-                }
-
-                // return new StuffResponse(Response.status(200).header("X-Custom-Header",
-                // xCustomHeader).build())
-
-                JInvocation builderArgument = ((JClass) context.getGeneratorType(javax.ws.rs.core.Response.class)).staticInvoke(
-                    "status")
-                    .arg(JExpr.lit(statusCode));
-
-                for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
-                {
-                    final String argumentName = Names.buildVariableName(namedHeaderParameter.getKey());
-
-                    builderArgument = builderArgument.invoke("header")
-                        .arg(namedHeaderParameter.getKey())
-                        .arg(JExpr.ref(argumentName));
-
-                    addParameterJavaDoc(namedHeaderParameter.getValue(), argumentName, javadoc);
-
-                    responseBuilderMethod.param(
-                        types.buildParameterType(namedHeaderParameter.getValue(), argumentName), argumentName);
-                }
-
-                builderArgument = builderArgument.invoke("build");
-
-                responseBuilderMethod.body()._return(JExpr._new(responseClass).arg(builderArgument));
-            }
+            createResponseBuilderInResourceMethodReturnType(action, responseClass, statusCodeAndResponse);
         }
 
         return responseClass;
+    }
+
+    private void createResponseBuilderInResourceMethodReturnType(final Action action,
+                                                                 final JDefinedClass responseClass,
+                                                                 final Entry<String, Response> statusCodeAndResponse)
+        throws Exception
+    {
+        final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
+        final Response response = statusCodeAndResponse.getValue();
+
+        for (final MimeType responseMimeType : response.getBody().values())
+        {
+            final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode,
+                responseMimeType);
+
+            final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
+                responseBuilderMethodName);
+
+            final JDocComment javadoc = responseBuilderMethod.javadoc();
+            if (isNotBlank(response.getDescription()))
+            {
+                javadoc.add(response.getDescription());
+            }
+            if (isNotBlank(responseMimeType.getExample()))
+            {
+                javadoc.add(EXAMPLE_PREFIX + responseMimeType.getExample());
+            }
+
+            JInvocation builderArgument = types.getGeneratorClass(javax.ws.rs.core.Response.class)
+                .staticInvoke("status")
+                .arg(JExpr.lit(statusCode));
+
+            builderArgument = builderArgument.invoke("header")
+                .arg(HttpHeaders.CONTENT_TYPE)
+                .arg(responseMimeType.getType());
+
+            for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
+            {
+                final String argumentName = Names.buildVariableName(namedHeaderParameter.getKey());
+
+                builderArgument = builderArgument.invoke("header")
+                    .arg(namedHeaderParameter.getKey())
+                    .arg(JExpr.ref(argumentName));
+
+                addParameterJavaDoc(namedHeaderParameter.getValue(), argumentName, javadoc);
+
+                responseBuilderMethod.param(
+                    types.buildParameterType(namedHeaderParameter.getValue(), argumentName), argumentName);
+            }
+
+            // TODO generate DTOs from XML/JSON schema and use them instead of generic
+            // StreamingOutput
+            builderArgument = builderArgument.invoke("entity").arg(JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
+            responseBuilderMethod.param(StreamingOutput.class, GENERIC_PAYLOAD_ARGUMENT_NAME);
+
+            builderArgument = builderArgument.invoke("build");
+
+            responseBuilderMethod.body()._return(JExpr._new(responseClass).arg(builderArgument));
+        }
     }
 
     private JDocComment addBaseJavaDoc(final Action action, final JMethod method)
@@ -353,7 +377,7 @@ public class Generator
         {
             // use a "catch all" javax.mail.internet.MimeMultipart parameter
             addCatchAllFormParametersArgument(bodyMimeType, method, javadoc,
-                context.getGeneratorType(MimeMultipart.class));
+                types.getGeneratorType(MimeMultipart.class));
         }
         else
         {
@@ -400,8 +424,8 @@ public class Generator
         if (hasAMultiTypeFormParameter(bodyMimeType))
         {
             // use a "catch all" MultivaluedMap<String, String> parameter
-            final JClass type = ((JClass) context.getGeneratorType(MultivaluedMap.class)).narrow(
-                String.class, String.class);
+            final JClass type = types.getGeneratorClass(MultivaluedMap.class).narrow(String.class,
+                String.class);
 
             addCatchAllFormParametersArgument(bodyMimeType, method, javadoc, type);
         }
@@ -450,7 +474,7 @@ public class Generator
                                       final JDocComment javadoc)
     {
         // TODO generate DTOs from XML/JSON schema and use them instead of generic Reader
-        method.param(context.getGeneratorType(Reader.class), GENERIC_PAYLOAD_ARGUMENT_NAME);
+        method.param(types.getGeneratorType(Reader.class), GENERIC_PAYLOAD_ARGUMENT_NAME);
 
         final String example = isNotBlank(bodyMimeType.getExample()) ? EXAMPLE_PREFIX
                                                                        + bodyMimeType.getExample() : "";

@@ -48,6 +48,16 @@ public class Types
         }
     }
 
+    public JType getGeneratorType(final Class<?> clazz)
+    {
+        return context.getGeneratorType(clazz);
+    }
+
+    public JClass getGeneratorClass(final Class<?> clazz)
+    {
+        return (JClass) context.getGeneratorType(clazz);
+    }
+
     private static Class<?> getJavaType(final AbstractParam parameter)
     {
         if (parameter.getType() == null)
