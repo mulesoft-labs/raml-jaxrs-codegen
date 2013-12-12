@@ -173,15 +173,20 @@ public class Generator
     {
         for (final Action action : resource.getActions().values())
         {
-            if (action.getBody().isEmpty())
+            if (action.getBody().size() <= 1)
             {
-                addResourceMethods(resourceInterface, resourceInterfacePath, action, null);
+                final MimeType bodyMimeType = action.getBody().isEmpty() ? null : action.getBody()
+                    .values()
+                    .iterator()
+                    .next();
+
+                addResourceMethods(resourceInterface, resourceInterfacePath, action, bodyMimeType, false);
             }
             else
             {
                 for (final MimeType bodyMimeType : action.getBody().values())
                 {
-                    addResourceMethods(resourceInterface, resourceInterfacePath, action, bodyMimeType);
+                    addResourceMethods(resourceInterface, resourceInterfacePath, action, bodyMimeType, true);
                 }
             }
         }
@@ -195,19 +200,28 @@ public class Generator
     private void addResourceMethods(final JDefinedClass resourceInterface,
                                     final String resourceInterfacePath,
                                     final Action action,
-                                    final MimeType bodyMimeType) throws Exception
+                                    final MimeType bodyMimeType,
+                                    final boolean addBodyMimeTypeInMethodName) throws Exception
     {
         final Collection<MimeType> uniqueResponseMimeTypes = getUniqueResponseMimeTypes(action);
-        if (uniqueResponseMimeTypes.isEmpty())
+
+        // one or zero response mime types, we don't need to add them in the method name
+        if (uniqueResponseMimeTypes.size() <= 1)
         {
-            addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType, null);
+            final MimeType responseMimeTypeOrNull = uniqueResponseMimeTypes.isEmpty()
+                                                                                     ? null
+                                                                                     : uniqueResponseMimeTypes.iterator()
+                                                                                         .next();
+
+            addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
+                addBodyMimeTypeInMethodName, responseMimeTypeOrNull, false);
         }
         else
         {
             for (final MimeType responseMimeType : uniqueResponseMimeTypes)
             {
                 addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
-                    responseMimeType);
+                    addBodyMimeTypeInMethodName, responseMimeType, true);
             }
         }
     }
@@ -216,9 +230,13 @@ public class Generator
                                    final String resourceInterfacePath,
                                    final Action action,
                                    final MimeType bodyMimeType,
-                                   final MimeType responseMimeType) throws Exception
+                                   final boolean addBodyMimeTypeInMethodName,
+                                   final MimeType responseMimeType,
+                                   final boolean addResponseMimeTypeInMethodName) throws Exception
     {
-        final String methodName = Names.buildResourceMethodName(action, bodyMimeType, responseMimeType);
+        final String methodName = Names.buildResourceMethodName(action,
+            addBodyMimeTypeInMethodName ? bodyMimeType : null,
+            addResponseMimeTypeInMethodName ? responseMimeType : null);
 
         final JType resourceMethodReturnType = getResourceMethodReturnType(methodName, action,
             responseMimeType, resourceInterface);
