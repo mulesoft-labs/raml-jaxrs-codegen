@@ -136,6 +136,12 @@ public class Generator
         }
 
         Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");
+
+        // TODO remove when JSR-303 annotations are supported
+        if (configuration.isUseJsr303Annotations())
+        {
+            LOGGER.warn("JSR-303 annotation support is currently not available");
+        }
     }
 
     private Set<String> run(final Raml raml, final Configuration configuration) throws Exception

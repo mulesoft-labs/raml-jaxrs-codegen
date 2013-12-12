@@ -1,3 +1,4 @@
 # RAML to JAX-RS codegen - Maven Plug-in
 
-Coming soon
+_Documentation coming soon_
+

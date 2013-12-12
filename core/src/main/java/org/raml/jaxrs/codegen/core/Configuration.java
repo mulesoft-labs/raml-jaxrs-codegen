@@ -17,12 +17,40 @@
 package org.raml.jaxrs.codegen.core;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 
 public class Configuration
 {
     public enum JaxrsVersion
     {
-        JAXRS_1_1, JAXRS_2_0
+        JAXRS_1_1("1.1"), JAXRS_2_0("2.0");
+
+        private final String alias;
+
+        private JaxrsVersion(final String alias)
+        {
+            this.alias = alias;
+        }
+
+        public static JaxrsVersion fromAlias(final String alias)
+        {
+            final List<String> supportedAliases = new ArrayList<String>();
+
+            for (final JaxrsVersion jaxrsVersion : JaxrsVersion.values())
+            {
+                if (jaxrsVersion.alias.equals(alias))
+                {
+                    return jaxrsVersion;
+                }
+                supportedAliases.add(jaxrsVersion.alias);
+            }
+
+            throw new IllegalArgumentException(alias + " is not a supported JAX-RS version ("
+                                               + StringUtils.join(supportedAliases, ',') + ")");
+        }
     };
 
     private File outputDirectory;
