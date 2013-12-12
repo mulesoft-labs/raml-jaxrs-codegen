@@ -23,6 +23,10 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.strip;
+import static org.raml.jaxrs.codegen.core.Constants.RESPONSE_HEADER_WILDCARD_SYMBOL;
+import static org.raml.jaxrs.codegen.core.Names.EXAMPLE_PREFIX;
+import static org.raml.jaxrs.codegen.core.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
+import static org.raml.jaxrs.codegen.core.Names.MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME;
 
 import java.io.File;
 import java.io.Reader;
@@ -46,6 +50,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response.ResponseBuilder;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -69,6 +74,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
@@ -82,9 +88,6 @@ import com.sun.codemodel.JVar;
 public class Generator
 {
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
-
-    private static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
-    private static final String EXAMPLE_PREFIX = " e.g. ";
 
     private Context context;
     private Types types;
@@ -321,6 +324,7 @@ public class Generator
                 responseBuilderMethodName);
 
             final JDocComment javadoc = responseBuilderMethod.javadoc();
+
             if (isNotBlank(response.getDescription()))
             {
                 javadoc.add(response.getDescription());
@@ -338,28 +342,59 @@ public class Generator
                 .arg(HttpHeaders.CONTENT_TYPE)
                 .arg(responseMimeType.getType());
 
-            // TODO support {?} in headers (accept a map and generate code to call header)
-            for (final Entry<String, Header> namedHeaderParameter : action.getHeaders().entrySet())
+            final StringBuilder freeFormHeadersDescription = new StringBuilder();
+
+            for (final Entry<String, Header> namedHeaderParameter : response.getHeaders().entrySet())
             {
-                final String argumentName = Names.buildVariableName(namedHeaderParameter.getKey());
+                final String headerName = namedHeaderParameter.getKey();
+                final Header header = namedHeaderParameter.getValue();
+
+                if (headerName.contains(RESPONSE_HEADER_WILDCARD_SYMBOL))
+                {
+                    appendParameterJavadocDescription(header, freeFormHeadersDescription);
+                    continue;
+                }
+
+                final String argumentName = Names.buildVariableName(headerName);
 
                 builderArgument = builderArgument.invoke("header")
-                    .arg(namedHeaderParameter.getKey())
+                    .arg(headerName)
                     .arg(JExpr.ref(argumentName));
 
-                addParameterJavaDoc(namedHeaderParameter.getValue(), argumentName, javadoc);
+                addParameterJavaDoc(header, argumentName, javadoc);
 
-                responseBuilderMethod.param(
-                    types.buildParameterType(namedHeaderParameter.getValue(), argumentName), argumentName);
+                responseBuilderMethod.param(types.buildParameterType(header, argumentName), argumentName);
             }
 
-            builderArgument = builderArgument.invoke("entity").arg(JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
+            final JBlock responseBuilderMethodBody = responseBuilderMethod.body();
+
+            final JVar builderVariable = responseBuilderMethodBody.decl(
+                types.getGeneratorType(ResponseBuilder.class), "responseBuilder", builderArgument);
+
+            if (freeFormHeadersDescription.length() > 0)
+            {
+                // generate a Map<String, List<Object>> argument
+                final JClass listOfObjectsClass = types.getGeneratorClass(List.class).narrow(Object.class);
+                final JClass headersArgument = types.getGeneratorClass(Map.class).narrow(
+                    types.getGeneratorClass(String.class), listOfObjectsClass);
+
+                builderArgument = responseBuilderMethodBody.invoke("headers")
+                    .arg(JExpr.ref(MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME))
+                    .arg(builderVariable);
+
+                final JVar param = responseBuilderMethod.param(headersArgument,
+                    MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME);
+
+                javadoc.addParam(param).add(freeFormHeadersDescription.toString());
+            }
+
+            responseBuilderMethodBody.invoke(builderVariable, "entity").arg(
+                JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
             responseBuilderMethod.param(types.getResponseEntityClass(responseMimeType),
                 GENERIC_PAYLOAD_ARGUMENT_NAME);
+            javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(defaultString(responseMimeType.getExample()));
 
-            builderArgument = builderArgument.invoke("build");
-
-            responseBuilderMethod.body()._return(JExpr._new(responseClass).arg(builderArgument));
+            responseBuilderMethodBody._return(JExpr._new(responseClass).arg(builderVariable.invoke("build")));
         }
     }
 
@@ -508,13 +543,7 @@ public class Generator
 
             for (final FormParameter formParameter : namedFormParameters.getValue())
             {
-                sb.append(formParameter.getDescription());
-                if (isNotBlank(formParameter.getExample()))
-                {
-                    sb.append(EXAMPLE_PREFIX).append(formParameter.getExample());
-                }
-
-                sb.append("<br/>\n");
+                appendParameterJavadocDescription(formParameter, sb);
             }
 
             javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(sb.toString());
@@ -528,10 +557,8 @@ public class Generator
 
         method.param(types.getRequestEntityClass(bodyMimeType), GENERIC_PAYLOAD_ARGUMENT_NAME);
 
-        final String example = isNotBlank(bodyMimeType.getExample()) ? EXAMPLE_PREFIX
-                                                                       + bodyMimeType.getExample() : "";
-
-        javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(example);
+        javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(
+            getPrefixedExampleOrBlank(bodyMimeType.getExample()));
     }
 
     private boolean hasAMultiTypeFormParameter(final MimeType bodyMimeType)
@@ -571,10 +598,36 @@ public class Generator
                                      final String parameterName,
                                      final JDocComment javadoc)
     {
-        final String example = isNotBlank(parameter.getExample())
-                                                                 ? EXAMPLE_PREFIX + parameter.getExample()
-                                                                 : "";
+        javadoc.addParam(parameterName).add(
+            defaultString(parameter.getDescription()) + getPrefixedExampleOrBlank(parameter.getExample()));
+    }
 
-        javadoc.addParam(parameterName).add(defaultString(parameter.getDescription()) + example);
+    private String getPrefixedExampleOrBlank(final String example)
+    {
+        return isNotBlank(example) ? EXAMPLE_PREFIX + example : "";
+    }
+
+    private void appendParameterJavadocDescription(final AbstractParam param, final StringBuilder sb)
+    {
+        if (isNotBlank(param.getDisplayName()))
+        {
+            sb.append(param.getDisplayName());
+        }
+
+        if (isNotBlank(param.getDescription()))
+        {
+            if (sb.length() > 0)
+            {
+                sb.append(" - ");
+            }
+            sb.append(param.getDescription());
+        }
+
+        if (isNotBlank(param.getExample()))
+        {
+            sb.append(EXAMPLE_PREFIX).append(param.getExample());
+        }
+
+        sb.append("<br/>\n");
     }
 }

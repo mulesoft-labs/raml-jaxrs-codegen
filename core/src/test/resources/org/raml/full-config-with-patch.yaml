@@ -96,6 +96,10 @@ protocols: [HTTP, HTTPS]
                     application/json:
                         example: '{ "key": "value" }'
             400:
+                headers:
+                    x-meta-{?}:
+                        description: |
+                            Field names prefixed with x-meta- contain user-specified metadata.
                 body:
                     text/xml:
                         example: '<root>none</root>'

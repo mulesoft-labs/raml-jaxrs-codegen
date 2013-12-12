@@ -5,7 +5,9 @@ import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.Date;
 import java.util.Locale;
+import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.core.EntityTag;
@@ -27,6 +29,22 @@ public abstract class ResponseWrapper extends Response
     protected ResponseWrapper(final Response delegate)
     {
         this.delegate = delegate;
+    }
+
+    protected static ResponseBuilder headers(final Map<String, List<Object>> headers, final ResponseBuilder responseBuilder)
+    {
+        if (headers != null)
+        {
+            for (final Entry<String, List<Object>> nameAndValues : headers.entrySet())
+            {
+                for (final Object value : nameAndValues.getValue())
+                {
+                    responseBuilder.header(nameAndValues.getKey(), value);
+                }
+            }
+        }
+
+        return responseBuilder;
     }
 
     @Override

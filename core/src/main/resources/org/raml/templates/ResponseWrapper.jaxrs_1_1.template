@@ -1,6 +1,10 @@
 
 package ${codegen.support.package};
 
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
@@ -14,6 +18,22 @@ public abstract class ResponseWrapper extends Response
     protected ResponseWrapper(final Response delegate)
     {
         this.delegate = delegate;
+    }
+
+    protected static ResponseBuilder headers(final Map<String, List<Object>> headers, final ResponseBuilder responseBuilder)
+    {
+        if (headers != null)
+        {
+            for (final Entry<String, List<Object>> nameAndValues : headers.entrySet())
+            {
+                for (final Object value : nameAndValues.getValue())
+                {
+                    responseBuilder.header(nameAndValues.getKey(), value);
+                }
+            }
+        }
+
+        return responseBuilder;
     }
 
     @Override

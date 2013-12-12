@@ -32,6 +32,8 @@ public abstract class Constants
 
     public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
+    public static final String RESPONSE_HEADER_WILDCARD_SYMBOL = "{?}";
+
     private Constants()
     {
         throw new UnsupportedOperationException();

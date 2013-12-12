@@ -18,6 +18,10 @@ import org.raml.model.Resource;
 
 public class Names
 {
+    public static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
+    public static final String MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME = "headers";
+    public static final String EXAMPLE_PREFIX = " e.g. ";
+
     public static String buildResourceInterfaceName(final Resource resource)
     {
         final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
@@ -55,8 +59,7 @@ public class Names
             .getUri()
             .replace("{", " By "));
 
-        return "handle" + StringUtils.capitalize(action.getType().toString().toLowerCase())
-               + buildMimeTypeInfix(bodyMimeType) + methodBaseName
+        return action.getType().toString().toLowerCase() + buildMimeTypeInfix(bodyMimeType) + methodBaseName
                + (responseMimeType != null ? "As" + buildMimeTypeInfix(responseMimeType) : "");
     }
 
