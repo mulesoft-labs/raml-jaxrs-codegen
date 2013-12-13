@@ -10,6 +10,7 @@
     <modules>
         <module>core</module>
         <module>maven-plugin</module>
+        <module>jersey-example</module>
     </modules>
 
     <build>

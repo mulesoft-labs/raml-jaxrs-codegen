@@ -1,15 +1,23 @@
 
 package org.raml.jaxrs.codegen.maven;
 
+import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_RUNTIME;
+
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
 import org.apache.maven.plugin.MojoFailureException;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
+import org.apache.maven.project.MavenProject;
 import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 import org.raml.jaxrs.codegen.core.Generator;
@@ -18,8 +26,18 @@ import org.raml.jaxrs.codegen.core.Generator;
  * When invoked, this goals read one or more <a href="http://raml.org">RAML</a> files and produces
  * JAX-RS annotated Java classes.
  */
+@Mojo(name = "generate", requiresProject = true, threadSafe = false, requiresDependencyResolution = COMPILE_PLUS_RUNTIME, defaultPhase = LifecyclePhase.GENERATE_SOURCES)
 public class RamlJaxrsCodegenMojo extends AbstractMojo
 {
+    @Parameter(defaultValue = "${project}")
+    private MavenProject project;
+
+    /**
+     * Skip plug-in execution.
+     */
+    @Parameter(property = "skip", defaultValue = "false")
+    private boolean skip;
+
     /**
      * Target directory for generated Java source files.
      */
@@ -27,11 +45,16 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     private File outputDirectory;
 
     /**
-     * An array of locations of the RAML file(s). Note: each item may refer to a single file or a
-     * directory of files.
+     * An array of locations of the RAML file(s).
      */
-    @Parameter(property = "sourcePaths", required = true)
+    @Parameter(property = "sourcePaths")
     private File[] sourcePaths;
+
+    /**
+     * Directory location of the RAML file(s).
+     */
+    @Parameter(property = "sourceDirectory")
+    private File sourceDirectory;
 
     /**
      * The targetted JAX-RS version: either "1.1" or "2.0" .
@@ -42,13 +65,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     /**
      * Base package name used for generated Java classes.
      */
-    @Parameter(property = "jaxrsVersion", required = true)
+    @Parameter(property = "basePackageName", required = true)
     private String basePackageName;
 
     /**
      * Should JSR-303 annotations be used?
      */
-    @Parameter(property = "jaxrsVersion", defaultValue = "false")
+    @Parameter(property = "useJsr303Annotations", defaultValue = "false")
     private boolean useJsr303Annotations;
 
     /**
@@ -61,6 +84,17 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
+        if (skip)
+        {
+            getLog().info("Skipping execution...");
+            return;
+        }
+
+        if ((sourceDirectory == null) && (sourcePaths == null))
+        {
+            throw new MojoExecutionException("One of sourceDirectory or sourcePaths must be provided");
+        }
+
         try
         {
             FileUtils.forceMkdir(outputDirectory);
@@ -86,7 +120,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 
         try
         {
-            configuration.setBasePackageName("org.raml.jaxrs.test");
+            configuration.setBasePackageName(basePackageName);
             configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
@@ -96,21 +130,46 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             throw new MojoExecutionException("Failed to configure plug-in", e);
         }
 
+        project.addCompileSourceRoot(outputDirectory.getPath());
+
         File currentSourcePath = null;
 
         try
         {
             final Generator generator = new Generator();
 
-            for (final File sourcePath : sourcePaths)
+            for (final File ramlFile : getRamlFiles())
             {
-                currentSourcePath = sourcePath;
-                generator.run(new FileReader(sourcePath), configuration);
+                getLog().info("Generating Java classes from: " + ramlFile);
+                currentSourcePath = ramlFile;
+                generator.run(new FileReader(ramlFile), configuration);
             }
         }
         catch (final Exception e)
         {
             throw new MojoExecutionException("Error generating Java classes from: " + currentSourcePath, e);
+        }
+    }
+
+    private Collection<File> getRamlFiles() throws MojoExecutionException
+    {
+        if (sourceDirectory != null)
+        {
+            if (!sourceDirectory.isDirectory())
+            {
+                throw new MojoExecutionException("The provided path doesn't refer to a valid directory: "
+                                                 + sourceDirectory);
+            }
+
+            getLog().info("Looking for RAML files in and below: " + sourceDirectory);
+
+            return FileUtils.listFiles(sourceDirectory, new String[]{"raml", "yaml"}, true);
+        }
+        else
+        {
+            final List<File> sourceFiles = Arrays.asList(sourcePaths);
+            getLog().info("Using RAML files: " + sourceFiles);
+            return sourceFiles;
         }
     }
 }
