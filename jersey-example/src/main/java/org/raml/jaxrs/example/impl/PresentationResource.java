@@ -14,12 +14,12 @@ public class PresentationResource implements Presentations
     {
         if (!"s3cr3t".equals(authorization))
         {
-            throw new SecurityException("not authorized");
+            return GetPresentationsResponse.unauthorized();
         }
 
         final Presentation presentation = new Presentation().withId("fake-id").withTitle(title);
 
-        return GetPresentationsResponse.oK(presentation);
+        return GetPresentationsResponse.jsonOK(presentation);
     }
 
     @Override
@@ -27,12 +27,12 @@ public class PresentationResource implements Presentations
     {
         if (!"s3cr3t".equals(authorization))
         {
-            throw new SecurityException("not authorized");
+            return PostPresentationsResponse.unauthorized();
         }
 
         entity.setId("fake-new-id");
 
-        return PostPresentationsResponse.created(entity);
+        return PostPresentationsResponse.jsonCreated(entity);
     }
 
     @Override

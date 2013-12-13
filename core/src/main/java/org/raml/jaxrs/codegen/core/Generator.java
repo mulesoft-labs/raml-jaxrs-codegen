@@ -75,6 +75,7 @@ import org.slf4j.LoggerFactory;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;
@@ -215,25 +216,8 @@ public class Generator
     {
         final Collection<MimeType> uniqueResponseMimeTypes = getUniqueResponseMimeTypes(action);
 
-        // one or zero response mime types, we don't need to add them in the method name
-        if (uniqueResponseMimeTypes.size() <= 1)
-        {
-            final MimeType responseMimeTypeOrNull = uniqueResponseMimeTypes.isEmpty()
-                                                                                     ? null
-                                                                                     : uniqueResponseMimeTypes.iterator()
-                                                                                         .next();
-
-            addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
-                addBodyMimeTypeInMethodName, responseMimeTypeOrNull, false);
-        }
-        else
-        {
-            for (final MimeType responseMimeType : uniqueResponseMimeTypes)
-            {
-                addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
-                    addBodyMimeTypeInMethodName, responseMimeType, true);
-            }
-        }
+        addResourceMethod(resourceInterface, resourceInterfacePath, action, bodyMimeType,
+            addBodyMimeTypeInMethodName, uniqueResponseMimeTypes);
     }
 
     private void addResourceMethod(final JDefinedClass resourceInterface,
@@ -241,15 +225,13 @@ public class Generator
                                    final Action action,
                                    final MimeType bodyMimeType,
                                    final boolean addBodyMimeTypeInMethodName,
-                                   final MimeType responseMimeType,
-                                   final boolean addResponseMimeTypeInMethodName) throws Exception
+                                   final Collection<MimeType> uniqueResponseMimeTypes) throws Exception
     {
         final String methodName = Names.buildResourceMethodName(action,
-            addBodyMimeTypeInMethodName ? bodyMimeType : null,
-            addResponseMimeTypeInMethodName ? responseMimeType : null);
+            addBodyMimeTypeInMethodName ? bodyMimeType : null);
 
         final JType resourceMethodReturnType = getResourceMethodReturnType(methodName, action,
-            responseMimeType, resourceInterface);
+            uniqueResponseMimeTypes.isEmpty(), resourceInterface);
 
         // the actually created unique method name should be needed in the previous method but
         // no way of doing this :(
@@ -260,7 +242,7 @@ public class Generator
 
         addParamAnnotation(resourceInterfacePath, action, method);
         addConsumesAnnotation(bodyMimeType, method);
-        addProducesAnnotation(responseMimeType, method);
+        addProducesAnnotation(uniqueResponseMimeTypes, method);
 
         final JDocComment javadoc = addBaseJavaDoc(action, method);
 
@@ -274,22 +256,21 @@ public class Generator
 
     private JType getResourceMethodReturnType(final String methodName,
                                               final Action action,
-                                              final MimeType responseMimeType,
+                                              final boolean returnsVoid,
                                               final JDefinedClass resourceInterface) throws Exception
     {
-        if (responseMimeType == null)
+        if (returnsVoid)
         {
             return types.getGeneratorType(void.class);
         }
         else
         {
-            return createResourceMethodReturnType(methodName, action, responseMimeType, resourceInterface);
+            return createResourceMethodReturnType(methodName, action, resourceInterface);
         }
     }
 
     private JDefinedClass createResourceMethodReturnType(final String methodName,
                                                          final Action action,
-                                                         final MimeType responseMimeType,
                                                          final JDefinedClass resourceInterface)
         throws Exception
     {
@@ -302,15 +283,13 @@ public class Generator
 
         for (final Entry<String, Response> statusCodeAndResponse : action.getResponses().entrySet())
         {
-            createResponseBuilderInResourceMethodReturnType(action, responseMimeType, responseClass,
-                statusCodeAndResponse);
+            createResponseBuilderInResourceMethodReturnType(action, responseClass, statusCodeAndResponse);
         }
 
         return responseClass;
     }
 
     private void createResponseBuilderInResourceMethodReturnType(final Action action,
-                                                                 final MimeType responseMimeType,
                                                                  final JDefinedClass responseClass,
                                                                  final Entry<String, Response> statusCodeAndResponse)
         throws Exception
@@ -318,91 +297,107 @@ public class Generator
         final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
         final Response response = statusCodeAndResponse.getValue();
 
-        for (final MimeType mimeType : response.getBody().values())
+        if (response.getBody().isEmpty())
         {
-            if (!mimeType.getType().equals(responseMimeType.getType()))
+            createResponseBuilderInResourceMethodReturnType(responseClass, statusCode, response, null);
+        }
+        else
+        {
+            for (final MimeType mimeType : response.getBody().values())
             {
-                continue;
+                createResponseBuilderInResourceMethodReturnType(responseClass, statusCode, response, mimeType);
             }
+        }
+    }
 
-            final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode);
+    private void createResponseBuilderInResourceMethodReturnType(final JDefinedClass responseClass,
+                                                                 final int statusCode,
+                                                                 final Response response,
+                                                                 final MimeType responseMimeType)
+        throws Exception
+    {
+        final String responseBuilderMethodName = Names.buildResponseMethodName(statusCode, responseMimeType);
 
-            final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
-                responseBuilderMethodName);
+        final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
+            responseBuilderMethodName);
 
-            final JDocComment javadoc = responseBuilderMethod.javadoc();
+        final JDocComment javadoc = responseBuilderMethod.javadoc();
 
-            if (isNotBlank(response.getDescription()))
-            {
-                javadoc.add(response.getDescription());
-            }
-            if (isNotBlank(responseMimeType.getExample()))
-            {
-                javadoc.add(EXAMPLE_PREFIX + responseMimeType.getExample());
-            }
+        if (isNotBlank(response.getDescription()))
+        {
+            javadoc.add(response.getDescription());
+        }
 
-            JInvocation builderArgument = types.getGeneratorClass(javax.ws.rs.core.Response.class)
-                .staticInvoke("status")
-                .arg(JExpr.lit(statusCode));
+        if ((responseMimeType != null) && (isNotBlank(responseMimeType.getExample())))
+        {
+            javadoc.add(EXAMPLE_PREFIX + responseMimeType.getExample());
+        }
 
+        JInvocation builderArgument = types.getGeneratorClass(javax.ws.rs.core.Response.class)
+            .staticInvoke("status")
+            .arg(JExpr.lit(statusCode));
+
+        if (responseMimeType != null)
+        {
             builderArgument = builderArgument.invoke("header")
                 .arg(HttpHeaders.CONTENT_TYPE)
                 .arg(responseMimeType.getType());
+        }
 
-            final StringBuilder freeFormHeadersDescription = new StringBuilder();
+        final StringBuilder freeFormHeadersDescription = new StringBuilder();
 
-            for (final Entry<String, Header> namedHeaderParameter : response.getHeaders().entrySet())
+        for (final Entry<String, Header> namedHeaderParameter : response.getHeaders().entrySet())
+        {
+            final String headerName = namedHeaderParameter.getKey();
+            final Header header = namedHeaderParameter.getValue();
+
+            if (headerName.contains(RESPONSE_HEADER_WILDCARD_SYMBOL))
             {
-                final String headerName = namedHeaderParameter.getKey();
-                final Header header = namedHeaderParameter.getValue();
-
-                if (headerName.contains(RESPONSE_HEADER_WILDCARD_SYMBOL))
-                {
-                    appendParameterJavadocDescription(header, freeFormHeadersDescription);
-                    continue;
-                }
-
-                final String argumentName = Names.buildVariableName(headerName);
-
-                builderArgument = builderArgument.invoke("header")
-                    .arg(headerName)
-                    .arg(JExpr.ref(argumentName));
-
-                addParameterJavaDoc(header, argumentName, javadoc);
-
-                responseBuilderMethod.param(types.buildParameterType(header, argumentName), argumentName);
+                appendParameterJavadocDescription(header, freeFormHeadersDescription);
+                continue;
             }
 
-            final JBlock responseBuilderMethodBody = responseBuilderMethod.body();
+            final String argumentName = Names.buildVariableName(headerName);
 
-            final JVar builderVariable = responseBuilderMethodBody.decl(
-                types.getGeneratorType(ResponseBuilder.class), "responseBuilder", builderArgument);
+            builderArgument = builderArgument.invoke("header").arg(headerName).arg(JExpr.ref(argumentName));
 
-            if (freeFormHeadersDescription.length() > 0)
-            {
-                // generate a Map<String, List<Object>> argument
-                final JClass listOfObjectsClass = types.getGeneratorClass(List.class).narrow(Object.class);
-                final JClass headersArgument = types.getGeneratorClass(Map.class).narrow(
-                    types.getGeneratorClass(String.class), listOfObjectsClass);
+            addParameterJavaDoc(header, argumentName, javadoc);
 
-                builderArgument = responseBuilderMethodBody.invoke("headers")
-                    .arg(JExpr.ref(MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME))
-                    .arg(builderVariable);
+            responseBuilderMethod.param(types.buildParameterType(header, argumentName), argumentName);
+        }
 
-                final JVar param = responseBuilderMethod.param(headersArgument,
-                    MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME);
+        final JBlock responseBuilderMethodBody = responseBuilderMethod.body();
 
-                javadoc.addParam(param).add(freeFormHeadersDescription.toString());
-            }
+        final JVar builderVariable = responseBuilderMethodBody.decl(
+            types.getGeneratorType(ResponseBuilder.class), "responseBuilder", builderArgument);
 
+        if (freeFormHeadersDescription.length() > 0)
+        {
+            // generate a Map<String, List<Object>> argument for {?} headers
+            final JClass listOfObjectsClass = types.getGeneratorClass(List.class).narrow(Object.class);
+            final JClass headersArgument = types.getGeneratorClass(Map.class).narrow(
+                types.getGeneratorClass(String.class), listOfObjectsClass);
+
+            builderArgument = responseBuilderMethodBody.invoke("headers")
+                .arg(JExpr.ref(MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME))
+                .arg(builderVariable);
+
+            final JVar param = responseBuilderMethod.param(headersArgument,
+                MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME);
+
+            javadoc.addParam(param).add(freeFormHeadersDescription.toString());
+        }
+
+        if (responseMimeType != null)
+        {
             responseBuilderMethodBody.invoke(builderVariable, "entity").arg(
                 JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
             responseBuilderMethod.param(types.getResponseEntityClass(responseMimeType),
                 GENERIC_PAYLOAD_ARGUMENT_NAME);
             javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(defaultString(responseMimeType.getExample()));
-
-            responseBuilderMethodBody._return(JExpr._new(responseClass).arg(builderVariable.invoke("build")));
         }
+
+        responseBuilderMethodBody._return(JExpr._new(responseClass).arg(builderVariable.invoke("build")));
     }
 
     private JDocComment addBaseJavaDoc(final Action action, final JMethod method)
@@ -435,11 +430,19 @@ public class Generator
         }
     }
 
-    private void addProducesAnnotation(final MimeType responseMimeType, final JMethod method)
+    private void addProducesAnnotation(final Collection<MimeType> uniqueResponseMimeTypes,
+                                       final JMethod method)
     {
-        if (responseMimeType != null)
+        if (uniqueResponseMimeTypes.isEmpty())
         {
-            method.annotate(Produces.class).param("value", responseMimeType.getType());
+            return;
+        }
+
+        final JAnnotationArrayMember paramArray = method.annotate(Produces.class).paramArray("value");
+
+        for (final MimeType responseMimeType : uniqueResponseMimeTypes)
+        {
+            paramArray.param(responseMimeType.getType());
         }
     }
 

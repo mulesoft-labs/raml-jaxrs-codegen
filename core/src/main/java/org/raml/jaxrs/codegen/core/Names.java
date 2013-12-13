@@ -51,22 +51,20 @@ public class Names
         return friendlyName;
     }
 
-    public static String buildResourceMethodName(final Action action,
-                                                 final MimeType bodyMimeType,
-                                                 final MimeType responseMimeType)
+    public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType)
     {
         final String methodBaseName = buildJavaFriendlyName(action.getResource()
             .getUri()
             .replace("{", " By "));
 
-        return action.getType().toString().toLowerCase() + buildMimeTypeInfix(bodyMimeType) + methodBaseName
-               + (responseMimeType != null ? "As" + buildMimeTypeInfix(responseMimeType) : "");
+        return action.getType().toString().toLowerCase() + buildMimeTypeInfix(bodyMimeType) + methodBaseName;
     }
 
-    public static String buildResponseMethodName(final int statusCode)
+    public static String buildResponseMethodName(final int statusCode, final MimeType mimeType)
     {
         final String status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
-        return uncapitalize(buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
+        return uncapitalize(getShortMimeType(mimeType)
+                            + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
     }
 
     private static String buildMimeTypeInfix(final MimeType bodyMimeType)
