@@ -106,7 +106,8 @@ public class GeneratorTestCase
             Thread.currentThread().setContextClassLoader(resourceClassLoader);
             final ResourceConfig config = new PackagesResourceConfig(TEST_BASE_PACKAGE);
 
-            assertThat(config.getRootResourceClasses(), hasSize(11));
+            assertThat("Found: " + config.getRootResourceClasses(), config.getRootResourceClasses(),
+                hasSize(11));
 
             // TODO testing: actually send HTTP requests at the resources
         }

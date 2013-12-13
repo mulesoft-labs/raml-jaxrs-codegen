@@ -1,14 +1,27 @@
 
 package org.raml.jaxrs.example.impl;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Reader;
+
+import javax.ws.rs.core.StreamingOutput;
+
 import org.raml.jaxrs.example.resource.Presentations;
 
 public class PresentationResource implements Presentations
 {
     @Override
-    public PostPresentationsResponse postPresentations(final String authorization, final Object entity)
+    public PostPresentationsResponse postPresentations(final String authorization, final Reader entity)
     {
-        return PostPresentationsResponse.created("A created JSON presentation");
+        return PostPresentationsResponse.created(new StreamingOutput()
+        {
+            @Override
+            public void write(final OutputStream output) throws IOException
+            {
+                output.write("A created JSON presentation".getBytes());
+            }
+        });
     }
 
     @Override
@@ -17,23 +30,14 @@ public class PresentationResource implements Presentations
                                                      final Double start,
                                                      final Double pages)
     {
-        return GetPresentationsResponse.oK("A JSON object of presentations");
-    }
-
-    @Override
-    public PutPresentationsByPresentationIdResponse putPresentationsByPresentationId(final String authorization,
-                                                                                     final Object entity)
-    {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    @Override
-    public PatchPresentationsByPresentationIdResponse patchPresentationsByPresentationId(final String authorization,
-                                                                                         final Object entity)
-    {
-        // TODO Auto-generated method stub
-        return null;
+        return GetPresentationsResponse.oK(new StreamingOutput()
+        {
+            @Override
+            public void write(final OutputStream output) throws IOException
+            {
+                output.write("A JSON object of presentations".getBytes());
+            }
+        });
     }
 
     @Override
@@ -45,6 +49,22 @@ public class PresentationResource implements Presentations
 
     @Override
     public GetPresentationsByPresentationIdResponse getPresentationsByPresentationId(final String authorization)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PatchPresentationsByPresentationIdResponse patchPresentationsByPresentationId(final String authorization,
+                                                                                         final Reader entity)
+    {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    @Override
+    public PutPresentationsByPresentationIdResponse putPresentationsByPresentationId(final String authorization,
+                                                                                     final Reader entity)
     {
         // TODO Auto-generated method stub
         return null;

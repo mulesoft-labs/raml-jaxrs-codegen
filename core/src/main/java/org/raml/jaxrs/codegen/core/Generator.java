@@ -166,7 +166,7 @@ public class Generator
         context.setCurrentResourceInterface(resourceInterface);
 
         final String path = strip(resource.getRelativeUri(), "/");
-        resourceInterface.annotate(Path.class).param("value", path);
+        resourceInterface.annotate(Path.class).param("value", StringUtils.defaultIfBlank(path, "/"));
 
         if (isNotBlank(resource.getDescription()))
         {
@@ -418,8 +418,12 @@ public class Generator
                                     final Action action,
                                     final JMethod method)
     {
-        method.annotate(Path.class).param("value",
-            StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath + "/"));
+        final String path = StringUtils.substringAfter(action.getResource().getUri(), resourceInterfacePath
+                                                                                      + "/");
+        if (isNotBlank(path))
+        {
+            method.annotate(Path.class).param("value", path);
+        }
     }
 
     private void addConsumesAnnotation(final MimeType bodyMimeType, final JMethod method)

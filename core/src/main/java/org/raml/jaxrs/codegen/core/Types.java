@@ -8,7 +8,9 @@ import static org.apache.commons.lang.WordUtils.capitalize;
 import java.io.File;
 import java.io.Reader;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.ws.rs.core.StreamingOutput;
 
@@ -26,11 +28,14 @@ public class Types
     private static final Logger LOGGER = LoggerFactory.getLogger(Types.class);
 
     private final Context context;
+    private final Map<String, Class<?>> schemaClasses;
 
     public Types(final Context context)
     {
         Validate.notNull(context, "context can't be null");
         this.context = context;
+
+        schemaClasses = new HashMap<String, Class<?>>();
     }
 
     public JType buildParameterType(final AbstractParam parameter, final String name) throws Exception
@@ -55,10 +60,11 @@ public class Types
 
     public JType getRequestEntityClass(final MimeType mimeType)
     {
-        if (isNotBlank(mimeType.getSchema()))
+        final Class<?> schemaClass = getSchemaClass(mimeType);
+
+        if (schemaClass != null)
         {
-            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
-            return getGeneratorType(Object.class);
+            return getGeneratorType(schemaClass);
         }
         else if (startsWith(mimeType.getType(), "text/"))
         {
@@ -73,10 +79,11 @@ public class Types
 
     public JType getResponseEntityClass(final MimeType mimeType)
     {
-        if (isNotBlank(mimeType.getSchema()))
+        final Class<?> schemaClass = getSchemaClass(mimeType);
+
+        if (schemaClass != null)
         {
-            // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
-            return getGeneratorType(Object.class);
+            return getGeneratorType(schemaClass);
         }
         else if (startsWith(mimeType.getType(), "text/"))
         {
@@ -97,6 +104,17 @@ public class Types
     public JClass getGeneratorClass(final Class<?> clazz)
     {
         return (JClass) context.getGeneratorType(clazz);
+    }
+
+    private Class<?> getSchemaClass(final MimeType mimeType)
+    {
+        // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
+        return isNotBlank(mimeType.getSchema()) ? schemaClasses.get(buildSchemaKey(mimeType)) : null;
+    }
+
+    private String buildSchemaKey(final MimeType mimeType)
+    {
+        return mimeType.getType() + "@" + mimeType.getSchema().hashCode();
     }
 
     private static Class<?> getJavaType(final AbstractParam parameter)
