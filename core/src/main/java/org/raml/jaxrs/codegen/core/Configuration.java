@@ -21,6 +21,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
+import org.jsonschema2pojo.AnnotationStyle;
+import org.jsonschema2pojo.DefaultGenerationConfig;
+import org.jsonschema2pojo.GenerationConfig;
 
 public class Configuration
 {
@@ -57,6 +60,43 @@ public class Configuration
     private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
     private boolean useJsr303Annotations = false;
+    private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+
+    public GenerationConfig createJsonSchemaGenerationConfig()
+    {
+        return new DefaultGenerationConfig()
+        {
+            @Override
+            public AnnotationStyle getAnnotationStyle()
+            {
+                return super.getAnnotationStyle();
+            }
+
+            @Override
+            public boolean isIncludeJsr303Annotations()
+            {
+                return useJsr303Annotations;
+            }
+
+            @Override
+            public boolean isGenerateBuilders()
+            {
+                return true;
+            }
+
+            @Override
+            public boolean isIncludeHashcodeAndEquals()
+            {
+                return false;
+            }
+
+            @Override
+            public boolean isIncludeToString()
+            {
+                return false;
+            }
+        };
+    }
 
     public File getOutputDirectory()
     {
@@ -96,5 +136,15 @@ public class Configuration
     public void setUseJsr303Annotations(final boolean useJsr303Annotations)
     {
         this.useJsr303Annotations = useJsr303Annotations;
+    }
+
+    public AnnotationStyle getJsonMapper()
+    {
+        return jsonMapper;
+    }
+
+    public void setJsonMapper(final AnnotationStyle jsonMapper)
+    {
+        this.jsonMapper = jsonMapper;
     }
 }

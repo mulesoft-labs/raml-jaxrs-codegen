@@ -74,7 +74,7 @@ public class Names
         return bodyMimeType != null ? buildJavaFriendlyName(getShortMimeType(bodyMimeType)) : "";
     }
 
-    private static String getShortMimeType(final MimeType bodyMimeType)
+    public static String getShortMimeType(final MimeType bodyMimeType)
     {
         if (bodyMimeType == null)
         {

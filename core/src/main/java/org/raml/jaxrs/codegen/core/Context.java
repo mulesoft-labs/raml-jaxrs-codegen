@@ -10,6 +10,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -23,6 +24,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.jsonschema2pojo.AnnotatorFactory;
+import org.jsonschema2pojo.GenerationConfig;
+import org.jsonschema2pojo.SchemaGenerator;
+import org.jsonschema2pojo.SchemaMapper;
+import org.jsonschema2pojo.SchemaStore;
+import org.jsonschema2pojo.rules.RuleFactory;
+import org.raml.model.Raml;
 
 import com.sun.codemodel.JAnnotatable;
 import com.sun.codemodel.JClass;
@@ -46,20 +54,31 @@ class Context
     }
 
     private final Configuration configuration;
+    private final Raml raml;
     private final JCodeModel codeModel;
     private final Map<String, Set<String>> resourcesMethods;
+    private final SchemaMapper schemaMapper;
 
     private boolean shouldGenerateResponseWrapper = false;
     private JDefinedClass currentResourceInterface;
 
-    public Context(final Configuration configuration)
+    public Context(final Configuration configuration, final Raml raml)
     {
         Validate.notNull(configuration, "configuration can't be null");
+        Validate.notNull(raml, "raml can't be null");
+
         this.configuration = configuration;
+        this.raml = raml;
 
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+
+        // configure the JSON -> POJO generator
+        final GenerationConfig jsonSchemaGenerationConfig = configuration.createJsonSchemaGenerationConfig();
+        schemaMapper = new SchemaMapper(new RuleFactory(jsonSchemaGenerationConfig,
+            new AnnotatorFactory().getAnnotator(jsonSchemaGenerationConfig.getAnnotationStyle()),
+            new SchemaStore()), new SchemaGenerator());
     }
 
     public Configuration getConfiguration()
@@ -206,6 +225,26 @@ class Context
         return clazz.isPrimitive() ? JType.parse(codeModel, clazz.getSimpleName()) : codeModel.ref(clazz);
     }
 
+    public String getGlobalSchema(final String name)
+    {
+        for (final Map<String, String> nameAndSchema : raml.getSchemas())
+        {
+            final String schema = nameAndSchema.get(name);
+            if (schema != null)
+            {
+                return schema;
+            }
+        }
+
+        return null;
+    }
+
+    public JClass generateClassFromJsonSchema(final String className, final URL schemaUrl) throws IOException
+    {
+        schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl);
+        return codeModel.ref(getModelPackage() + "." + className);
+    }
+
     private JDefinedClass createCustomHttpMethodAnnotation(final String httpMethod)
         throws JClassAlreadyExistsException
     {
@@ -217,6 +256,11 @@ class Context
         annotationClazz.javadoc().add("Custom JAX-RS support for HTTP " + httpMethod + ".");
         HTTP_METHOD_ANNOTATIONS.put(httpMethod.toUpperCase(), annotationClazz);
         return annotationClazz;
+    }
+
+    private String getModelPackage()
+    {
+        return configuration.getBasePackageName() + ".model";
     }
 
     private String getSupportPackage()

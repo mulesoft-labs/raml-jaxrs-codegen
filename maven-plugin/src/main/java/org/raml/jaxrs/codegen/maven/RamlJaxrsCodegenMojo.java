@@ -18,6 +18,7 @@ import org.apache.maven.plugins.annotations.LifecyclePhase;
 import org.apache.maven.plugins.annotations.Mojo;
 import org.apache.maven.plugins.annotations.Parameter;
 import org.apache.maven.project.MavenProject;
+import org.jsonschema2pojo.AnnotationStyle;
 import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 import org.raml.jaxrs.codegen.core.Generator;
@@ -57,7 +58,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     private File sourceDirectory;
 
     /**
-     * The targetted JAX-RS version: either "1.1" or "2.0" .
+     * The targeted JAX-RS version: either "1.1" or "2.0" .
      */
     @Parameter(property = "jaxrsVersion", defaultValue = "1.1")
     private String jaxrsVersion;
@@ -80,6 +81,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "removeOldOutput", defaultValue = "false")
     private boolean removeOldOutput;
+
+    /**
+     * The JSON object mapper to generate annotations to: either "jackson1", "jackson2" or "gson" or
+     * "none"
+     */
+    @Parameter(property = "jsonMapper", defaultValue = "jackson1")
+    private String jsonMapper;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -124,6 +132,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
+            configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
         }
         catch (final Exception e)
         {

@@ -29,6 +29,7 @@ import static org.raml.jaxrs.codegen.core.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
 import static org.raml.jaxrs.codegen.core.Names.MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.util.Collection;
@@ -148,7 +149,7 @@ public class Generator
     {
         validate(configuration);
 
-        context = new Context(configuration);
+        context = new Context(configuration, raml);
         types = new Types(context);
 
         for (final Resource resource : raml.getResources().values())
@@ -562,7 +563,7 @@ public class Generator
 
     private void addPlainBodyArgument(final MimeType bodyMimeType,
                                       final JMethod method,
-                                      final JDocComment javadoc)
+                                      final JDocComment javadoc) throws IOException
     {
 
         method.param(types.getRequestEntityClass(bodyMimeType), GENERIC_PAYLOAD_ARGUMENT_NAME);

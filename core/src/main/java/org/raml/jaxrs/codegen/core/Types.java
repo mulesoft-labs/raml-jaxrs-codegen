@@ -1,19 +1,23 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.WordUtils.capitalize;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.Reader;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.Validate;
 import org.raml.model.MimeType;
 import org.raml.model.parameter.AbstractParam;
@@ -28,14 +32,15 @@ public class Types
     private static final Logger LOGGER = LoggerFactory.getLogger(Types.class);
 
     private final Context context;
-    private final Map<String, Class<?>> schemaClasses;
+    private final Map<String, JClass> schemaClasses;
 
     public Types(final Context context)
     {
         Validate.notNull(context, "context can't be null");
+
         this.context = context;
 
-        schemaClasses = new HashMap<String, Class<?>>();
+        schemaClasses = new HashMap<String, JClass>();
     }
 
     public JType buildParameterType(final AbstractParam parameter, final String name) throws Exception
@@ -58,13 +63,13 @@ public class Types
         }
     }
 
-    public JType getRequestEntityClass(final MimeType mimeType)
+    public JType getRequestEntityClass(final MimeType mimeType) throws IOException
     {
-        final Class<?> schemaClass = getSchemaClass(mimeType);
+        final JClass schemaClass = getSchemaClass(mimeType);
 
         if (schemaClass != null)
         {
-            return getGeneratorType(schemaClass);
+            return schemaClass;
         }
         else if (startsWith(mimeType.getType(), "text/"))
         {
@@ -77,13 +82,13 @@ public class Types
         }
     }
 
-    public JType getResponseEntityClass(final MimeType mimeType)
+    public JType getResponseEntityClass(final MimeType mimeType) throws IOException
     {
-        final Class<?> schemaClass = getSchemaClass(mimeType);
+        final JClass schemaClass = getSchemaClass(mimeType);
 
         if (schemaClass != null)
         {
-            return getGeneratorType(schemaClass);
+            return schemaClass;
         }
         else if (startsWith(mimeType.getType(), "text/"))
         {
@@ -106,15 +111,65 @@ public class Types
         return (JClass) context.getGeneratorType(clazz);
     }
 
-    private Class<?> getSchemaClass(final MimeType mimeType)
+    private JClass getSchemaClass(final MimeType mimeType) throws IOException
     {
-        // TODO generate DTOs from XML/JSON schema and use them instead of generic Object
-        return isNotBlank(mimeType.getSchema()) ? schemaClasses.get(buildSchemaKey(mimeType)) : null;
+        final String schemaNameOrContent = mimeType.getSchema();
+        if (isBlank(schemaNameOrContent))
+        {
+            return null;
+        }
+
+        final String buildSchemaKey = buildSchemaKey(mimeType);
+
+        final JClass existingClass = schemaClasses.get(buildSchemaKey);
+        if (existingClass != null)
+        {
+            return existingClass;
+        }
+
+        // TODO support XML schema
+
+        if (MediaType.APPLICATION_JSON.equalsIgnoreCase(mimeType.getType()))
+        {
+
+            final String globalSchema = context.getGlobalSchema(schemaNameOrContent);
+
+            String schema;
+            final String className;
+
+            if (globalSchema == null)
+            {
+                schema = schemaNameOrContent;
+                // TODO improve name of embedded JSON schema
+                className = "Anonymous" + Names.buildJavaFriendlyName(buildSchemaKey);
+            }
+            else
+            {
+                schema = globalSchema;
+                className = Names.buildJavaFriendlyName(schemaNameOrContent);
+            }
+
+            // dump it to a temp file so the json schema generator can pick it up
+            final File tempFile = File.createTempFile(className.toLowerCase() + "-", ".json");
+            tempFile.deleteOnExit();
+            FileUtils.writeStringToFile(tempFile, schema);
+
+            final JClass generatedClass = context.generateClassFromJsonSchema(className, tempFile.toURI()
+                .toURL());
+
+            schemaClasses.put(buildSchemaKey, generatedClass);
+
+            return generatedClass;
+        }
+        else
+        {
+            return null;
+        }
     }
 
     private String buildSchemaKey(final MimeType mimeType)
     {
-        return mimeType.getType() + "@" + mimeType.getSchema().hashCode();
+        return Names.getShortMimeType(mimeType) + "@" + mimeType.getSchema().hashCode();
     }
 
     private static Class<?> getJavaType(final AbstractParam parameter)
