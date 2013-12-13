@@ -26,8 +26,8 @@ public class Main
         new Scanner(System.in).nextLine();
 
         simpleContainer.close();
-        System.exit(0);
 
         System.out.println("Bye!");
+        System.exit(0);
     }
 }

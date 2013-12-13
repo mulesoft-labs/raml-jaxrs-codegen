@@ -36,14 +36,25 @@ public class PresentationResource implements Presentations
     }
 
     @Override
-    public GetPresentationsByPresentationIdResponse getPresentationsByPresentationId(final String authorization)
+    public GetPresentationsByPresentationIdResponse getPresentationsByPresentationId(final String presentationId,
+                                                                                     final String authorization)
     {
         // TODO implement me!
         return null;
     }
 
     @Override
-    public PatchPresentationsByPresentationIdResponse patchPresentationsByPresentationId(final String authorization,
+    public PutPresentationsByPresentationIdResponse putPresentationsByPresentationId(final String presentationId,
+                                                                                     final String authorization,
+                                                                                     final Presentation entity)
+    {
+        // TODO implement me!
+        return null;
+    }
+
+    @Override
+    public PatchPresentationsByPresentationIdResponse patchPresentationsByPresentationId(final String presentationId,
+                                                                                         final String authorization,
                                                                                          final Presentation entity)
     {
         // TODO implement me!
@@ -51,16 +62,8 @@ public class PresentationResource implements Presentations
     }
 
     @Override
-    public void deletePresentationsByPresentationId(final String authorization)
+    public void deletePresentationsByPresentationId(final String presentationId, final String authorization)
     {
         // TODO implement me!
-    }
-
-    @Override
-    public PutPresentationsByPresentationIdResponse putPresentationsByPresentationId(final String authorization,
-                                                                                     final Presentation entity)
-    {
-        // TODO implement me!
-        return null;
     }
 }

@@ -1,5 +1,11 @@
 # RAML JAX-RS Codegen
 
+## TODO
+
+- Generation of JAXB annotated class based on XML Schema
+- Generation of JSR-303 annotation based on RAML parameter constraints
+
+
 ## Using the core code generator
 
 Example:

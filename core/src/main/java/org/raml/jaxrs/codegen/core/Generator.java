@@ -111,7 +111,7 @@ public class Generator
                     @Override
                     public String apply(final ValidationResult vr)
                     {
-                        return String.format("%s %s", vr.getStartMark(), vr.getMessage());
+                        return String.format("%s %s", vr.getStartColumn(), vr.getMessage());
                     }
                 });
 
