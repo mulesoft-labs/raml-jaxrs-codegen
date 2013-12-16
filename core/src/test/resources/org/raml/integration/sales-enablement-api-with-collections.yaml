@@ -7,7 +7,7 @@ schemas:
   - presentation: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A product presentation",
+         "description": "A single product Presentation",
          "properties": {
            "id":  { "type": "string" },
            "title":  { "type": "string" },
@@ -17,10 +17,23 @@ schemas:
          },
          "required": [ "id", "title", "fileUrl", "productId" ]
       }
+  - presentations: |
+      {  "$schema": "http://json-schema.org/draft-03/schema",
+         "type": "object",
+         "description": "A collection of product Presentations",
+         "properties": {
+           "size":  { "type": "integer" },
+           "presentations":  {
+              "type": "array",
+              "items": { "$ref": "presentation" }
+           }
+         },
+         "required": [ "size" ]
+      }
   - product: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A Product",
+         "description": "A single Product",
          "properties": {
            "id":  { "type": "string" },
            "name":  { "type": "string" },
@@ -29,6 +42,19 @@ schemas:
            "region": { "type": "string" }
          },
          "required": [ "id", "name", "region" ]
+      }
+  - products: |
+      {  "$schema": "http://json-schema.org/draft-03/schema",
+         "type": "object",
+         "description": "A collection of Products",
+         "properties": {
+           "size":  { "type": "integer" },
+           "products":  {
+              "type": "array",
+              "items": { "$ref": "product" }
+           }
+         },
+         "required": [ "size" ]
       }
 resourceTypes:
   - base:
@@ -58,7 +84,7 @@ resourceTypes:
           200:
             body:
               application/json:
-                schema: <<schema>>
+                schema: <<collectionSchema>>
       post:
         body:
           application/json:
@@ -122,7 +148,7 @@ traits:
         401:
           description: Unauthorized
 /presentations: &presentations
-  type: { typedCollection: { schema: presentation } }
+  type: { typedCollection: { schema: presentation, collectionSchema: presentations } }
   is: [ secured ]
   get:
     queryParameters:
@@ -134,7 +160,7 @@ traits:
     type: { typedMember: { schema: presentation } }
     is: [ secured ]
 /products:
-  type: { typedCollection: { schema: product } }
+  type: { typedCollection: { schema: product, collectionSchema: products } }
   is: [ secured ]
   get:
     queryParameters:

@@ -16,10 +16,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.ws.rs.HttpMethod;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.apache.commons.lang.StringUtils;
@@ -31,7 +33,10 @@ import org.jsonschema2pojo.SchemaMapper;
 import org.jsonschema2pojo.SchemaStore;
 import org.jsonschema2pojo.rules.RuleFactory;
 import org.raml.model.Raml;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import com.google.common.io.Files;
 import com.sun.codemodel.JAnnotatable;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
@@ -53,47 +58,42 @@ class Context
         }
     }
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
+
     private final Configuration configuration;
-    private final Raml raml;
     private final JCodeModel codeModel;
     private final Map<String, Set<String>> resourcesMethods;
+
     private final SchemaMapper schemaMapper;
 
     private boolean shouldGenerateResponseWrapper = false;
     private JDefinedClass currentResourceInterface;
+    private final File globalSchemaStore;
 
-    public Context(final Configuration configuration, final Raml raml)
+    public Context(final Configuration configuration, final Raml raml) throws IOException
     {
         Validate.notNull(configuration, "configuration can't be null");
         Validate.notNull(raml, "raml can't be null");
 
         this.configuration = configuration;
-        this.raml = raml;
 
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+
+        // write all global schemas to a temporary directory
+        globalSchemaStore = Files.createTempDir();
+        for (final Entry<String, String> nameAndSchema : raml.getConsolidatedSchemas().entrySet())
+        {
+            final File schemaFile = new File(globalSchemaStore, nameAndSchema.getKey());
+            FileUtils.writeStringToFile(schemaFile, nameAndSchema.getValue());
+        }
 
         // configure the JSON -> POJO generator
         final GenerationConfig jsonSchemaGenerationConfig = configuration.createJsonSchemaGenerationConfig();
         schemaMapper = new SchemaMapper(new RuleFactory(jsonSchemaGenerationConfig,
             new AnnotatorFactory().getAnnotator(jsonSchemaGenerationConfig.getAnnotationStyle()),
             new SchemaStore()), new SchemaGenerator());
-    }
-
-    public Configuration getConfiguration()
-    {
-        return configuration;
-    }
-
-    public JDefinedClass getCurrentResourceInterface()
-    {
-        return currentResourceInterface;
-    }
-
-    public void setCurrentResourceInterface(final JDefinedClass currentResourceInterface)
-    {
-        this.currentResourceInterface = currentResourceInterface;
     }
 
     public Set<String> generate() throws IOException
@@ -110,7 +110,48 @@ class Context
         }
         generatedFiles.addAll(Arrays.asList(StringUtils.split(baos.toString())));
 
+        try
+        {
+            FileUtils.deleteDirectory(globalSchemaStore);
+        }
+        catch (final Exception e)
+        {
+            LOGGER.warn("Failed to delete temporary directory: " + globalSchemaStore);
+        }
+
         return generatedFiles;
+    }
+
+    public File getSchemaFile(final String schemaNameOrContent) throws IOException
+    {
+        File schemaFile = new File(globalSchemaStore, schemaNameOrContent);
+
+        if (!schemaFile.isFile())
+        {
+            // this is not a global reference but a local schema def - dump it to a temp file so
+            // the type generators can pick it up
+            // TODO improve name of embedded schema nodes
+            final String schemaFileName = "anonymous" + schemaNameOrContent.hashCode();
+            schemaFile = new File(globalSchemaStore, schemaFileName);
+            FileUtils.writeStringToFile(schemaFile, schemaNameOrContent);
+        }
+
+        return schemaFile;
+    }
+
+    public Configuration getConfiguration()
+    {
+        return configuration;
+    }
+
+    public JDefinedClass getCurrentResourceInterface()
+    {
+        return currentResourceInterface;
+    }
+
+    public void setCurrentResourceInterface(final JDefinedClass currentResourceInterface)
+    {
+        this.currentResourceInterface = currentResourceInterface;
     }
 
     private String generateResponseWrapper() throws IOException
@@ -225,22 +266,10 @@ class Context
         return clazz.isPrimitive() ? JType.parse(codeModel, clazz.getSimpleName()) : codeModel.ref(clazz);
     }
 
-    public String getGlobalSchema(final String name)
-    {
-        for (final Map<String, String> nameAndSchema : raml.getSchemas())
-        {
-            final String schema = nameAndSchema.get(name);
-            if (schema != null)
-            {
-                return schema;
-            }
-        }
-
-        return null;
-    }
-
     public JClass generateClassFromJsonSchema(final String className, final URL schemaUrl) throws IOException
     {
+        // TODO return actually generated type when
+        // https://github.com/joelittlejohn/jsonschema2pojo/issues/137 will be fixed
         schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl);
         return codeModel.ref(getModelPackage() + "." + className);
     }

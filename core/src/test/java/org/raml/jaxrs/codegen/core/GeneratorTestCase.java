@@ -60,7 +60,7 @@ public class GeneratorTestCase
         configuration.setBasePackageName(TEST_BASE_PACKAGE + ".integration");
         generatedSources.addAll(new Generator().run(
             new InputStreamReader(getClass().getResourceAsStream(
-                "/org/raml/integration/sales-enablement-api.yaml")), configuration));
+                "/org/raml/integration/sales-enablement-api-with-collections.yaml")), configuration));
 
         configuration.setBasePackageName(TEST_BASE_PACKAGE + ".rules");
         generatedSources.addAll(new Generator().run(

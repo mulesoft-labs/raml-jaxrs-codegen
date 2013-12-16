@@ -17,9 +17,11 @@ public class PresentationResource implements Presentations
             return GetPresentationsResponse.unauthorized();
         }
 
-        final Presentation presentation = new Presentation().withId("fake-id").withTitle(title);
+        final org.raml.jaxrs.example.model.Presentations presentations = new org.raml.jaxrs.example.model.Presentations().withSize(1);
 
-        return GetPresentationsResponse.jsonOK(presentation);
+        presentations.getPresentations().add(new Presentation().withId("fake-id").withTitle(title));
+
+        return GetPresentationsResponse.jsonOK(presentations);
     }
 
     @Override
@@ -39,8 +41,13 @@ public class PresentationResource implements Presentations
     public GetPresentationsByPresentationIdResponse getPresentationsByPresentationId(final String presentationId,
                                                                                      final String authorization)
     {
-        // TODO implement me!
-        return null;
+        if (!"s3cr3t".equals(authorization))
+        {
+            return GetPresentationsByPresentationIdResponse.unauthorized();
+        }
+
+        return GetPresentationsByPresentationIdResponse.jsonOK(new Presentation().withId(presentationId)
+            .withTitle("Title of " + presentationId));
     }
 
     @Override

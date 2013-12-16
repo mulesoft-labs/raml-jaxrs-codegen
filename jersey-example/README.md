@@ -2,7 +2,9 @@
 
 ## Manual Testing
 
-Run: `org.raml.jaxrs.example.Main`
+Run `org.raml.jaxrs.example.Main` for example with:
+
+    mvn exec:java
 
 Then:
 

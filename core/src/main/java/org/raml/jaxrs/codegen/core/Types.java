@@ -17,7 +17,6 @@ import java.util.Map;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.Validate;
 import org.raml.model.MimeType;
 import org.raml.model.parameter.AbstractParam;
@@ -131,34 +130,11 @@ public class Types
 
         if (MediaType.APPLICATION_JSON.equalsIgnoreCase(mimeType.getType()))
         {
-
-            final String globalSchema = context.getGlobalSchema(schemaNameOrContent);
-
-            String schema;
-            final String className;
-
-            if (globalSchema == null)
-            {
-                schema = schemaNameOrContent;
-                // TODO improve name of embedded JSON schema
-                className = "Anonymous" + Names.buildJavaFriendlyName(buildSchemaKey);
-            }
-            else
-            {
-                schema = globalSchema;
-                className = Names.buildJavaFriendlyName(schemaNameOrContent);
-            }
-
-            // dump it to a temp file so the json schema generator can pick it up
-            final File tempFile = File.createTempFile(className.toLowerCase() + "-", ".json");
-            tempFile.deleteOnExit();
-            FileUtils.writeStringToFile(tempFile, schema);
-
-            final JClass generatedClass = context.generateClassFromJsonSchema(className, tempFile.toURI()
+            final File schemaFile = context.getSchemaFile(schemaNameOrContent);
+            final String className = Names.buildJavaFriendlyName(schemaFile.getName());
+            final JClass generatedClass = context.generateClassFromJsonSchema(className, schemaFile.toURI()
                 .toURL());
-
             schemaClasses.put(buildSchemaKey, generatedClass);
-
             return generatedClass;
         }
         else
