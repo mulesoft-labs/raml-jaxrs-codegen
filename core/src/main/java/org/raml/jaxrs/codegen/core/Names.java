@@ -67,19 +67,26 @@ public class Names
                             + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
     }
 
+    public static String buildNestedSchemaName(final MimeType mimeType)
+    {
+        // TODO improve naming strategy for nested schemas
+        return getShortMimeType(mimeType)
+               + (isBlank(mimeType.getSchema()) ? mimeType.hashCode() : mimeType.getSchema().hashCode());
+    }
+
     private static String buildMimeTypeInfix(final MimeType bodyMimeType)
     {
         return bodyMimeType != null ? buildJavaFriendlyName(getShortMimeType(bodyMimeType)) : "";
     }
 
-    public static String getShortMimeType(final MimeType bodyMimeType)
+    public static String getShortMimeType(final MimeType mimeType)
     {
-        if (bodyMimeType == null)
+        if (mimeType == null)
         {
             return "";
         }
 
-        return remove(StringUtils.substringAfter(bodyMimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
+        return remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
             "x-www-");
     }
 

@@ -1,6 +1,8 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static org.raml.jaxrs.codegen.core.Constants.JAXRS_HTTP_METHODS;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -11,6 +13,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URL;
+import java.util.AbstractMap.SimpleEntry;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -49,20 +52,13 @@ import com.sun.codemodel.JType;
 
 class Context
 {
-    private static final Map<String, Object> HTTP_METHOD_ANNOTATIONS = new HashMap<String, Object>();
-    static
-    {
-        for (final Class<? extends Annotation> clazz : Constants.JAXRS_HTTP_METHODS)
-        {
-            HTTP_METHOD_ANNOTATIONS.put(clazz.getSimpleName(), clazz);
-        }
-    }
-
     private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
 
     private final Configuration configuration;
+    private final Raml raml;
     private final JCodeModel codeModel;
     private final Map<String, Set<String>> resourcesMethods;
+    private final Map<String, Object> httpMethodAnnotations;
 
     private final SchemaMapper schemaMapper;
 
@@ -76,10 +72,18 @@ class Context
         Validate.notNull(raml, "raml can't be null");
 
         this.configuration = configuration;
+        this.raml = raml;
 
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+
+        // prime the HTTP method annotation cache
+        httpMethodAnnotations = new HashMap<String, Object>();
+        for (final Class<? extends Annotation> clazz : JAXRS_HTTP_METHODS)
+        {
+            httpMethodAnnotations.put(clazz.getSimpleName(), clazz);
+        }
 
         // write all global schemas to a temporary directory
         globalSchemaStore = Files.createTempDir();
@@ -122,21 +126,26 @@ class Context
         return generatedFiles;
     }
 
-    public File getSchemaFile(final String schemaNameOrContent) throws IOException
+    /**
+     * @return a {schema file, schema name} tuple.
+     */
+    public Entry<File, String> getSchemaFile(final String schemaNameOrContent) throws IOException
     {
-        File schemaFile = new File(globalSchemaStore, schemaNameOrContent);
-
-        if (!schemaFile.isFile())
+        if (raml.getConsolidatedSchemas().containsKey(schemaNameOrContent))
+        {
+            // schemaNameOrContent is actually a global name
+            return new SimpleEntry<File, String>(new File(globalSchemaStore, schemaNameOrContent),
+                schemaNameOrContent);
+        }
+        else
         {
             // this is not a global reference but a local schema def - dump it to a temp file so
             // the type generators can pick it up
-            // TODO improve name of embedded schema nodes
-            final String schemaFileName = "anonymous" + schemaNameOrContent.hashCode();
-            schemaFile = new File(globalSchemaStore, schemaFileName);
+            final String schemaFileName = "schema" + schemaNameOrContent.hashCode();
+            final File schemaFile = new File(globalSchemaStore, schemaFileName);
             FileUtils.writeStringToFile(schemaFile, schemaNameOrContent);
+            return new SimpleEntry<File, String>(schemaFile, null);
         }
-
-        return schemaFile;
     }
 
     public Configuration getConfiguration()
@@ -238,7 +247,7 @@ class Context
     public Context addHttpMethodAnnotation(final String httpMethod, final JAnnotatable annotatable)
         throws Exception
     {
-        final Object annotationClass = HTTP_METHOD_ANNOTATIONS.get(httpMethod.toUpperCase());
+        final Object annotationClass = httpMethodAnnotations.get(httpMethod.toUpperCase());
         if (annotationClass == null)
         {
             final JDefinedClass annotationClazz = createCustomHttpMethodAnnotation(httpMethod);
@@ -283,7 +292,7 @@ class Context
         annotationClazz.annotate(Retention.class).param("value", RetentionPolicy.RUNTIME);
         annotationClazz.annotate(HttpMethod.class).param("value", httpMethod);
         annotationClazz.javadoc().add("Custom JAX-RS support for HTTP " + httpMethod + ".");
-        HTTP_METHOD_ANNOTATIONS.put(httpMethod.toUpperCase(), annotationClazz);
+        httpMethodAnnotations.put(httpMethod.toUpperCase(), annotationClazz);
         return annotationClazz;
     }
 

@@ -5,14 +5,18 @@ import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.WordUtils.capitalize;
+import static org.raml.jaxrs.codegen.core.Names.buildJavaFriendlyName;
+import static org.raml.jaxrs.codegen.core.Names.buildNestedSchemaName;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
@@ -130,10 +134,15 @@ public class Types
 
         if (MediaType.APPLICATION_JSON.equalsIgnoreCase(mimeType.getType()))
         {
-            final File schemaFile = context.getSchemaFile(schemaNameOrContent);
-            final String className = Names.buildJavaFriendlyName(schemaFile.getName());
-            final JClass generatedClass = context.generateClassFromJsonSchema(className, schemaFile.toURI()
-                .toURL());
+            final Entry<File, String> schemaNameAndFile = context.getSchemaFile(schemaNameOrContent);
+            if (isBlank(schemaNameAndFile.getValue()))
+            {
+                schemaNameAndFile.setValue(buildNestedSchemaName(mimeType));
+            }
+
+            final String className = buildJavaFriendlyName(schemaNameAndFile.getValue());
+            final JClass generatedClass = context.generateClassFromJsonSchema(className,
+                schemaNameAndFile.getKey().toURI().toURL());
             schemaClasses.put(buildSchemaKey, generatedClass);
             return generatedClass;
         }
@@ -169,7 +178,7 @@ public class Types
             case INTEGER :
                 return usePrimitive ? long.class : Long.class;
             case NUMBER :
-                return usePrimitive ? double.class : Double.class;
+                return BigDecimal.class;
             case STRING :
                 return String.class;
             default :

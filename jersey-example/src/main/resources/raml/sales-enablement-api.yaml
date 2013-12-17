@@ -134,11 +134,11 @@ traits:
         start:
           displayName: start
           description: The first page to return
-          type: number
+          type: integer
         pages:
           displayName: pages
           description: The number of pages to return
-          type: number
+          type: integer
   - secured:
       displayName: secured
       headers:

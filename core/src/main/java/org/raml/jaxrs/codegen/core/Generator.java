@@ -23,6 +23,7 @@ import static org.apache.commons.lang.StringUtils.defaultString;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.join;
 import static org.apache.commons.lang.StringUtils.strip;
+import static org.apache.commons.lang.builder.ToStringStyle.SHORT_PREFIX_STYLE;
 import static org.raml.jaxrs.codegen.core.Constants.RESPONSE_HEADER_WILDCARD_SYMBOL;
 import static org.raml.jaxrs.codegen.core.Names.EXAMPLE_PREFIX;
 import static org.raml.jaxrs.codegen.core.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -40,6 +42,10 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.mail.internet.MimeMultipart;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.FormParam;
@@ -56,6 +62,7 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
+import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.math.NumberUtils;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
@@ -76,6 +83,7 @@ import org.slf4j.LoggerFactory;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.JAnnotationArrayMember;
+import com.sun.codemodel.JAnnotationUse;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JDefinedClass;
@@ -89,6 +97,8 @@ import com.sun.codemodel.JVar;
 
 public class Generator
 {
+    private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
+
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
     private Context context;
@@ -138,12 +148,6 @@ public class Generator
         }
 
         Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");
-
-        // TODO remove when JSR-303 annotations are supported
-        if (configuration.isUseJsr303Annotations())
-        {
-            LOGGER.warn("JSR-303 annotation support is currently not available");
-        }
     }
 
     private Set<String> run(final Raml raml, final Configuration configuration) throws Exception
@@ -168,7 +172,8 @@ public class Generator
         context.setCurrentResourceInterface(resourceInterface);
 
         final String path = strip(resource.getRelativeUri(), "/");
-        resourceInterface.annotate(Path.class).param("value", StringUtils.defaultIfBlank(path, "/"));
+        resourceInterface.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER,
+            StringUtils.defaultIfBlank(path, "/"));
 
         if (isNotBlank(resource.getDescription()))
         {
@@ -245,8 +250,6 @@ public class Generator
         addProducesAnnotation(uniqueResponseMimeTypes, method);
 
         final JDocComment javadoc = addBaseJavaDoc(action, method);
-
-        // TODO add JSR-303 request/response @constraints if config.isUseJsr303Annotations
 
         addPathParameters(action, method, javadoc);
         addHeaderParameters(action, method, javadoc);
@@ -418,7 +421,7 @@ public class Generator
                                                                                       + "/");
         if (isNotBlank(path))
         {
-            method.annotate(Path.class).param("value", path);
+            method.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER, path);
         }
     }
 
@@ -426,7 +429,7 @@ public class Generator
     {
         if (bodyMimeType != null)
         {
-            method.annotate(Consumes.class).param("value", bodyMimeType.getType());
+            method.annotate(Consumes.class).param(DEFAULT_ANNOTATION_PARAMETER, bodyMimeType.getType());
         }
     }
 
@@ -438,7 +441,8 @@ public class Generator
             return;
         }
 
-        final JAnnotationArrayMember paramArray = method.annotate(Produces.class).paramArray("value");
+        final JAnnotationArrayMember paramArray = method.annotate(Produces.class).paramArray(
+            DEFAULT_ANNOTATION_PARAMETER);
 
         for (final MimeType responseMimeType : uniqueResponseMimeTypes)
         {
@@ -595,17 +599,84 @@ public class Generator
     {
         final String argumentName = Names.buildVariableName(name);
 
-        final JVar codegenParam = method.param(types.buildParameterType(parameter, argumentName),
+        final JVar argumentVariable = method.param(types.buildParameterType(parameter, argumentName),
             argumentName);
 
-        codegenParam.annotate(annotationClass).param("value", name);
+        argumentVariable.annotate(annotationClass).param(DEFAULT_ANNOTATION_PARAMETER, name);
 
         if (parameter.getDefaultValue() != null)
         {
-            codegenParam.annotate(DefaultValue.class).param("value", parameter.getDefaultValue());
+            argumentVariable.annotate(DefaultValue.class).param(DEFAULT_ANNOTATION_PARAMETER,
+                parameter.getDefaultValue());
         }
 
-        addParameterJavaDoc(parameter, codegenParam.name(), javadoc);
+        if (context.getConfiguration().isUseJsr303Annotations())
+        {
+            addJsr303Annotations(parameter, argumentVariable);
+        }
+
+        addParameterJavaDoc(parameter, argumentVariable.name(), javadoc);
+    }
+
+    private void addJsr303Annotations(final AbstractParam parameter, final JVar argumentVariable)
+    {
+        if (isNotBlank(parameter.getPattern()))
+        {
+            LOGGER.info("Pattern constraint ignored for parameter: "
+                        + ToStringBuilder.reflectionToString(parameter, SHORT_PREFIX_STYLE));
+        }
+
+        final Integer minLength = parameter.getMinLength();
+        final Integer maxLength = parameter.getMaxLength();
+        if ((minLength != null) || (maxLength != null))
+        {
+            final JAnnotationUse sizeAnnotation = argumentVariable.annotate(Size.class);
+
+            if (minLength != null)
+            {
+                sizeAnnotation.param("min", minLength);
+            }
+
+            if (maxLength != null)
+            {
+                sizeAnnotation.param("max", maxLength);
+            }
+        }
+
+        final Double minimum = parameter.getMinimum();
+        if (minimum != null)
+        {
+            addMinMaxConstraint(parameter, "minimum", Min.class, minimum, argumentVariable);
+        }
+
+        final Double maximum = parameter.getMinimum();
+        if (maximum != null)
+        {
+            addMinMaxConstraint(parameter, "maximum", Max.class, maximum, argumentVariable);
+        }
+
+        if (parameter.isRequired())
+        {
+            argumentVariable.annotate(NotNull.class);
+        }
+    }
+
+    private void addMinMaxConstraint(final AbstractParam parameter,
+                                     final String name,
+                                     final Class<? extends Annotation> clazz,
+                                     final Double value,
+                                     final JVar argumentVariable)
+    {
+        try
+        {
+            final long boundary = BigDecimal.valueOf(value).longValueExact();
+            argumentVariable.annotate(clazz).param(DEFAULT_ANNOTATION_PARAMETER, boundary);
+        }
+        catch (final ArithmeticException ae)
+        {
+            LOGGER.info("Non integer " + name + " constraint ignored for parameter: "
+                        + ToStringBuilder.reflectionToString(parameter, SHORT_PREFIX_STYLE));
+        }
     }
 
     private void addParameterJavaDoc(final AbstractParam parameter,

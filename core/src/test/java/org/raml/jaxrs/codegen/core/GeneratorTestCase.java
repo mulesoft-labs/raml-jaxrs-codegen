@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion.JAXRS_1_1;
+import static org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion.JAXRS_2_0;
 
 import java.io.InputStreamReader;
 import java.net.URL;
@@ -22,9 +24,11 @@ import org.apache.commons.jci.readers.FileResourceReader;
 import org.apache.commons.jci.stores.FileResourceStore;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.builder.ToStringStyle;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
+import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 
 import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.api.core.ResourceConfig;
@@ -40,11 +44,38 @@ public class GeneratorTestCase
     public TemporaryFolder compilationOutputFolder = new TemporaryFolder();
 
     @Test
-    public void run() throws Exception
+    public void runForJaxrs11WithoutJsr303() throws Exception
+    {
+        run(JAXRS_1_1, false);
+    }
+
+    @Test
+    public void runForJaxrs11WithJsr303() throws Exception
+    {
+        run(JAXRS_1_1, true);
+    }
+
+    @Ignore("Can only be run with JAX-RS 2.0 API on classpath")
+    @Test
+    public void runForJaxrs20WithoutJsr303() throws Exception
+    {
+        run(JAXRS_2_0, false);
+    }
+
+    @Ignore("Can only be run with JAX-RS 2.0 API on classpath")
+    @Test
+    public void runForJaxrs20WithJsr303() throws Exception
+    {
+        run(JAXRS_2_0, true);
+    }
+
+    private void run(final JaxrsVersion jaxrsVersion, final boolean useJsr303Annotations) throws Exception
     {
         final Set<String> generatedSources = new HashSet<String>();
 
         final Configuration configuration = new Configuration();
+        configuration.setJaxrsVersion(jaxrsVersion);
+        configuration.setUseJsr303Annotations(useJsr303Annotations);
         configuration.setOutputDirectory(codegenOutputFolder.getRoot());
 
         configuration.setBasePackageName(TEST_BASE_PACKAGE);

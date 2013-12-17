@@ -9,8 +9,8 @@ public class PresentationResource implements Presentations
     @Override
     public GetPresentationsResponse getPresentations(final String authorization,
                                                      final String title,
-                                                     final Double start,
-                                                     final Double pages)
+                                                     final Long start,
+                                                     final Long pages)
     {
         if (!"s3cr3t".equals(authorization))
         {

@@ -1,9 +1,16 @@
 # RAML JAX-RS Codegen
 
+## Supported
+
+- JAX-RS 1.1 and 2.0,
+- JSR-303 annotations, except `@Pattern` because RAML uses ECMA 262/Perl 5 patterns and javax.validation uses Java ones,
+and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraints defined in RAML.
+- Model object generation based on JSON schema, with Jackson 1, 2 or Gson annotations.
+
+
 ## TODO
 
 - Generation of JAXB annotated class based on XML Schema
-- Generation of JSR-303 annotation based on RAML parameter constraints
 
 
 ## Using the core code generator
