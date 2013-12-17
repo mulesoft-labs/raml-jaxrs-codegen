@@ -104,6 +104,14 @@ public class GeneratorTestCase
             new InputStreamReader(getClass().getResourceAsStream("/org/raml/rules/resource-with-uri.yaml")),
             configuration));
 
+        configuration.setBasePackageName(TEST_BASE_PACKAGE + ".schema");
+        generatedSources.addAll(new Generator().run(
+            new InputStreamReader(getClass().getResourceAsStream("/org/raml/schema/valid-xml-global.yaml")),
+            configuration));
+        generatedSources.addAll(new Generator().run(
+            new InputStreamReader(getClass().getResourceAsStream("/org/raml/schema/valid-xml.yaml")),
+            configuration));
+
         // test compile the classes
         final JavaCompiler compiler = new JavaCompilerFactory().createCompiler("eclipse");
 
@@ -138,7 +146,7 @@ public class GeneratorTestCase
             final ResourceConfig config = new PackagesResourceConfig(TEST_BASE_PACKAGE);
 
             assertThat("Found: " + config.getRootResourceClasses(), config.getRootResourceClasses(),
-                hasSize(11));
+                hasSize(13));
 
             // TODO testing: actually send HTTP requests at the resources
         }

@@ -1,9 +1,16 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_XML;
+import static javax.ws.rs.core.MediaType.TEXT_XML;
+import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.startsWith;
+import static org.apache.commons.lang.StringUtils.substringAfter;
+import static org.apache.commons.lang.StringUtils.substringAfterLast;
+import static org.apache.commons.lang.StringUtils.substringBefore;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.raml.jaxrs.codegen.core.Names.buildJavaFriendlyName;
 import static org.raml.jaxrs.codegen.core.Names.buildNestedSchemaName;
@@ -18,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.Validate;
@@ -130,9 +136,12 @@ public class Types
             return existingClass;
         }
 
-        // TODO support XML schema
-
-        if (MediaType.APPLICATION_JSON.equalsIgnoreCase(mimeType.getType()))
+        if (isCompatibleWith(mimeType, APPLICATION_XML, TEXT_XML))
+        {
+            // TODO support XML schema
+            return null;
+        }
+        else if (isCompatibleWith(mimeType, APPLICATION_JSON))
         {
             final Entry<File, String> schemaNameAndFile = context.getSchemaFile(schemaNameOrContent);
             if (isBlank(schemaNameAndFile.getValue()))
@@ -150,6 +159,39 @@ public class Types
         {
             return null;
         }
+    }
+
+    private boolean isCompatibleWith(final MimeType mt, final String... mediaTypes)
+    {
+        final String mimeType = mt.getType();
+
+        if (isBlank(mimeType))
+        {
+            return false;
+        }
+
+        for (final String mediaType : mediaTypes)
+        {
+            if (mediaType.toString().equals(mimeType))
+            {
+                return true;
+            }
+
+            final String primaryType = substringBefore(mimeType, "/");
+
+            if (substringBefore(mediaType, "/").equals(primaryType))
+            {
+                final String subType = defaultIfBlank(substringAfterLast(mimeType, "+"),
+                    substringAfter(mimeType, "/"));
+
+                if (substringAfter(mediaType, "/").equals(subType))
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     private String buildSchemaKey(final MimeType mimeType)
