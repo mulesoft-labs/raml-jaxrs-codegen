@@ -643,13 +643,13 @@ public class Generator
             }
         }
 
-        final Double minimum = parameter.getMinimum();
+        final BigDecimal minimum = parameter.getMinimum();
         if (minimum != null)
         {
             addMinMaxConstraint(parameter, "minimum", Min.class, minimum, argumentVariable);
         }
 
-        final Double maximum = parameter.getMinimum();
+        final BigDecimal maximum = parameter.getMinimum();
         if (maximum != null)
         {
             addMinMaxConstraint(parameter, "maximum", Max.class, maximum, argumentVariable);
@@ -664,12 +664,12 @@ public class Generator
     private void addMinMaxConstraint(final AbstractParam parameter,
                                      final String name,
                                      final Class<? extends Annotation> clazz,
-                                     final Double value,
+                                     final BigDecimal value,
                                      final JVar argumentVariable)
     {
         try
         {
-            final long boundary = BigDecimal.valueOf(value).longValueExact();
+            final long boundary = value.longValueExact();
             argumentVariable.annotate(clazz).param(DEFAULT_ANNOTATION_PARAMETER, boundary);
         }
         catch (final ArithmeticException ae)
