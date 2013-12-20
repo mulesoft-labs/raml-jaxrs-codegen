@@ -37,3 +37,7 @@ and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraint
 
 - [Using the Maven Plug-in](maven-plugin/README.md)
 - [Using the Core Generator](core/README.md)
+
+## Examples
+
+- [Jersey 2](jersey-example/README.md)
