@@ -1,3 +1,5 @@
+![](http://raml.org/images/logo.png)
+
 # RAML to JAX-RS codegen - Gradle Plug-in
 
-Coming soon
+_Coming soon_
