@@ -2,59 +2,60 @@
 ---
 title: "Muse: Mule Sales Enablement API"
 version: v1
-baseUri: http://vast-coast-7974.herokuapp.com/muse
 schemas:
   - presentation: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A single product Presentation",
+         "description": "A product presentation",
          "properties": {
-           "id":  { "type": "string" },
-           "title":  { "type": "string" },
+           "id":  { "type": "string", "required": true },
+           "title":  { "type": "string", "required": true },
            "description":  { "type": "string" },
-           "fileUrl":  { "type": "string" },
-           "productId":  { "type": "string" }
-         },
-         "required": [ "id", "title", "fileUrl", "productId" ]
+           "fileUrl":  { "type": "string", "required": true },
+           "productId":  { "type": "string", "required": true }
+         }
       }
   - presentations: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "object",
-         "description": "A collection of product Presentations",
-         "properties": {
-           "size":  { "type": "integer" },
-           "presentations":  {
-              "type": "array",
-              "items": { "$ref": "presentation" }
+         "type": "array",
+         "description": "Multiple product presentations",
+         "items": {
+           "type": "object",
+           "properties": {
+             "id":  { "type": "string", "required": true },
+             "title":  { "type": "string", "required": true },
+             "description":  { "type": "string" },
+             "fileUrl":  { "type": "string", "required": true },
+             "productId":  { "type": "string", "required": true }
            }
-         },
-         "required": [ "size" ]
+         }
       }
   - product: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A single Product",
+         "description": "A product",
          "properties": {
-           "id":  { "type": "string" },
-           "name":  { "type": "string" },
+           "id":  { "type": "string", "required": true },
+           "name":  { "type": "string", "required": true },
            "description":  { "type": "string" },
            "imageUrl":  { "type": "string" },
-           "region": { "type": "string" }
-         },
-         "required": [ "id", "name", "region" ]
+           "region": { "type": "string", "required": true }
+         }
       }
   - products: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "object",
-         "description": "A collection of Products",
-         "properties": {
-           "size":  { "type": "integer" },
-           "products":  {
-              "type": "array",
-              "items": { "$ref": "product" }
+         "type": "array",
+         "description": "Multiple products",
+         "items": {
+           "type": "object",
+           "properties": {
+             "id":  { "type": "string", "required": true },
+             "name":  { "type": "string", "required": true },
+             "description":  { "type": "string" },
+             "imageUrl":  { "type": "string" },
+             "region":  { "type": "string", "required": true }
            }
-         },
-         "required": [ "size" ]
+         }
       }
 resourceTypes:
   - base:
