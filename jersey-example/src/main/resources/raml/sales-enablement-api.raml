@@ -6,7 +6,7 @@ schemas:
   - presentation: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A product presentation",
+         "description": "A single product Presentation",
          "properties": {
            "id":  { "type": "string", "required": true },
            "title":  { "type": "string", "required": true },
@@ -17,23 +17,20 @@ schemas:
       }
   - presentations: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "array",
-         "description": "Multiple product presentations",
-         "items": {
-           "type": "object",
-           "properties": {
-             "id":  { "type": "string", "required": true },
-             "title":  { "type": "string", "required": true },
-             "description":  { "type": "string" },
-             "fileUrl":  { "type": "string", "required": true },
-             "productId":  { "type": "string", "required": true }
+         "type": "object",
+         "description": "A collection of product Presentations",
+         "properties": {
+           "size":  { "type": "integer", "required": true },
+           "presentations":  {
+              "type": "array",
+              "items": { "$ref": "presentation" }
            }
          }
       }
   - product: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
-         "description": "A product",
+         "description": "A single Product",
          "properties": {
            "id":  { "type": "string", "required": true },
            "name":  { "type": "string", "required": true },
@@ -44,16 +41,13 @@ schemas:
       }
   - products: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "array",
-         "description": "Multiple products",
-         "items": {
-           "type": "object",
-           "properties": {
-             "id":  { "type": "string", "required": true },
-             "name":  { "type": "string", "required": true },
-             "description":  { "type": "string" },
-             "imageUrl":  { "type": "string" },
-             "region":  { "type": "string", "required": true }
+         "type": "object",
+         "description": "A collection of Products",
+         "properties": {
+           "size":  { "type": "integer", "required": true },
+           "products":  {
+              "type": "array",
+              "items": { "$ref": "product" }
            }
          }
       }
