@@ -33,6 +33,15 @@ and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraint
 
 - Generation of JAXB annotated classes based on XML Schemas
 
+## TO-DO's 
+
+- Documentation needs a lot of improvements, completion and examples. Most developers will be able to figure the missing gaps by themselves and looking at the Jersey example, but we will enhance documentation soon.
+- There is no hosting of Maven artifacts yet, so users need to download from git and install in the local repo for now.
+- Maven Archetypes implementation, for the most common project types that this plug-in could be used with, like: plain JAR if this is used as part of another project, plain WAR if this is to be deployed on a JavaEE container, WAR+specific JAX-RS implementation (for example Jersey) if to be deployed on a web container that does not provide JAX-RS, standalone JAR with a particular JAX-RS implementation.
+- Project assume developers are familiar with JAX-RS to get started. There is only one example in Jersey included, but we may want to add examples in other implementations of JAX-RS to help developers choose between the different options.
+
+
+
 ## Usage
 
 - [Using the Maven Plug-in](maven-plugin/README.md)
