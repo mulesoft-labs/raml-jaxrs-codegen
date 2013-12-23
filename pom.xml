@@ -13,7 +13,46 @@
         <module>jersey-example</module>
     </modules>
 
+    <properties>
+        <licensePath>LICENSE_HEADER.txt</licensePath>
+    </properties>
+
     <build>
+        <plugins>
+            <plugin>
+                <groupId>com.mycila.maven-license-plugin</groupId>
+                <artifactId>maven-license-plugin</artifactId>
+                <version>1.9.0</version>
+                <configuration>
+                    <header>${licensePath}</header>
+                    <excludes>
+                        <exclude>target/**</exclude>
+                        <exclude>**/.gitignore</exclude>
+                        <exclude>.idea/**</exclude>
+                        <exclude>**/*.yaml</exclude>
+                        <exclude>**/*.raml</exclude>
+                        <exclude>**/*.txt</exclude>
+                        <exclude>**/*.json</exclude>
+                        <exclude>**/*.xml</exclude>
+                        <exclude>**/*.xsd</exclude>
+                        <exclude>**/*.properties</exclude>
+                        <exclude>**/*.md</exclude>
+                        <exclude>**/*.template</exclude>
+                    </excludes>
+                    <mapping>
+                        <java>SLASHSTAR_STYLE</java>
+                    </mapping>
+                    <strictCheck>true</strictCheck>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>

@@ -12,6 +12,10 @@
     <packaging>jar</packaging>
     <name>RAML JAX-RS Codegen Core</name>
 
+    <properties>
+        <licensePath>../LICENSE_HEADER.txt</licensePath>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.raml</groupId>
