@@ -73,7 +73,7 @@
         <repository>
             <id>mulesoft-releases</id>
             <name>MuleSoft Releases Repository</name>
-            <url>https://repository-master.mulesoft.org/release/</url>
+            <url>https://repository-master.mulesoft.org/releases/</url>
             <snapshots>
               <enabled>false</enabled>
             </snapshots>
