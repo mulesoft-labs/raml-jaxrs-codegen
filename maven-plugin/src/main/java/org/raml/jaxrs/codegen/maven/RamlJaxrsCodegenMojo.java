@@ -69,7 +69,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     /**
      * Directory location of the RAML file(s).
      */
-    @Parameter(property = "sourceDirectory")
+    @Parameter(property = "sourceDirectory", defaultValue = "${basedir}/src/main/raml")
     private File sourceDirectory;
 
     /**
@@ -177,7 +177,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 
     private Collection<File> getRamlFiles() throws MojoExecutionException
     {
-        if (sourceDirectory != null)
+				if (sourcePaths != null && sourcePaths.length > 0 )
+				{
+            final List<File> sourceFiles = Arrays.asList(sourcePaths);
+            getLog().info("Using RAML files: " + sourceFiles);
+            return sourceFiles;
+				}
+				else
         {
             if (!sourceDirectory.isDirectory())
             {
@@ -188,12 +194,6 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             getLog().info("Looking for RAML files in and below: " + sourceDirectory);
 
             return FileUtils.listFiles(sourceDirectory, new String[]{"raml", "yaml"}, true);
-        }
-        else
-        {
-            final List<File> sourceFiles = Arrays.asList(sourcePaths);
-            getLog().info("Using RAML files: " + sourceFiles);
-            return sourceFiles;
         }
     }
 }
