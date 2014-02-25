@@ -108,11 +108,11 @@ public class Generator
     {
         final String ramlBuffer = IOUtils.toString(ramlReader);
 
-        final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlBuffer);
+        final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlBuffer, "");
 
         if (ValidationResult.areValid(results))
         {
-            return run(new RamlDocumentBuilder().build(ramlBuffer), configuration);
+            return run(new RamlDocumentBuilder().build(ramlBuffer, ""), configuration);
         }
         else
         {
@@ -189,13 +189,13 @@ public class Generator
     {
         for (final Action action : resource.getActions().values())
         {
-            if (action.getBody().size() <= 1)
+            if (!action.hasBody())
             {
-                final MimeType bodyMimeType = action.getBody().isEmpty() ? null : action.getBody()
-                    .values()
-                    .iterator()
-                    .next();
-
+                addResourceMethods(resourceInterface, resourceInterfacePath, action, null, false);
+            }
+            else if (action.getBody().size() == 1)
+            {
+                final MimeType bodyMimeType = action.getBody().values().iterator().next();
                 addResourceMethods(resourceInterface, resourceInterfacePath, action, bodyMimeType, false);
             }
             else
@@ -300,7 +300,7 @@ public class Generator
         final int statusCode = NumberUtils.toInt(statusCodeAndResponse.getKey());
         final Response response = statusCodeAndResponse.getValue();
 
-        if (response.getBody().isEmpty())
+        if (!response.hasBody())
         {
             createResponseBuilderInResourceMethodReturnType(responseClass, statusCode, response, null);
         }
@@ -455,11 +455,14 @@ public class Generator
         final Map<String, MimeType> responseMimeTypes = new HashMap<String, MimeType>();
         for (final Response response : action.getResponses().values())
         {
-            for (final MimeType responseMimeType : response.getBody().values())
+            if (response.hasBody())
             {
-                if (responseMimeType != null)
+                for (final MimeType responseMimeType : response.getBody().values())
                 {
-                    responseMimeTypes.put(responseMimeType.getType(), responseMimeType);
+                    if (responseMimeType != null)
+                    {
+                        responseMimeTypes.put(responseMimeType.getType(), responseMimeType);
+                    }
                 }
             }
         }
