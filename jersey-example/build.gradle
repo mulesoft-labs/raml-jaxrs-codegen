@@ -1,0 +1,45 @@
+apply plugin: 'java'
+apply plugin: 'raml'
+
+group = 'org.raml'
+version = '1.0-SNAPSHOT'
+
+description '''RAML JAX-RS Jersey Example'''
+
+sourceCompatibility = '1.6'
+
+buildscript {
+    repositories {
+        mavenLocal()
+        maven { url 'https://repository.mulesoft.org/snapshots/' }
+        maven { url 'https://repository.mulesoft.org/releases/' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'org.raml:raml-gradle-plugin:1.0-SNAPSHOT'
+    }
+}
+
+ext {
+    jerseyVersion='2.4.1'
+}
+
+repositories {
+    mavenLocal()
+    maven { url 'https://repository.mulesoft.org/snapshots/' }
+    maven { url 'https://repository.mulesoft.org/releases/' }
+    mavenCentral()
+}
+
+dependencies {
+    compile "org.glassfish.jersey.containers:jersey-container-simple-http:${jerseyVersion}"
+    compile "org.glassfish.jersey.media:jersey-media-multipart:${jerseyVersion}"
+    compile 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.2.3'
+}
+
+raml {
+    basePackageName = 'org.raml.jaxrs.example'
+    jaxrsVersion = '2.0'
+    jsonMapper = 'JACKSON2'
+    sourcePaths = files("$rootDir/src/main/resources/raml/sales-enablement-api.raml")
+}
