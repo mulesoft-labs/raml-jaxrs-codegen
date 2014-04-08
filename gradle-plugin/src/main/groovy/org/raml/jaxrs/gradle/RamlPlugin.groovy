@@ -49,6 +49,7 @@ class RamlPlugin implements Plugin<Project> {
 			configuration = project.extensions.raml
 		})
 		Task generateTask = project.tasks.getByName('raml-generate')
-		generateTask.setDescription("Generates JAX-RS annotated Java classes from the provided RAML configuration file(s).")
+		generateTask.setGroup('sourceGeneration')
+		generateTask.setDescription('Generates JAX-RS annotated Java classes from the provided RAML configuration file(s).')
 	}
 }
