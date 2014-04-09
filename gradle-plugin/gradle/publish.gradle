@@ -76,15 +76,29 @@ publishing {
         maven {
             name 'snapshots'
             url 'https://repository.mulesoft.org/snapshots'
+            credentials {
+                // Use -PrepoUsername and -PrepoPassword command line properties
+                username = repoUsername
+                password = repoPassword
+            }
         }
         maven {
             name 'releases'
             url 'https://repository.mulesoft.org/releases'
+            credentials {
+                // Use -PrepoUsername and -PrepoPassword command line properties
+                username = repoUsername
+                password = repoPassword
+            }
         }
         maven {
-            // Use -PlocalRepoUrl command line property.
             name 'localrepo'
-            url localRepoUrl
+            url localRepoUrl				// Use -PlocalRepoUrl command line property.
+            credentials {
+                // Use -PrepoUsername and -PrepoPassword command line properties
+                username = repoUsername
+                password = repoPassword
+            }
         }
     }
 }
