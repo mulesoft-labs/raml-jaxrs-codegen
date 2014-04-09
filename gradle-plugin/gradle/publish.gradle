@@ -13,50 +13,78 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-apply plugin: 'maven'
+apply plugin: 'maven-publish'
 
-task sourcesJar(type: Jar) {
-    classifier "sources"
+task sourceJar(type: Jar) {
+    classifier 'sources'
     from sourceSets.main.allSource
 }
 
 task javadocJar(type: Jar) {
-    classifier "javadoc"
+    classifier 'javadoc'
     from javadoc
 }
 
 artifacts {
-    archives sourcesJar, javadocJar
+    archives sourceJar, javadocJar
 }
 
-def poms = [project.install.repositories.mavenInstaller.pom]
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
 
-poms*.whenConfigured {
-    it.project {
-        name project.name
-        packaging 'jar'
-        description project.description
-        url 'http://raml.org/'
+            artifact sourceJar {
+                classifier 'sources'
+            }
 
-        licenses {
-            license {
-                name 'The Apache Software License, Version 2.0'
-                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-                distribution 'repo'
+            artifact javadocJar {
+                classifier 'javadoc'
+            }
+
+            pom.withXml {
+                asNode().children().last() + {
+                    resolveStrategy = Closure.DELEGATE_FIRST
+                    name project.name
+                    description project.description
+                    url 'http://raml.org/'
+                    scm {
+                        delegate.url 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
+                        connection 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
+                        developerConnection 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
+                    }
+                    licenses {
+                        license {
+                            name 'The Apache Software License, Version 2.0'
+                            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                            distribution 'repo'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id 'jdpgrailsdev'
+                            name 'Jonathan Pearlin'
+                        }
+                    }
+                }
+
             }
         }
+    }
 
-        scm {
-            delegate.url 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
-            connection 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
-            developerConnection 'scm:git@github.com:mulesoft/raml-jaxrs-codegen.git'
+    repositories {
+        maven {
+            name 'snapshots'
+            url 'https://repository.mulesoft.org/snapshots'
         }
-
-        developers {
-            developer {
-                id 'jdpgrailsdev'
-                name 'Jonathan Pearlin'
-            }
+        maven {
+            name 'releases'
+            url 'https://repository.mulesoft.org/releases'
+        }
+        maven {
+            // Use -PlocalRepoUrl command line property.
+            name 'localrepo'
+            url localRepoUrl
         }
     }
 }
