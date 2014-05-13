@@ -41,7 +41,7 @@ public class Names
         final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
             resource.getRelativeUri()));
 
-        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
+        return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName.concat("Resource");
     }
 
     public static String buildVariableName(final String source)
