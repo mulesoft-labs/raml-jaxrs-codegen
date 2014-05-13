@@ -76,7 +76,13 @@ public class Names
 
     public static String buildResponseMethodName(final int statusCode, final MimeType mimeType)
     {
-        final String status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
+        final String status;
+        if (statusCode == 204) {
+            status = "withoutContent";
+        } else {
+            status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
+        }
+
         return uncapitalize(getShortMimeType(mimeType)
                             + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
     }
