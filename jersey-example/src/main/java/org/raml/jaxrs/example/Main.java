@@ -24,7 +24,6 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.simple.SimpleContainerFactory;
 import org.raml.jaxrs.example.impl.PresentationResourceImpl;
 
-
 public class Main
 {
     @SuppressWarnings("resource")
