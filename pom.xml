@@ -90,4 +90,19 @@
             </snapshots>
         </repository>
     </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>archiva.ideais</id>
+            <name>ideais</name>
+            <url>http://intranet/archiva/repository/ideais</url>
+        </repository>
+        <!-- use the following if you ARE using a snapshot version. -->
+        <snapshotRepository>
+            <id>archiva.ideais-snapshots</id>
+            <name>ideais-snapshots</name>
+            <url>http://intranet/archiva/repository/ideais-snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
 </project>
