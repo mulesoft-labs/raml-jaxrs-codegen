@@ -15,14 +15,14 @@
  */
 package org.raml.jaxrs.codegen.core;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.jsonschema2pojo.AnnotationStyle;
 import org.jsonschema2pojo.DefaultGenerationConfig;
 import org.jsonschema2pojo.GenerationConfig;
+
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Configuration
 {
@@ -60,6 +60,7 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private Class methodThrowException = Exception.class;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -146,4 +147,14 @@ public class Configuration
     {
         this.jsonMapper = jsonMapper;
     }
+
+    public Class getMethodThrowException() {
+        return methodThrowException;
+    }
+
+    public void setMethodThrowException(Class methodThrowException) {
+        this.methodThrowException = methodThrowException;
+    }
+
+
 }
