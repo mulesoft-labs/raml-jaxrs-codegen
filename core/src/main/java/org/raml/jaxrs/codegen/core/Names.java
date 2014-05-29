@@ -15,20 +15,16 @@
  */
 package org.raml.jaxrs.codegen.core;
 
-import static org.apache.commons.lang.StringUtils.defaultIfBlank;
-import static org.apache.commons.lang.StringUtils.isBlank;
-import static org.apache.commons.lang.StringUtils.left;
-import static org.apache.commons.lang.StringUtils.remove;
-import static org.apache.commons.lang.StringUtils.uncapitalize;
-import static org.apache.commons.lang.WordUtils.capitalize;
-import static org.apache.commons.lang.math.NumberUtils.isDigits;
-import static org.raml.jaxrs.codegen.core.Constants.DEFAULT_LOCALE;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.impl.EnglishReasonPhraseCatalog;
 import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
+
+import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.WordUtils.capitalize;
+import static org.apache.commons.lang.math.NumberUtils.isDigits;
+import static org.raml.jaxrs.codegen.core.Constants.DEFAULT_LOCALE;
 
 public class Names
 {
@@ -106,8 +102,8 @@ public class Names
             return "";
         }
 
-        return remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
-            "x-www-");
+        return remove(remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
+            "x-www-"),"+");
     }
 
     private Names()
