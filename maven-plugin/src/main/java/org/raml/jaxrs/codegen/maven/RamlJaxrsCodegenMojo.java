@@ -102,6 +102,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
+    
+    /**
+     * Generate response wrappers as inner classes in the resource interfaces or inside the support package.
+     */
+    @Parameter(property = "responseWrapperAsInnerClass", defaultValue = "true")
+    private boolean responseWrapperAsInnerClass;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -146,6 +152,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
+            configuration.setResponseWrapperAsInnerClass(responseWrapperAsInnerClass);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
         }
         catch (final Exception e)
