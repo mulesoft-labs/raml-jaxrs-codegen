@@ -460,16 +460,28 @@ public class Generator
         }
     }
 
+    private void addAllResourcePathParameters(Resource resource, final JMethod method, final JDocComment javadoc) throws Exception {
+
+        for (final Entry<String, UriParameter> namedUriParameter : resource
+                .getUriParameters()
+                .entrySet())
+        {
+            addParameter(namedUriParameter.getKey(), namedUriParameter.getValue(), PathParam.class, method,
+                    javadoc);
+        }
+
+        Resource parentResource = resource.getParentResource();
+
+        if (parentResource != null ) {
+            addAllResourcePathParameters(parentResource, method, javadoc);
+        }
+
+    }
+
     private void addPathParameters(final Action action, final JMethod method, final JDocComment javadoc)
         throws Exception
     {
-        for (final Entry<String, UriParameter> namedUriParameter : action.getResource()
-            .getUriParameters()
-            .entrySet())
-        {
-            addParameter(namedUriParameter.getKey(), namedUriParameter.getValue(), PathParam.class, method,
-                javadoc);
-        }
+        addAllResourcePathParameters(action.getResource(), method, javadoc);
     }
 
     private void addHeaderParameters(final Action action, final JMethod method, final JDocComment javadoc)
