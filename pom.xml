@@ -11,6 +11,7 @@
         <module>core</module>
         <module>maven-plugin</module>
         <module>jersey-example</module>
+        <module>raml-jaxrs-maven-plugin-extension-example</module>
     </modules>
 
     <properties>

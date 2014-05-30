@@ -21,26 +21,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import org.apache.commons.io.IOUtils;
-import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClass;
-import org.raml.jaxrs.codegen.core.repositories.SchemaRepository;
 
 public class ResponseWrapperVisitor extends TemplateResourceVisitor {
-
-	/**
-	 * Dependencies.
-	 */
-	private Configuration configuration;
-	private SchemaRepository schemaRepository;
 	
-	/**
-	 * Constructor.
-	 */
-	public ResponseWrapperVisitor(Configuration configuration, SchemaRepository schemaRepository) {
-		this.configuration = configuration;
-		this.schemaRepository = schemaRepository;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see org.raml.jaxrs.codegen.core.visitor.ResourceVisitor#visit(org.raml.jaxrs.codegen.core.dataobjects.ResponseClass)
@@ -49,11 +33,11 @@ public class ResponseWrapperVisitor extends TemplateResourceVisitor {
 	public void visit(ResponseClass responseClass) {
 
 		try {
-			String supportPackage = configuration.getSupportPackage();
+			String supportPackage = getConfiguration().getSupportPackage();
 			String template = IOUtils.toString(getClass().getResourceAsStream(
-					"/org/raml/templates/ResponseWrapper." + configuration.getJaxrsVersion().toString().toLowerCase() + ".template"));
+					"/org/raml/templates/ResponseWrapper." + getConfiguration().getJaxrsVersion().toString().toLowerCase() + ".template"));
 
-			File supportPackageOutputDirectory = new File(configuration.getOutputDirectory(), supportPackage.replace('.', File.separatorChar));
+			File supportPackageOutputDirectory = new File(getConfiguration().getOutputDirectory(), supportPackage.replace('.', File.separatorChar));
 			if(supportPackageOutputDirectory.exists()) {
 				return;
 			}
@@ -68,7 +52,7 @@ public class ResponseWrapperVisitor extends TemplateResourceVisitor {
 			IOUtils.write(source, fileWriter);
 			IOUtils.closeQuietly(fileWriter);
 			
-			schemaRepository.saveSupport(supportPackage.replace('.', '/') + "/" + name + ".java", sourceOutputFile);
+			getSchemaRepository().saveSupport(supportPackage.replace('.', '/') + "/" + name + ".java", sourceOutputFile);
 		} catch (IOException e) {
 			throw new RuntimeException(e.getMessage(), e);
 		}

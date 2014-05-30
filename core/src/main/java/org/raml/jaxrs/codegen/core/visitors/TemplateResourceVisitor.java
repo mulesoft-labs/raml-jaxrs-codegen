@@ -16,6 +16,8 @@
 
 package org.raml.jaxrs.codegen.core.visitors;
 
+import org.jsonschema2pojo.SchemaMapper;
+import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.dataobjects.ArgumentType;
 import org.raml.jaxrs.codegen.core.dataobjects.GlobalSchema;
 import org.raml.jaxrs.codegen.core.dataobjects.ResourceEntity;
@@ -25,9 +27,21 @@ import org.raml.jaxrs.codegen.core.dataobjects.ResourceMethodArgument;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClass;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethod;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethodArgument;
+import org.raml.jaxrs.codegen.core.repositories.SchemaRepository;
 import org.raml.jaxrs.codegen.core.visitor.ResourceVisitor;
 
+import com.sun.codemodel.JCodeModel;
+
 public abstract class TemplateResourceVisitor implements ResourceVisitor {
+	
+	/**
+	 * Dependencies.
+	 */
+	private JCodeModel codeModel;
+	private SchemaMapper mapper;
+	private SchemaRepository schemaRepository;
+	private Configuration configuration;
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.raml.jaxrs.codegen.core.visitor.ResourceVisitor#start()
@@ -114,5 +128,61 @@ public abstract class TemplateResourceVisitor implements ResourceVisitor {
 	 */
 	@Override
 	public void end() {
+	}
+
+	/**
+	 * @return the codeModel
+	 */
+	public JCodeModel getCodeModel() {
+		return codeModel;
+	}
+
+	/**
+	 * @return the mapper
+	 */
+	public SchemaMapper getMapper() {
+		return mapper;
+	}
+
+	/**
+	 * @return the schemaRepository
+	 */
+	public SchemaRepository getSchemaRepository() {
+		return schemaRepository;
+	}
+
+	/**
+	 * @return the configuration
+	 */
+	public Configuration getConfiguration() {
+		return configuration;
+	}
+
+	/**
+	 * @param codeModel the codeModel to set
+	 */
+	public void setCodeModel(JCodeModel codeModel) {
+		this.codeModel = codeModel;
+	}
+
+	/**
+	 * @param mapper the mapper to set
+	 */
+	public void setMapper(SchemaMapper mapper) {
+		this.mapper = mapper;
+	}
+
+	/**
+	 * @param schemaRepository the schemaRepository to set
+	 */
+	public void setSchemaRepository(SchemaRepository schemaRepository) {
+		this.schemaRepository = schemaRepository;
+	}
+
+	/**
+	 * @param configuration the configuration to set
+	 */
+	public void setConfiguration(Configuration configuration) {
+		this.configuration = configuration;
 	}
 }

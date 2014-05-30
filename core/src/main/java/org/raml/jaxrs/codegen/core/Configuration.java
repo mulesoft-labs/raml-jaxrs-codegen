@@ -75,6 +75,7 @@ public class Configuration
 	private String basePackageName;
 	private boolean responseWrapperAsInnerClass;
 	private boolean useJsr303Annotations = false;
+	private final List<String> externalVisitors = new ArrayList<String>();
 	private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
 
 	public GenerationConfig createJsonSchemaGenerationConfig()
@@ -189,5 +190,12 @@ public class Configuration
 	 */
 	public void setResponseWrapperAsInnerClass(boolean responseWrapperAsInnerClass) {
 		this.responseWrapperAsInnerClass = responseWrapperAsInnerClass;
+	}
+
+	/**
+	 * @return the externalCodeGenerators
+	 */
+	public List<String> getExternalCodeGenerators() {
+		return externalVisitors;
 	}
 }

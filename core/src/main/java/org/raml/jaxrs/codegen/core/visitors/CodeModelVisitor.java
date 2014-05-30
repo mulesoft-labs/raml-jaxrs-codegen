@@ -58,8 +58,6 @@ import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.StreamingOutput;
 
 import org.apache.commons.lang.StringUtils;
-import org.jsonschema2pojo.SchemaMapper;
-import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.Names;
 import org.raml.jaxrs.codegen.core.Types;
 import org.raml.jaxrs.codegen.core.dataobjects.ArgumentType;
@@ -71,7 +69,6 @@ import org.raml.jaxrs.codegen.core.dataobjects.ResourceMethodArgument;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClass;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethod;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethodArgument;
-import org.raml.jaxrs.codegen.core.repositories.SchemaRepository;
 import org.raml.jaxrs.codegen.core.support.CodeModelHelper;
 import org.raml.jaxrs.codegen.core.support.RamlHelper;
 import org.raml.model.MimeType;
@@ -83,7 +80,6 @@ import org.raml.model.parameter.Header;
 import com.sun.codemodel.JBlock;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JDocComment;
 import com.sun.codemodel.JExpr;
@@ -98,14 +94,6 @@ import com.sun.codemodel.JVar;
 public class CodeModelVisitor extends TemplateResourceVisitor {
 
 	/**
-	 * Dependencies.
-	 */
-	private final JCodeModel codeModel;
-	private final SchemaMapper mapper;
-	private final SchemaRepository schemaRepository;
-	private final Configuration configuration;
-
-	/**
 	 * Locals for avoiding duplicates.
 	 */
 	private final Set<String> schemaEntities = new HashSet<String>();
@@ -117,25 +105,13 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 	 */
 	private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
 
-	/**
-	 * Constructor.
-	 */
-	public CodeModelVisitor(JCodeModel codeModel, SchemaMapper mapper,
-			SchemaRepository schemaRepository, Configuration configuration) {
-		super();
-		this.codeModel = codeModel;
-		this.mapper = mapper;
-		this.schemaRepository = schemaRepository;
-		this.configuration = configuration;
-	}
-
 	/*
 	 * (non-Javadoc)
 	 * @see org.raml.jaxrs.codegen.core.ramlresource.RamlObjectVisitor#visit(org.raml.jaxrs.codegen.core.ramlresource.util.dataobjects.GlobalSchema)
 	 */
 	@Override
 	public void visit(GlobalSchema globalSchema) {
-		schemaRepository.saveGlobal(globalSchema.getName(), globalSchema.getValue());
+		getSchemaRepository().saveGlobal(globalSchema.getName(), globalSchema.getValue());
 	}
 
 	/*
@@ -156,12 +132,12 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 		} else if(Types.isCompatibleWith(mimeType, APPLICATION_JSON)) {
 
 			String buildSchemaKey = Types.buildSchemaKey(mimeType);
-			Entry<File, String> schemaNameAndFile = schemaRepository.getGlobal(schemaNameOrContent);
+			Entry<File, String> schemaNameAndFile = getSchemaRepository().getGlobal(schemaNameOrContent);
 			if (isBlank(schemaNameAndFile.getValue())) {
 				schemaNameAndFile.setValue(buildNestedSchemaName(mimeType));
 			}
 
-			String packageName = configuration.getModelPackage();
+			String packageName = getConfiguration().getModelPackage();
 			String className = buildJavaFriendlyName(schemaNameAndFile.getValue());
 			String classAndPackageName = packageName + "." + className;
 
@@ -170,13 +146,13 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 
 				try {
 					URL url = schemaNameAndFile.getKey().toURI().toURL();	
-					mapper.generate(codeModel, className, packageName, url).boxify();
+					getMapper().generate(getCodeModel(), className, packageName, url).boxify();
 				} catch (IOException e) {
 					throw new RuntimeException(e.getMessage(), e);
 				}	
 			}
 
-			JClass clazz = codeModel.ref(classAndPackageName);
+			JClass clazz = getCodeModel().ref(classAndPackageName);
 			resourceEntity.setGeneratedObject(clazz);
 			schemaClasses.put(buildSchemaKey, clazz);
 		}
@@ -188,7 +164,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 	 */
 	@Override
 	public void visit(ResourceInterface resourceInterface) {
-		String packageName = configuration.getBasePackageName() + ".resource";
+		String packageName = getConfiguration().getBasePackageName() + ".resource";
 
 		Resource resource = resourceInterface.getResource();
 		String name = Names.buildResourceInterfaceName(resource);
@@ -206,7 +182,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 		}
 
 		try {
-			JPackage pkg = codeModel._package(packageName);
+			JPackage pkg = getCodeModel()._package(packageName);
 			JDefinedClass clazz = pkg._interface(actualName);
 			clazz.annotate(Path.class).param(DEFAULT_ANNOTATION_PARAMETER, StringUtils.defaultIfBlank(path, "/"));
 			if (isNotBlank(javadoc)) {
@@ -226,7 +202,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 	public void visit(ResourceMethod resourceMethod) {
 		JType returnType;
 		if(resourceMethod.getResponseClass() == null) {
-			returnType = CodeModelHelper.getGeneratorType(codeModel, void.class);
+			returnType = CodeModelHelper.getGeneratorType(getCodeModel(), void.class);
 		} else {
 			returnType = resourceMethod.getResponseClass().getGeneratedObject();
 		}
@@ -330,13 +306,13 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 							responseClass.getResourceMethod().getAction(), addBodyMimeTypeInMethodName ? 
 									responseClass.getResourceMethod().getMimeType() : null));
 
-			JClass directClass = codeModel.directClass(configuration.getSupportPackage() + ".ResponseWrapper");
+			JClass directClass = getCodeModel().directClass(getConfiguration().getSupportPackage() + ".ResponseWrapper");
 			JDefinedClass jDefinedResponseClass;
-			if(configuration.isResponseWrapperAsInnerClass()) {
+			if(getConfiguration().isResponseWrapperAsInnerClass()) {
 				jDefinedResponseClass = resourceInterface._class(name + "Response");
 			} else {
-				String supportPackageName = configuration.getSupportPackage() + "." + resourceInterface.name().toLowerCase();
-				JPackage jPackage = codeModel._package(supportPackageName);
+				String supportPackageName = getConfiguration().getSupportPackage() + "." + resourceInterface.name().toLowerCase();
+				JPackage jPackage = getCodeModel()._package(supportPackageName);
 				jDefinedResponseClass = jPackage._class(name + "Response");
 			}
 			jDefinedResponseClass._extends(directClass);
@@ -389,7 +365,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 		}
 
 		JInvocation builderArgument = ((JClass) CodeModelHelper.
-				getGeneratorType(codeModel, javax.ws.rs.core.Response.class)).
+				getGeneratorType(getCodeModel(), javax.ws.rs.core.Response.class)).
 				staticInvoke("status").arg(JExpr.lit(responseClassMethod.getStatusCode()));
 
 		String contentType = null;
@@ -416,7 +392,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 
 		final JBlock responseBuilderMethodBody = responseBuilderMethod.body();
 		final JVar builderVariable = responseBuilderMethodBody.decl(
-				CodeModelHelper.getGeneratorType(codeModel, ResponseBuilder.class),
+				CodeModelHelper.getGeneratorType(getCodeModel(), ResponseBuilder.class),
 				"responseBuilder", builderArgument);
 
 		StringBuilder freeFormHeadersDescription = new StringBuilder();
@@ -430,10 +406,10 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 		if (freeFormHeadersDescription.length() > 0) {
 
 			// generate a Map<String, List<Object>> argument for {?} headers
-			JClass listOfObjectsClass = ((JClass) CodeModelHelper.getGeneratorType(codeModel, List.class)).
+			JClass listOfObjectsClass = ((JClass) CodeModelHelper.getGeneratorType(getCodeModel(), List.class)).
 					narrow(Object.class);
-			JClass headersArgument = ((JClass) CodeModelHelper.getGeneratorType(codeModel, Map.class)).
-					narrow((JClass) CodeModelHelper.getGeneratorType(codeModel, String.class), listOfObjectsClass);
+			JClass headersArgument = ((JClass) CodeModelHelper.getGeneratorType(getCodeModel(), Map.class)).
+					narrow((JClass) CodeModelHelper.getGeneratorType(getCodeModel(), String.class), listOfObjectsClass);
 
 			builderArgument = responseBuilderMethodBody.invoke("headers")
 					.arg(JExpr.ref(MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME))
@@ -452,10 +428,10 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 
 			if(entity == null) {
 				if (startsWith(contentType, "text/")) {
-					entity = CodeModelHelper.getGeneratorType(codeModel, String.class);
+					entity = CodeModelHelper.getGeneratorType(getCodeModel(), String.class);
 				} else {
 					// fallback to a streaming output
-					entity = CodeModelHelper.getGeneratorType(codeModel, StreamingOutput.class);
+					entity = CodeModelHelper.getGeneratorType(getCodeModel(), StreamingOutput.class);
 				}
 			}
 
@@ -478,16 +454,16 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 				codegenType = schemaClasses.get(Types.buildSchemaKey(methodArgumentType.getArgument().getMimeType()));
 
 			} else if(methodArgumentType.getType() == ArgumentType.Type.MULTIVALUE) {
-				codegenType = ((JClass) CodeModelHelper.getGeneratorType(codeModel, MultivaluedMap.class)).narrow(String.class, String.class);
+				codegenType = ((JClass) CodeModelHelper.getGeneratorType(getCodeModel(), MultivaluedMap.class)).narrow(String.class, String.class);
 			} else if(methodArgumentType.getType() == ArgumentType.Type.MULTIPART) {
-				codegenType = CodeModelHelper.getGeneratorType(codeModel, MimeMultipart.class);
+				codegenType = CodeModelHelper.getGeneratorType(getCodeModel(), MimeMultipart.class);
 			} else if(methodArgumentType.getType() == ArgumentType.Type.UNKNOWN) {
 				MimeType mimeType = methodArgumentType.getArgument().getMimeType();
 				if (startsWith(mimeType.getType(), "text/")) {
-					codegenType = CodeModelHelper.getGeneratorType(codeModel, String.class);
+					codegenType = CodeModelHelper.getGeneratorType(getCodeModel(), String.class);
 				} else {
 					// fallback to a generic reader
-					codegenType = CodeModelHelper.getGeneratorType(codeModel, Reader.class);
+					codegenType = CodeModelHelper.getGeneratorType(getCodeModel(), Reader.class);
 				}
 			} else {
 				AbstractParam param = methodArgumentType.getArgument().getParameter();
@@ -503,10 +479,10 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
 					codegenType = enumType;
 
 				} else if (param.isRepeat()) {
-					codegenType = CodeModelHelper.getGeneratorType(codeModel, Types.getJavaType(param));
-					codegenType = ((JClass) CodeModelHelper.getGeneratorType(codeModel, List.class)).narrow(codegenType);
+					codegenType = CodeModelHelper.getGeneratorType(getCodeModel(), Types.getJavaType(param));
+					codegenType = ((JClass) CodeModelHelper.getGeneratorType(getCodeModel(), List.class)).narrow(codegenType);
 				} else {
-					codegenType = CodeModelHelper.getGeneratorType(codeModel, Types.getJavaType(param));
+					codegenType = CodeModelHelper.getGeneratorType(getCodeModel(), Types.getJavaType(param));
 				}
 			}
 			methodArgumentType.setGeneratedObject(codegenType);

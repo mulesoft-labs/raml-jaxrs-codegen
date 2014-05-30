@@ -18,6 +18,7 @@ package org.raml.jaxrs.codegen.core.visitors;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.jsonschema2pojo.SchemaMapper;
@@ -58,11 +59,35 @@ public class VisitorFactory {
 	
 	public List<ResourceVisitor> createResourceVisitors(SchemaRepository schemaRepository,
 			JCodeModel codeModel, SchemaMapper mapper, Configuration configuration) {		
-		List<ResourceVisitor> result = new ArrayList<ResourceVisitor>();
-		result.add(new CodeModelVisitor(codeModel, mapper, schemaRepository, configuration));
-		result.add(new HttpMethodAnnotationVisitor(codeModel, configuration));
-		result.add(new ResponseWrapperVisitor(configuration, schemaRepository));
+		
+		List<TemplateResourceVisitor> result = new LinkedList<TemplateResourceVisitor>();
+		result.add(new CodeModelVisitor());
+		result.add(new HttpMethodAnnotationVisitor());
+		result.add(new ResponseWrapperVisitor());
 		result.add(new JSR303Visitor());
-		return Collections.unmodifiableList(result);
+		
+		for(String className :  configuration.getExternalCodeGenerators()) {
+			try {
+				Class<?> clazz = Class.forName(className);
+				TemplateResourceVisitor visitor = (TemplateResourceVisitor) clazz.newInstance();
+				result.add(visitor);
+			} catch (ClassNotFoundException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			} catch (InstantiationException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			} catch (IllegalAccessException e) {
+				throw new RuntimeException(e.getMessage(), e);
+			}	
+		}
+		
+		// Set up dependencies
+		for(TemplateResourceVisitor visitor : result) {
+			visitor.setCodeModel(codeModel);
+			visitor.setConfiguration(configuration);
+			visitor.setMapper(mapper);
+			visitor.setSchemaRepository(schemaRepository);
+		}
+		
+		return Collections.unmodifiableList(new LinkedList<ResourceVisitor>(result));
 	}
 }

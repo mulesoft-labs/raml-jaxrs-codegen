@@ -39,7 +39,7 @@ public class JSR303Visitor extends TemplateResourceVisitor {
 	 */
 	private static final Logger LOGGER = LoggerFactory.getLogger(JSR303Visitor.class);
 	private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
-
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.raml.jaxrs.codegen.core.visitor.ResourceVisitor#visit(org.raml.jaxrs.codegen.core.dataobjects.ResourceMethodArgument)

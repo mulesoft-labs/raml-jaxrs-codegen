@@ -35,7 +35,6 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
 import org.apache.commons.lang.StringUtils;
-import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.Constants;
 import org.raml.jaxrs.codegen.core.dataobjects.ResourceMethod;
 import org.raml.jaxrs.codegen.core.support.RamlHelper;
@@ -44,7 +43,6 @@ import org.raml.model.MimeType;
 import com.sun.codemodel.JAnnotationArrayMember;
 import com.sun.codemodel.JClass;
 import com.sun.codemodel.JClassAlreadyExistsException;
-import com.sun.codemodel.JCodeModel;
 import com.sun.codemodel.JDefinedClass;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JPackage;
@@ -57,25 +55,9 @@ public class HttpMethodAnnotationVisitor extends TemplateResourceVisitor {
 	private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
 
 	/**
-	 * Dependencies.
-	 */
-	private JCodeModel codeModel;
-	private Configuration configuration;
-
-	/**
 	 * Locals.
 	 */
 	private Map<String, Object> httpMethodAnnotations;
-
-	/**
-	 * Constructor.
-	 */
-	public HttpMethodAnnotationVisitor(JCodeModel codeModel,
-			Configuration configuration) {
-		super();
-		this.codeModel = codeModel;
-		this.configuration = configuration;
-	}
 
 	/*
 	 * (non-Javadoc)
@@ -102,7 +84,7 @@ public class HttpMethodAnnotationVisitor extends TemplateResourceVisitor {
 		final Object annotationClass = httpMethodAnnotations.get(httpMethod.toUpperCase());
 		if (annotationClass == null) {
 			try {
-				final JPackage pkg = codeModel._package(configuration.getSupportPackage());
+				final JPackage pkg = getCodeModel()._package(getConfiguration().getSupportPackage());
 				final JDefinedClass annotationClazz = pkg._annotationTypeDeclaration(httpMethod);
 				annotationClazz.annotate(Target.class).param("value", ElementType.METHOD);
 				annotationClazz.annotate(Retention.class).param("value", RetentionPolicy.RUNTIME);
