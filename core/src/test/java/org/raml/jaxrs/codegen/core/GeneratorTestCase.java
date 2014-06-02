@@ -92,7 +92,6 @@ public class GeneratorTestCase
     configuration.setJaxrsVersion(jaxrsVersion);
     configuration.setUseJsr303Annotations(useJsr303Annotations);
     configuration.setOutputDirectory(codegenOutputFolder.getRoot());
-    configuration.setResponseWrapperAsInnerClass(true);
     configuration.setBasePackageName(TEST_BASE_PACKAGE);
     generatedSources.addAll(new Generator().run(
       new InputStreamReader(getClass().getResourceAsStream("/org/raml/full-config-with-patch.yaml")),

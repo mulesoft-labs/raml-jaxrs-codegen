@@ -65,6 +65,7 @@ public class VisitorFactory {
 		result.add(new HttpMethodAnnotationVisitor());
 		result.add(new ResponseWrapperVisitor());
 		result.add(new JSR303Visitor());
+		result.add(new HateoasResourceSupportVisitor());
 		
 		for(String className :  configuration.getExternalCodeGenerators()) {
 			try {

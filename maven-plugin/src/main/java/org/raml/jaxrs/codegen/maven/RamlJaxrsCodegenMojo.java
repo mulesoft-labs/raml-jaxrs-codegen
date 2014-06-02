@@ -20,7 +20,6 @@ import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -111,8 +110,18 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 	@Parameter(property = "responseWrapperAsInnerClass", defaultValue = "true")
 	private boolean responseWrapperAsInnerClass;
 
+	/**
+	 * Extension class names separated by ";". 
+	 * Base class: org.raml.jaxrs.codegen.core.visitors.TemplateResourceVisitor.
+	 */
 	@Parameter(property = "externalVisitors")
 	private String externalVisitors;
+	
+	/**
+	 * Adds extensions from hateoas org.springframework.hateoas.ResourceSupport.
+	 */
+	@Parameter(property = "hateoasResourceSupport", defaultValue = "false")
+	private boolean hateoasResourceSupport;
 
 
 	@Override
@@ -168,6 +177,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 			configuration.setUseJsr303Annotations(useJsr303Annotations);
 			configuration.setResponseWrapperAsInnerClass(responseWrapperAsInnerClass);
 			configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+			configuration.setHateoasResourceSupport(hateoasResourceSupport);
 		}
 		catch (final Exception e)
 		{
@@ -215,5 +225,19 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 			getLog().info("Using RAML files: " + sourceFiles);
 			return sourceFiles;
 		}
+	}
+
+	/**
+	 * @return the hateoasResourceSupport
+	 */
+	public boolean isHateoasResourceSupport() {
+		return hateoasResourceSupport;
+	}
+
+	/**
+	 * @param hateoasResourceSupport the hateoasResourceSupport to set
+	 */
+	public void setHateoasResourceSupport(boolean hateoasResourceSupport) {
+		this.hateoasResourceSupport = hateoasResourceSupport;
 	}
 }

@@ -74,6 +74,7 @@ public class Configuration
 	private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
 	private String basePackageName;
 	private boolean responseWrapperAsInnerClass;
+	private boolean hateoasResourceSupport;
 	private boolean useJsr303Annotations = false;
 	private final List<String> externalVisitors = new ArrayList<String>();
 	private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
@@ -197,5 +198,19 @@ public class Configuration
 	 */
 	public List<String> getExternalCodeGenerators() {
 		return externalVisitors;
+	}
+
+	/**
+	 * @return the hateoasResourceSupport
+	 */
+	public boolean isHateoasResourceSupport() {
+		return hateoasResourceSupport;
+	}
+
+	/**
+	 * @param hateoasResourceSupport the hateoasResourceSupport to set
+	 */
+	public void setHateoasResourceSupport(boolean hateoasResourceSupport) {
+		this.hateoasResourceSupport = hateoasResourceSupport;
 	}
 }
