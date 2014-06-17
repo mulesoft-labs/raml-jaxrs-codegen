@@ -22,7 +22,7 @@ import java.util.Scanner;
 import org.glassfish.jersey.media.multipart.MultiPartFeature;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.glassfish.jersey.simple.SimpleContainerFactory;
-import org.raml.jaxrs.example.impl.PresentationResource;
+import org.raml.jaxrs.example.impl.PresentationsResourceImpl;
 
 public class Main
 {
@@ -30,7 +30,7 @@ public class Main
     public static void main(final String[] args) throws Exception
     {
         final ResourceConfig config = new ResourceConfig();
-        config.register(PresentationResource.class);
+        config.register(PresentationsResourceImpl.class);
         config.register(MultiPartFeature.class);
 
         final Closeable simpleContainer = SimpleContainerFactory.create(new URI("http://0.0.0.0:8181"),

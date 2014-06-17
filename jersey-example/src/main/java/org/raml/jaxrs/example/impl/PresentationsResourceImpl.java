@@ -16,9 +16,10 @@
 package org.raml.jaxrs.example.impl;
 
 import org.raml.jaxrs.example.model.Presentation;
-import org.raml.jaxrs.example.resource.Presentations;
+import org.raml.jaxrs.example.model.Presentations;
+import org.raml.jaxrs.example.resource.PresentationsResource;
 
-public class PresentationResource implements Presentations
+public class PresentationsResourceImpl implements PresentationsResource
 {
     @Override
     public GetPresentationsResponse getPresentations(final String authorization,
@@ -31,7 +32,7 @@ public class PresentationResource implements Presentations
             return GetPresentationsResponse.unauthorized();
         }
 
-        final org.raml.jaxrs.example.model.Presentations presentations = new org.raml.jaxrs.example.model.Presentations().withSize(1);
+        final Presentations presentations = new Presentations().withSize(1);
 
         presentations.getPresentations().add(new Presentation().withId("fake-id").withTitle(title));
 
