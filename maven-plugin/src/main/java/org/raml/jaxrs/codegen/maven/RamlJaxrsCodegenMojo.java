@@ -103,6 +103,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
 
+    /**
+     * Should integers be represented by longs?
+     */
+    @Parameter(property = "useLongIntegers", defaultValue = "false")
+    private boolean useLongIntegers;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -147,6 +153,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            configuration.setUseLongIntegers(useLongIntegers);
         }
         catch (final Exception e)
         {

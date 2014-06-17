@@ -60,6 +60,7 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private boolean useLongIntegers = false;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -93,6 +94,12 @@ public class Configuration
             public boolean isIncludeToString()
             {
                 return false;
+            }
+
+            @Override
+            public boolean isUseLongIntegers()
+            {
+                return useLongIntegers;
             }
         };
     }
@@ -146,4 +153,15 @@ public class Configuration
     {
         this.jsonMapper = jsonMapper;
     }
+
+    public boolean useLongIntegers()
+    {
+        return useLongIntegers;
+    }
+
+    public void setUseLongIntegers(final boolean useLongIntegers)
+    {
+        this.useLongIntegers = useLongIntegers;
+    }
+
 }
