@@ -58,6 +58,7 @@ public class Configuration
     private File outputDirectory;
     private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
+    private String modelPackageName = "model";
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
     private boolean useLongIntegers = false;
@@ -132,6 +133,16 @@ public class Configuration
     public void setBasePackageName(final String basePackageName)
     {
         this.basePackageName = basePackageName;
+    }
+
+    public String getModelPackageName()
+    {
+        return modelPackageName;
+    }
+
+    public void setModelPackageName(final String modelPackageName)
+    {
+        this.modelPackageName = modelPackageName;
     }
 
     public boolean isUseJsr303Annotations()

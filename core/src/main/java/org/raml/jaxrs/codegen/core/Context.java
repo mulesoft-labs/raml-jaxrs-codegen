@@ -312,7 +312,9 @@ class Context
 
     private String getModelPackage()
     {
-        return configuration.getBasePackageName() + ".model";
+        return configuration.getBasePackageName()
+                .concat(".")
+                .concat(configuration.getModelPackageName());
     }
 
     private String getSupportPackage()
