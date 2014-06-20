@@ -344,6 +344,13 @@ public class Generator
             builderArgument = builderArgument.invoke("header")
                 .arg(HttpHeaders.CONTENT_TYPE)
                 .arg(responseMimeType.getType());
+
+            final String accessControlAllowOrigin = context.getConfiguration().getAccessControlAllowOrigin();
+            if (accessControlAllowOrigin != null) {
+                builderArgument = builderArgument.invoke("header")
+                        .arg("Access-Control-Allow-Origin")
+                        .arg(accessControlAllowOrigin);
+            }
         }
 
         final StringBuilder freeFormHeadersDescription = new StringBuilder();

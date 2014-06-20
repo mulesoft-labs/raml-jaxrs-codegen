@@ -62,6 +62,7 @@ public class Configuration
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
     private boolean useLongIntegers = false;
+    private String accessControlAllowOrigin;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -175,4 +176,13 @@ public class Configuration
         this.useLongIntegers = useLongIntegers;
     }
 
+    public String getAccessControlAllowOrigin()
+    {
+        return accessControlAllowOrigin;
+    }
+
+    public void setAccessControlAllowOrigin(final String accessControlAllowOrigin)
+    {
+        this.accessControlAllowOrigin = accessControlAllowOrigin;
+    }
 }
