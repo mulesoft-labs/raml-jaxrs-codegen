@@ -115,6 +115,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     @Parameter(property = "useLongIntegers", defaultValue = "false")
     private boolean useLongIntegers;
 
+    /**
+     * Access-Control-Allow-Origin setting to be added into the header of the
+     * response for each generated resource.
+     */
+    @Parameter(property = "accessControlAllowOrigin")
+    private String accessControlAllowOrigin;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -161,6 +168,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
             configuration.setUseLongIntegers(useLongIntegers);
+            configuration.setAccessControlAllowOrigin(accessControlAllowOrigin);
         }
         catch (final Exception e)
         {
