@@ -26,55 +26,80 @@ import com.sun.codemodel.JMethod;
 
 public class ResponseClassMethod extends RamlObject<JMethod> {
 
-	private final ResponseClass responseClass;
-	private final MimeType mimeType;
-	private final int statusCode;
-	private final Response response;
-	private final List<ResponseClassMethodArgument> arguments = new ArrayList<ResponseClassMethodArgument>();
-	
-	public ResponseClassMethod(ResponseClass responseClass,
-			MimeType mimeType, int statusCode, Response response) {
-		super();
-		this.responseClass = responseClass;
-		this.mimeType = mimeType;
-		this.statusCode = statusCode;
-		this.response = response;
-	}
-	
-	/**
-	 * @return the responseClass
-	 */
-	public ResponseClass getResponseClass() {
-		return responseClass;
-	}
-	/**
-	 * @return the mimeTypes
-	 */
-	public MimeType getMimeType() {
-		return mimeType;
-	}
-	/**
-	 * @return the statusCode
-	 */
-	public int getStatusCode() {
-		return statusCode;
-	}
+  private final ResponseClass responseClass;
+  private final MimeType mimeType;
+  private final int statusCode;
+  private final Response response;
+  private boolean repeat;
+  private final List<ResponseClassMethodArgument> arguments = new ArrayList<ResponseClassMethodArgument>();
 
-	/**
-	 * @return the response
-	 */
-	public Response getResponse() {
-		return response;
-	}
-	
-	public void addArgument(ResponseClassMethodArgument argument) {
-		arguments.add(argument);
-	}
+  public ResponseClassMethod(ResponseClass responseClass,
+                             MimeType mimeType, int statusCode, Response response) {
+    super();
+    this.responseClass = responseClass;
+    this.mimeType = mimeType;
+    this.statusCode = statusCode;
+    this.response = response;
+  }
 
-	/**
-	 * @return the arguments
-	 */
-	public List<ResponseClassMethodArgument> getArguments() {
-		return arguments;
-	}
+  public ResponseClassMethod(ResponseClass responseClass,
+                             MimeType mimeType, int statusCode, Response response, boolean repeat) {
+    super();
+    this.responseClass = responseClass;
+    this.mimeType = mimeType;
+    this.statusCode = statusCode;
+    this.response = response;
+    this.repeat = repeat;
+  }
+
+  /**
+   * @return the responseClass
+   */
+  public ResponseClass getResponseClass() {
+    return responseClass;
+  }
+  /**
+   * @return the mimeTypes
+   */
+  public MimeType getMimeType() {
+    return mimeType;
+  }
+  /**
+   * @return the statusCode
+   */
+  public int getStatusCode() {
+    return statusCode;
+  }
+
+  /**
+   * @return the response
+   */
+  public Response getResponse() {
+    return response;
+  }
+
+  public void addArgument(ResponseClassMethodArgument argument) {
+    arguments.add(argument);
+  }
+
+  /**
+   * @return the arguments
+   */
+  public List<ResponseClassMethodArgument> getArguments() {
+    return arguments;
+  }
+
+  /**
+   * @return the repeat
+   */
+  public boolean isRepeat() {
+    return repeat;
+  }
+
+  /**
+   * @param repeat the repeat to set
+   */
+  public void setRepeat(boolean repeat) {
+    this.repeat = repeat;
+  }
 }
