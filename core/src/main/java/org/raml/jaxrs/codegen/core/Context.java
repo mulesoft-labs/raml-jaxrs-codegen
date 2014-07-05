@@ -72,6 +72,7 @@ class Context
     private final Raml raml;
     private final JCodeModel codeModel;
     private final Map<String, Set<String>> resourcesMethods;
+    private final Map<String, JDefinedClass> resourceEnums;
     private final Map<String, Object> httpMethodAnnotations;
 
     private final SchemaMapper schemaMapper;
@@ -91,6 +92,7 @@ class Context
         codeModel = new JCodeModel();
 
         resourcesMethods = new HashMap<String, Set<String>>();
+        resourceEnums = new HashMap<String, JDefinedClass>();
 
         // prime the HTTP method annotation cache
         httpMethodAnnotations = new HashMap<String, Object>();
@@ -247,8 +249,21 @@ class Context
                                             final String name,
                                             final List<String> values) throws Exception
     {
-        final JDefinedClass _enum = resourceInterface._enum(name);
 
+        // Build the key for the enum
+        final String enumKey =  resourceInterface.fullName() + "." + name;
+
+        // Get the enum from the cache
+        JDefinedClass _enum = resourceEnums.get(enumKey);
+
+        // Create an enum if it does not already exist
+        if (_enum == null)
+        {
+            _enum = resourceInterface._enum(name);
+            resourceEnums.put(enumKey, _enum);
+        }
+
+        // Add all enum values to the enum
         for (final String value : values)
         {
             _enum.enumConstant(value);
