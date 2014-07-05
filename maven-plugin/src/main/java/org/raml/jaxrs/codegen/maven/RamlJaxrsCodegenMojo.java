@@ -84,6 +84,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     private String basePackageName;
 
     /**
+     * Model package name used for generated Java classes.
+     */
+    @Parameter(property = "modelPackageName", defaultValue = "model")
+    private String modelPackageName;
+
+    /**
      * Should JSR-303 annotations be used?
      */
     @Parameter(property = "useJsr303Annotations", defaultValue = "false")
@@ -102,6 +108,19 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
+
+    /**
+     * Should integers be represented by longs?
+     */
+    @Parameter(property = "useLongIntegers", defaultValue = "false")
+    private boolean useLongIntegers;
+
+    /**
+     * Access-Control-Allow-Origin setting to be added into the header of the
+     * response for each generated resource.
+     */
+    @Parameter(property = "accessControlAllowOrigin")
+    private String accessControlAllowOrigin;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -143,10 +162,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
         try
         {
             configuration.setBasePackageName(basePackageName);
+            configuration.setModelPackageName(modelPackageName);
             configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            configuration.setUseLongIntegers(useLongIntegers);
+            configuration.setAccessControlAllowOrigin(accessControlAllowOrigin);
         }
         catch (final Exception e)
         {

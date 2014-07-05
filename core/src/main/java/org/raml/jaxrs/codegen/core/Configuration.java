@@ -58,8 +58,11 @@ public class Configuration
     private File outputDirectory;
     private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
+    private String modelPackageName = "model";
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private boolean useLongIntegers = false;
+    private String accessControlAllowOrigin;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -94,6 +97,12 @@ public class Configuration
             {
                 return false;
             }
+
+            @Override
+            public boolean isUseLongIntegers()
+            {
+                return useLongIntegers;
+            }
         };
     }
 
@@ -127,6 +136,16 @@ public class Configuration
         this.basePackageName = basePackageName;
     }
 
+    public String getModelPackageName()
+    {
+        return modelPackageName;
+    }
+
+    public void setModelPackageName(final String modelPackageName)
+    {
+        this.modelPackageName = modelPackageName;
+    }
+
     public boolean isUseJsr303Annotations()
     {
         return useJsr303Annotations;
@@ -145,5 +164,25 @@ public class Configuration
     public void setJsonMapper(final AnnotationStyle jsonMapper)
     {
         this.jsonMapper = jsonMapper;
+    }
+
+    public boolean useLongIntegers()
+    {
+        return useLongIntegers;
+    }
+
+    public void setUseLongIntegers(final boolean useLongIntegers)
+    {
+        this.useLongIntegers = useLongIntegers;
+    }
+
+    public String getAccessControlAllowOrigin()
+    {
+        return accessControlAllowOrigin;
+    }
+
+    public void setAccessControlAllowOrigin(final String accessControlAllowOrigin)
+    {
+        this.accessControlAllowOrigin = accessControlAllowOrigin;
     }
 }
