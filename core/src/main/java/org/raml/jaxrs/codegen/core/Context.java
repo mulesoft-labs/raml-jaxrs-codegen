@@ -27,14 +27,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.net.URL;
+import java.util.*;
 import java.util.AbstractMap.SimpleEntry;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 
 import javax.ws.rs.HttpMethod;
 
@@ -112,6 +107,11 @@ class Context
         schemaMapper = new SchemaMapper(new RuleFactory(jsonSchemaGenerationConfig,
             new AnnotatorFactory().getAnnotator(jsonSchemaGenerationConfig.getAnnotationStyle()),
             new SchemaStore()), new SchemaGenerator());
+    }
+
+    public JCodeModel getCodeModel()
+    {
+        return codeModel;
     }
 
     public Set<String> generate() throws IOException
@@ -247,6 +247,13 @@ class Context
                                             final String name,
                                             final List<String> values) throws Exception
     {
+        for( Iterator<JDefinedClass> i = resourceInterface.classes(); i.hasNext(); )
+        {
+            JDefinedClass clazz = i.next();
+            if( clazz.name().equals( name ))
+                return clazz;
+        }
+
         final JDefinedClass _enum = resourceInterface._enum(name);
 
         for (final String value : values)

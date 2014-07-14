@@ -15,103 +15,70 @@
  */
 package org.raml.jaxrs.codegen.core;
 
-import static com.sun.codemodel.JMod.PUBLIC;
-import static com.sun.codemodel.JMod.STATIC;
-import static org.apache.commons.lang.StringUtils.capitalize;
-import static org.apache.commons.lang.StringUtils.defaultString;
-import static org.apache.commons.lang.StringUtils.isNotBlank;
-import static org.apache.commons.lang.StringUtils.join;
-import static org.apache.commons.lang.StringUtils.strip;
-import static org.apache.commons.lang.builder.ToStringStyle.SHORT_PREFIX_STYLE;
-import static org.raml.jaxrs.codegen.core.Constants.RESPONSE_HEADER_WILDCARD_SYMBOL;
-import static org.raml.jaxrs.codegen.core.Names.EXAMPLE_PREFIX;
-import static org.raml.jaxrs.codegen.core.Names.GENERIC_PAYLOAD_ARGUMENT_NAME;
-import static org.raml.jaxrs.codegen.core.Names.MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.lang.annotation.Annotation;
-import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
-
-import javax.mail.internet.MimeMultipart;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.FormParam;
-import javax.ws.rs.HeaderParam;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response.ResponseBuilder;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
+import com.sun.codemodel.*;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.Validate;
 import org.apache.commons.lang.builder.ToStringBuilder;
 import org.apache.commons.lang.math.NumberUtils;
-import org.raml.model.Action;
-import org.raml.model.MimeType;
-import org.raml.model.Raml;
-import org.raml.model.Resource;
-import org.raml.model.Response;
-import org.raml.model.parameter.AbstractParam;
-import org.raml.model.parameter.FormParameter;
-import org.raml.model.parameter.Header;
-import org.raml.model.parameter.QueryParameter;
-import org.raml.model.parameter.UriParameter;
+import org.raml.model.*;
+import org.raml.model.parameter.*;
 import org.raml.parser.rule.ValidationResult;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.raml.parser.visitor.RamlValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Lists;
-import com.sun.codemodel.JAnnotationArrayMember;
-import com.sun.codemodel.JAnnotationUse;
-import com.sun.codemodel.JBlock;
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JDefinedClass;
-import com.sun.codemodel.JDocComment;
-import com.sun.codemodel.JExpr;
-import com.sun.codemodel.JInvocation;
+import javax.mail.internet.MimeMultipart;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
+import javax.ws.rs.*;
+import javax.ws.rs.core.HttpHeaders;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import com.sun.codemodel.JMethod;
 import com.sun.codemodel.JMod;
-import com.sun.codemodel.JType;
+import javax.ws.rs.core.StreamingOutput;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.math.BigDecimal;
+import java.net.URL;
 import com.sun.codemodel.JVar;
+import java.util.*;
+import java.util.Map.Entry;
+
+import static com.sun.codemodel.JMod.PUBLIC;
+import static com.sun.codemodel.JMod.STATIC;
+import static org.apache.commons.lang.StringUtils.*;
+import static org.apache.commons.lang.builder.ToStringStyle.SHORT_PREFIX_STYLE;
+import static org.raml.jaxrs.codegen.core.Constants.RESPONSE_HEADER_WILDCARD_SYMBOL;
+import static org.raml.jaxrs.codegen.core.Names.*;
 
 public class Generator
 {
     private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
+    private static final String GENERIC_RESPONSE_METHOD_NAME = "respond";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
     private Context context;
     private Types types;
 
-    public Set<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
+    public Set<String> run(final URL ramlFile, final Configuration configuration) throws Exception
     {
-        final String ramlBuffer = IOUtils.toString(ramlReader);
-
-        final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlBuffer, "");
+        final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlFile.toString());
 
         if (ValidationResult.areValid(results))
         {
-            return run(new RamlDocumentBuilder().build(ramlBuffer, ""), configuration);
+            final String ramlBuffer = IOUtils.toString(new FileReader(ramlFile.getPath()));
+            return run(new RamlDocumentBuilder().build(ramlBuffer, ramlFile.toString()), configuration);
         }
         else
         {
@@ -253,7 +220,8 @@ public class Generator
         addPathParameters(action, method, javadoc);
         addHeaderParameters(action, method, javadoc);
         addQueryParameters(action, method, javadoc);
-        addBodyParameters(bodyMimeType, method, javadoc);
+
+        addBodyParameters(action.getType(),bodyMimeType, method, javadoc);
     }
 
     private JType getResourceMethodReturnType(final String methodName,
@@ -287,6 +255,8 @@ public class Generator
         {
             createResponseBuilderInResourceMethodReturnType(action, responseClass, statusCodeAndResponse);
         }
+
+        createGenericResponseBuilderInResourceMethodReturnType( responseClass );
 
         return responseClass;
     }
@@ -402,6 +372,32 @@ public class Generator
         responseBuilderMethodBody._return(JExpr._new(responseClass).arg(builderVariable.invoke("build")));
     }
 
+    private void createGenericResponseBuilderInResourceMethodReturnType(final JDefinedClass responseClass )
+            throws Exception
+    {
+        final String responseBuilderMethodName = GENERIC_RESPONSE_METHOD_NAME;
+
+        final JMethod responseBuilderMethod = responseClass.method(PUBLIC + STATIC, responseClass,
+                responseBuilderMethodName);
+
+
+        JInvocation builderArgument = types.getGeneratorClass(javax.ws.rs.core.Response.class)
+                .staticInvoke("status")
+                .arg( JExpr.ref("status"));
+
+        responseBuilderMethod.param( context.getCodeModel().parseType( "int" ), "status");
+        responseBuilderMethod.param( context.getGeneratorType(StreamingOutput.class), GENERIC_PAYLOAD_ARGUMENT_NAME);
+
+        final JBlock responseBuilderMethodBody = responseBuilderMethod.body();
+
+        final JVar builderVariable = responseBuilderMethodBody.decl(
+                types.getGeneratorType(ResponseBuilder.class), "responseBuilder", builderArgument);
+        responseBuilderMethodBody.invoke(builderVariable, GENERIC_PAYLOAD_ARGUMENT_NAME).arg(
+                JExpr.ref(GENERIC_PAYLOAD_ARGUMENT_NAME));
+
+        responseBuilderMethodBody._return(JExpr._new(responseClass).arg(builderVariable.invoke("build")));
+    }
+
     private JDocComment addBaseJavaDoc(final Action action, final JMethod method)
     {
         final JDocComment javadoc = method.javadoc();
@@ -468,19 +464,19 @@ public class Generator
         return responseMimeTypes.values();
     }
 
-    private void addBodyParameters(final MimeType bodyMimeType,
+    private void addBodyParameters(ActionType type, final MimeType bodyMimeType,
                                    final JMethod method,
                                    final JDocComment javadoc) throws Exception
     {
-        if (bodyMimeType == null)
+        if (bodyMimeType == null && !hasBody( type ))
         {
             return;
         }
-        else if (MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
+        else if (bodyMimeType != null && MediaType.APPLICATION_FORM_URLENCODED.equals(bodyMimeType.getType()))
         {
             addFormParameters(bodyMimeType, method, javadoc);
         }
-        else if (MediaType.MULTIPART_FORM_DATA.equals(bodyMimeType.getType()))
+        else if (bodyMimeType != null && MediaType.MULTIPART_FORM_DATA.equals(bodyMimeType.getType()))
         {
             // use a "catch all" javax.mail.internet.MimeMultipart parameter
             addCatchAllFormParametersArgument(bodyMimeType, method, javadoc,
@@ -492,15 +488,22 @@ public class Generator
         }
     }
 
+    private boolean hasBody(ActionType type) {
+        return type == ActionType.PUT || type == ActionType.POST || type == ActionType.PATCH;
+    }
+
     private void addPathParameters(final Action action, final JMethod method, final JDocComment javadoc)
         throws Exception
     {
-        for (final Entry<String, UriParameter> namedUriParameter : action.getResource()
-            .getUriParameters()
-            .entrySet())
-        {
-            addParameter(namedUriParameter.getKey(), namedUriParameter.getValue(), PathParam.class, method,
-                javadoc);
+        Resource resource = action.getResource();
+
+        while( resource != null ) {
+            for (final Entry<String, UriParameter> namedUriParameter : resource.getUriParameters().entrySet()) {
+                addParameter(namedUriParameter.getKey(), namedUriParameter.getValue(), PathParam.class, method,
+                        javadoc);
+            }
+
+            resource = resource.getParentResource();
         }
     }
 
@@ -574,10 +577,9 @@ public class Generator
                                       final JMethod method,
                                       final JDocComment javadoc) throws IOException
     {
-
         method.param(types.getRequestEntityClass(bodyMimeType), GENERIC_PAYLOAD_ARGUMENT_NAME);
 
-        javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add(
+        javadoc.addParam(GENERIC_PAYLOAD_ARGUMENT_NAME).add( bodyMimeType == null ? "the request body" :
             getPrefixedExampleOrBlank(bodyMimeType.getExample()));
     }
 

@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json-schema.org/draft-03/schema",
+    "type": "object",
+    "description": "A collection of product Presentations",
+    "properties": {
+        "size":  { "type": "integer" },
+        "presentations":  {
+            "type": "array",
+            "items": { "$ref": "presentation" }
+        }
+    },
+    "required": [ "size" ]
+}

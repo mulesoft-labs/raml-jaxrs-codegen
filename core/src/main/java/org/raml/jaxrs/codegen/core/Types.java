@@ -94,7 +94,7 @@ public class Types
         {
             return schemaClass;
         }
-        else if (startsWith(mimeType.getType(), "text/"))
+        else if (mimeType != null && startsWith(mimeType.getType(), "text/"))
         {
             return getGeneratorType(String.class);
         }
@@ -136,6 +136,9 @@ public class Types
 
     private JClass getSchemaClass(final MimeType mimeType) throws IOException
     {
+        if( mimeType == null )
+            return null;
+
         final String schemaNameOrContent = mimeType.getSchema();
         if (isBlank(schemaNameOrContent))
         {

@@ -4,32 +4,8 @@ title: "Muse: Mule Sales Enablement API"
 version: v1
 baseUri: http://vast-coast-7974.herokuapp.com/muse
 schemas:
-  - presentation: |
-      {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "object",
-         "description": "A single product Presentation",
-         "properties": {
-           "id":  { "type": "string" },
-           "title":  { "type": "string" },
-           "description":  { "type": "string" },
-           "fileUrl":  { "type": "string" },
-           "productId":  { "type": "string" }
-         },
-         "required": [ "id", "title", "fileUrl", "productId" ]
-      }
-  - presentations: |
-      {  "$schema": "http://json-schema.org/draft-03/schema",
-         "type": "object",
-         "description": "A collection of product Presentations",
-         "properties": {
-           "size":  { "type": "integer" },
-           "presentations":  {
-              "type": "array",
-              "items": { "$ref": "presentation" }
-           }
-         },
-         "required": [ "size" ]
-      }
+  - presentation: !include presentation-schema.json
+  - presentations: !include presentations-schema.json
   - product: |
       {  "$schema": "http://json-schema.org/draft-03/schema",
          "type": "object",
