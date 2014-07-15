@@ -303,6 +303,11 @@ class Context
         schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl);
         return codeModel.ref(getModelPackage() + "." + className);
     }
+    
+    public JClass generateClassFromJsonSchema(final String className, final String jsonSchema) throws IOException {
+        schemaMapper.generate(codeModel, className, getModelPackage(), jsonSchema);
+        return codeModel.ref(getModelPackage() + "." + className);
+    }
 
     private JDefinedClass createCustomHttpMethodAnnotation(final String httpMethod)
         throws JClassAlreadyExistsException

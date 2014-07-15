@@ -15,9 +15,22 @@
  */
 package org.raml.jaxrs.codegen.core;
 
+import com.sun.codemodel.JClass;
+import com.sun.codemodel.JType;
+import java.io.File;
+import java.io.IOException;
+import java.io.Reader;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.MediaType.APPLICATION_XML;
 import static javax.ws.rs.core.MediaType.TEXT_XML;
+import javax.ws.rs.core.StreamingOutput;
 import static org.apache.commons.lang.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang.StringUtils.isBlank;
 import static org.apache.commons.lang.StringUtils.isNotBlank;
@@ -25,30 +38,14 @@ import static org.apache.commons.lang.StringUtils.startsWith;
 import static org.apache.commons.lang.StringUtils.substringAfter;
 import static org.apache.commons.lang.StringUtils.substringAfterLast;
 import static org.apache.commons.lang.StringUtils.substringBefore;
+import org.apache.commons.lang.Validate;
 import static org.apache.commons.lang.WordUtils.capitalize;
 import static org.raml.jaxrs.codegen.core.Names.buildJavaFriendlyName;
 import static org.raml.jaxrs.codegen.core.Names.buildNestedSchemaName;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.Reader;
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.ws.rs.core.StreamingOutput;
-
-import org.apache.commons.lang.Validate;
 import org.raml.model.MimeType;
 import org.raml.model.parameter.AbstractParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.sun.codemodel.JClass;
-import com.sun.codemodel.JType;
 
 public class Types
 {
@@ -167,8 +164,10 @@ public class Types
             }
 
             final String className = buildJavaFriendlyName(schemaNameAndFile.getValue());
+            final byte[] encoded = Files.readAllBytes(schemaNameAndFile.getKey().toPath());
+            final String schemaString = new String(encoded, "UTF-8");
             final JClass generatedClass = context.generateClassFromJsonSchema(className,
-                schemaNameAndFile.getKey().toURI().toURL());
+                schemaString);
             schemaClasses.put(buildSchemaKey, generatedClass);
             return generatedClass;
         }
