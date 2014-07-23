@@ -50,3 +50,8 @@ and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraint
 ## Examples
 
 - [Jersey 2](jersey-example/README.md)
+
+### Contributing
+If you are interested in contributing some code to this project, thanks! Please submit a [Contributors Agreement](https://api-notebook.anypoint.mulesoft.com/notebooks#bc1cf75a0284268407e4) acknowledging that you are transferring ownership.
+
+To discuss this project, please use its github issues or the [RAML forum](http://forums.raml.org/).
