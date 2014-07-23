@@ -164,7 +164,7 @@ public class Generator
         return context.generate();
     }
 
-    private void createResourceInterface(final Resource resource) throws Exception
+    protected void createResourceInterface(final Resource resource) throws Exception
     {
         final String resourceInterfaceName = Names.buildResourceInterfaceName(resource);
         final JDefinedClass resourceInterface = context.createResourceInterface(resourceInterfaceName);
@@ -224,7 +224,7 @@ public class Generator
             addBodyMimeTypeInMethodName, uniqueResponseMimeTypes);
     }
 
-    private void addResourceMethod(final JDefinedClass resourceInterface,
+    protected void addResourceMethod(final JDefinedClass resourceInterface,
                                    final String resourceInterfacePath,
                                    final Action action,
                                    final MimeType bodyMimeType,
