@@ -110,7 +110,7 @@ class Context
         // configure the JSON -> POJO generator
         final GenerationConfig jsonSchemaGenerationConfig = configuration.createJsonSchemaGenerationConfig();
         schemaMapper = new SchemaMapper(new RuleFactory(jsonSchemaGenerationConfig,
-            new AnnotatorFactory().getAnnotator(jsonSchemaGenerationConfig.getAnnotationStyle()),
+            new AnnotatorFactory().getAnnotator(configuration.getJsonMapper()),
             new SchemaStore()), new SchemaGenerator());
     }
 
