@@ -19,7 +19,7 @@ In your `pom.xml`, add the following build plug-in:
         <configuration>
             <!-- Use sourcePaths if you want to provide a single RAML file or a list of RAML files -->
             <sourceDirectory>${basedir}/src/main/resources/raml</sourceDirectory>
-            <!-- Optionally configure outputDirectory if you don't like the default value: ${project.build.directory}/generated-sources/raml-jaxrs
+            <!-- Optionally configure outputDirectory if you don't like the default value: ${project.build.directory}/generated-sources/raml-jaxrs -->
             <!-- Replace with your package name -->
             <basePackageName>com.acme.api</basePackageName>
             <!-- Valid values: 1.1 2.0 -->
