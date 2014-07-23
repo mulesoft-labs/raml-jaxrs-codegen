@@ -16,9 +16,9 @@
 package org.raml.jaxrs.example.impl;
 
 import org.raml.jaxrs.example.model.Presentation;
-import org.raml.jaxrs.example.resource.Presentations;
+import org.raml.jaxrs.example.resource.PresentationsResource;
 
-public class PresentationResource implements Presentations
+public class PresentationResourceImpl implements PresentationsResource
 {
     @Override
     public GetPresentationsResponse getPresentations(final String authorization,

@@ -15,15 +15,6 @@
  */
 package org.raml.jaxrs.codegen.maven;
 
-import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_RUNTIME;
-
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
@@ -36,6 +27,15 @@ import org.jsonschema2pojo.AnnotationStyle;
 import org.raml.jaxrs.codegen.core.Configuration;
 import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 import org.raml.jaxrs.codegen.core.Generator;
+
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_RUNTIME;
 
 /**
  * When invoked, this goals read one or more <a href="http://raml.org">RAML</a> files and produces
@@ -103,6 +103,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
 
+    /**
+     * Throw exception on Resource Method
+     */
+    //@Parameter(property = "methodThrowException")
+    //private String methodThrowException;
+
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
     {
@@ -147,6 +153,11 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            /*
+            if (methodThrowException != null) {
+                configuration.setMethodThrowException(Class.forName(methodThrowException));
+            }
+            */
         }
         catch (final Exception e)
         {
