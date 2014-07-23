@@ -60,6 +60,7 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private File sourceDirectory;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -145,5 +146,13 @@ public class Configuration
     public void setJsonMapper(final AnnotationStyle jsonMapper)
     {
         this.jsonMapper = jsonMapper;
+    }
+
+    public File getSourceDirectory() {
+        return sourceDirectory;
+    }
+
+    public void setSourceDirectory(File sourceDirectory) {
+        this.sourceDirectory = sourceDirectory;
     }
 }
