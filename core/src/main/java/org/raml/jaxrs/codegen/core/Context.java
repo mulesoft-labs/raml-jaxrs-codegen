@@ -291,10 +291,7 @@ class Context
 
     public JClass generateClassFromJsonSchema(final String className, final URL schemaUrl) throws IOException
     {
-        // TODO return actually generated type when
-        // https://github.com/joelittlejohn/jsonschema2pojo/issues/137 will be fixed
-        schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl);
-        return codeModel.ref(getModelPackage() + "." + className);
+        return schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl).boxify();
     }
 
     private JDefinedClass createCustomHttpMethodAnnotation(final String httpMethod)
