@@ -50,8 +50,9 @@ public class Configuration
                 supportedAliases.add(jaxrsVersion.alias);
             }
 
-            throw new IllegalArgumentException(alias + " is not a supported JAX-RS version ("
-                                               + StringUtils.join(supportedAliases, ',') + ")");
+            throw new IllegalArgumentException(alias
+                    + " is not a supported JAX-RS version ("
+                    + StringUtils.join(supportedAliases, ',') + ")");
         }
     };
 
@@ -59,7 +60,7 @@ public class Configuration
     private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
     private boolean useJsr303Annotations = false;
-    private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -68,7 +69,7 @@ public class Configuration
             @Override
             public AnnotationStyle getAnnotationStyle()
             {
-                return super.getAnnotationStyle();
+                return jsonMapper;
             }
 
             @Override
