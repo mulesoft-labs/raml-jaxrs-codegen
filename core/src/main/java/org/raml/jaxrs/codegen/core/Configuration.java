@@ -60,7 +60,8 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
-    private Class methodThrowException = Exception.class;
+    private File sourceDirectory;
+    private Class methodThrowException = Exception.class;    
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -154,5 +155,13 @@ public class Configuration
     
     public void setMethodThrowException(Class methodThrowException) {
         this.methodThrowException = methodThrowException;
+    }
+
+    public File getSourceDirectory() {
+        return sourceDirectory;
+    }
+
+    public void setSourceDirectory(File sourceDirectory) {
+        this.sourceDirectory = sourceDirectory;
     }
 }

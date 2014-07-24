@@ -153,6 +153,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            configuration.setSourceDirectory(sourceDirectory);
             /*
             if (methodThrowException != null) {
                 configuration.setMethodThrowException(Class.forName(methodThrowException));

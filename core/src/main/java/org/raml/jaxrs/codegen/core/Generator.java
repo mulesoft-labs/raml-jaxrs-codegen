@@ -73,6 +73,10 @@ import org.raml.model.parameter.FormParameter;
 import org.raml.model.parameter.Header;
 import org.raml.model.parameter.QueryParameter;
 import org.raml.model.parameter.UriParameter;
+import org.raml.parser.loader.ClassPathResourceLoader;
+import org.raml.parser.loader.CompositeResourceLoader;
+import org.raml.parser.loader.FileResourceLoader;
+import org.raml.parser.loader.UrlResourceLoader;
 import org.raml.parser.rule.ValidationResult;
 import org.raml.parser.visitor.RamlDocumentBuilder;
 import org.raml.parser.visitor.RamlValidationService;
@@ -106,12 +110,22 @@ public class Generator
     public Set<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
     {
         final String ramlBuffer = IOUtils.toString(ramlReader);
-
-        final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlBuffer, "");
+        String sourceDirAbsPath = configuration.getSourceDirectory().getAbsolutePath();
+        
+        final List<ValidationResult> results = RamlValidationService.createDefault(new CompositeResourceLoader(
+                    new UrlResourceLoader(),
+                    new ClassPathResourceLoader(),
+                    new FileResourceLoader(sourceDirAbsPath))
+            ).validate(ramlBuffer, "");
+                  
 
         if (ValidationResult.areValid(results))
         {
-            return run(new RamlDocumentBuilder().build(ramlBuffer, ""), configuration);
+            return run(new RamlDocumentBuilder(new CompositeResourceLoader(
+                        new UrlResourceLoader(),
+                        new ClassPathResourceLoader(),
+                        new FileResourceLoader(sourceDirAbsPath))
+                ).build(ramlBuffer, ""), configuration);            
         }
         else
         {
