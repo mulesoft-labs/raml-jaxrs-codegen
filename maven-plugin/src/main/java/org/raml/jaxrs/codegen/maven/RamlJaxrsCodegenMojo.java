@@ -102,6 +102,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
+    
+    /**
+    * Throw exception on Resource Method
+    */
+    //@Parameter(property = "methodThrowException")
+    //private String methodThrowException;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -147,6 +153,11 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            /*
+            if (methodThrowException != null) {
+                configuration.setMethodThrowException(Class.forName(methodThrowException));
+            }
+            */
         }
         catch (final Exception e)
         {

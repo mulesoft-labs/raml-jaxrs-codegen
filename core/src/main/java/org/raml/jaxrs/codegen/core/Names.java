@@ -76,7 +76,12 @@ public class Names
 
     public static String buildResponseMethodName(final int statusCode, final MimeType mimeType)
     {
-        final String status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
+        final String status;
+        if (statusCode == 204) {
+            status = "withoutContent";
+        } else {
+            status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
+        }
         return uncapitalize(getShortMimeType(mimeType)
                             + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
     }
@@ -100,8 +105,8 @@ public class Names
             return "";
         }
 
-        return remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
-            "x-www-");
+        return remove(remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
+            "x-www-"),"+");
     }
 
     private Names()
