@@ -70,7 +70,7 @@ public class Configuration
             @Override
             public AnnotationStyle getAnnotationStyle()
             {
-                return super.getAnnotationStyle();
+                return jsonMapper;
             }
 
             @Override
