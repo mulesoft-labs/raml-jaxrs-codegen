@@ -1,0 +1,13 @@
+{  
+  "$schema": "http://json-schema.org/draft-03/schema",
+   "type": "object",
+   "javaType": "org.raml.jaxrs.example.model.Presentation",
+   "description": "A single product Presentation",
+   "properties": {
+     "id":  { "type": "string", "required": true },
+     "title":  { "type": "string", "required": true },
+     "description":  { "type": "string" },
+     "fileUrl":  { "type": "string", "required": true },
+     "productId":  { "type": "string", "required": true }
+   }
+}

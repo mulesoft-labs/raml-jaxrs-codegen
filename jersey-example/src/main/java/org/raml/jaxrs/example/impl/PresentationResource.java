@@ -28,7 +28,7 @@ public class PresentationResource implements Presentations
     {
         if (!"s3cr3t".equals(authorization))
         {
-            return GetPresentationsResponse.unauthorized();
+            return GetPresentationsResponse.responseUnauthorized();
         }
 
         final org.raml.jaxrs.example.model.Presentations presentations = new org.raml.jaxrs.example.model.Presentations().withSize(1);
@@ -43,7 +43,7 @@ public class PresentationResource implements Presentations
     {
         if (!"s3cr3t".equals(authorization))
         {
-            return PostPresentationsResponse.unauthorized();
+            return PostPresentationsResponse.responseUnauthorized();
         }
 
         entity.setId("fake-new-id");
@@ -57,7 +57,7 @@ public class PresentationResource implements Presentations
     {
         if (!"s3cr3t".equals(authorization))
         {
-            return GetPresentationsByPresentationIdResponse.unauthorized();
+            return GetPresentationsByPresentationIdResponse.responseUnauthorized();
         }
 
         return GetPresentationsByPresentationIdResponse.jsonOK(new Presentation().withId(presentationId)

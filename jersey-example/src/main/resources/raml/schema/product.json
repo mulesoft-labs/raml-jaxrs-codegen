@@ -1,0 +1,12 @@
+{  
+  "$schema": "http://json-schema.org/draft-03/schema",
+   "type": "object",
+   "description": "A single Product",
+   "properties": {
+     "id":  { "type": "string", "required": true },
+     "name":  { "type": "string", "required": true },
+     "description":  { "type": "string" },
+     "imageUrl":  { "type": "string" },
+     "region": { "type": "string", "required": true }
+   }
+}
