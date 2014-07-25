@@ -30,26 +30,29 @@ import javax.ws.rs.OPTIONS;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
 
-public abstract class Constants
-{
+/**
+ * Contains needed constants
+ * @author JAshe
+ */
+public abstract class Constants {
+
     public static final Set<String> JAVA_KEYWORDS = Collections.unmodifiableSet(new HashSet<String>(
-        Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
-            "const", "continue", "default", "do", "double", "else", "enum", "extends", "false", "final",
-            "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
-            "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
-            "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
-            "throws", "transient", "true", "try", "void", "volatile", "while")));
+            Arrays.asList("abstract", "assert", "boolean", "break", "byte", "case", "catch", "char", "class",
+                    "const", "continue", "default", "do", "double", "else", "enum", "extends", "false", "final",
+                    "finally", "float", "for", "goto", "if", "implements", "import", "instanceof", "int",
+                    "interface", "long", "native", "new", "null", "package", "private", "protected", "public",
+                    "return", "short", "static", "strictfp", "super", "switch", "synchronized", "this", "throw",
+                    "throws", "transient", "true", "try", "void", "volatile", "while")));
 
     @SuppressWarnings("unchecked")
     public static final List<Class<? extends Annotation>> JAXRS_HTTP_METHODS = Arrays.asList(DELETE.class,
-        GET.class, HEAD.class, OPTIONS.class, POST.class, PUT.class);
+            GET.class, HEAD.class, OPTIONS.class, POST.class, PUT.class);
 
-    public static Locale DEFAULT_LOCALE = Locale.ENGLISH;
+    public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
 
     public static final String RESPONSE_HEADER_WILDCARD_SYMBOL = "{?}";
 
-    private Constants()
-    {
+    private Constants() {
         throw new UnsupportedOperationException();
     }
 }

@@ -1,0 +1,467 @@
+[INFO] Error stacktraces are turned on.
+[INFO] Scanning for projects...
+[WARNING] 
+[WARNING] Some problems were encountered while building the effective model for com.cvent:raml-jaxrs-codegen-core:jar:1.0-SNAPSHOT
+[WARNING] 'parent.relativePath' points at org.raml:raml-jaxrs-codegen-parent instead of com.cvent:maven-parent, please verify your project structure @ line 5, column 13
+[WARNING] 
+[WARNING] It is highly recommended to fix these problems because they threaten the stability of your build.
+[WARNING] 
+[WARNING] For this reason, future Maven versions might no longer support building such malformed projects.
+[WARNING] 
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Build Order:
+[INFO] 
+[INFO] RAML JAX-RS Codegen Core
+[INFO] RAML JAX-RS Codegen
+[INFO] RAML JAX-RS Maven Plug-in
+[INFO] RAML JAX-RS Jersey Example
+[INFO] 
+[INFO] Using the builder org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder with a thread count of 1
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building RAML JAX-RS Codegen Core 1.0-SNAPSHOT
+[INFO] ------------------------------------------------------------------------
+Downloading: http://hq04hqnug001:8081/nexus/content/groups/public/org/raml/raml-parser/0.9-SNAPSHOT/maven-metadata.xml
+97/979 B   979/979 B               Downloaded: http://hq04hqnug001:8081/nexus/content/groups/public/org/raml/raml-parser/0.9-SNAPSHOT/maven-metadata.xml (979 B at 2.7 KB/sec)
+Downloading: http://hq04hqnug001:8081/nexus/content/groups/public/org/jsonschema2pojo/jsonschema2pojo-core/0.4.5-SNAPSHOT/maven-metadata.xml
+            Downloading: http://hq04hqnug001:8081/nexus/content/groups/public/org/jsonschema2pojo/jsonschema2pojo/0.4.5-SNAPSHOT/maven-metadata.xml
+            [INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ raml-jaxrs-codegen-core ---
+[INFO] Deleting C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target
+[INFO] 
+[INFO] --- maven-enforcer-plugin:1.3.1:enforce (enforce) @ raml-jaxrs-codegen-core ---
+[INFO] 
+[INFO] --- maven-checkstyle-plugin:2.11:check (validate) @ raml-jaxrs-codegen-core ---
+[INFO] Starting audit...
+Audit done.
+
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ raml-jaxrs-codegen-core ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 2 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ raml-jaxrs-codegen-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 6 source files to C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target\classes
+[INFO] 
+[INFO] >>> findbugs-maven-plugin:2.5.3:check (analyze-compile) @ raml-jaxrs-codegen-core >>>
+[INFO] 
+[INFO] --- findbugs-maven-plugin:2.5.3:findbugs (findbugs) @ raml-jaxrs-codegen-core ---
+[INFO] Fork Value is true
+     [java] Jul 24, 2014 4:41:41 PM java.util.prefs.WindowsPreferences <init>
+     [java] WARNING: Could not open/create prefs root node Software\JavaSoft\Prefs at root 0x80000002. Windows RegCreateKeyEx(...) returned error code 5.
+[INFO] Done FindBugs Analysis....
+[INFO] 
+[INFO] <<< findbugs-maven-plugin:2.5.3:check (analyze-compile) @ raml-jaxrs-codegen-core <<<
+[INFO] 
+[INFO] --- findbugs-maven-plugin:2.5.3:check (analyze-compile) @ raml-jaxrs-codegen-core ---
+[INFO] BugInstance size is 0
+[INFO] Error size is 0
+[INFO] No errors/warnings found
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ raml-jaxrs-codegen-core ---
+[INFO] Using 'UTF-8' encoding to copy filtered resources.
+[INFO] Copying 11 resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ raml-jaxrs-codegen-core ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 1 source file to C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target\test-classes
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ raml-jaxrs-codegen-core ---
+[INFO] Surefire report directory: C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target\surefire-reports
+
+-------------------------------------------------------
+ T E S T S
+-------------------------------------------------------
+Running org.raml.jaxrs.codegen.core.GeneratorTestCase
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 2, Time elapsed: 0.04 sec
+
+Results :
+
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 2
+
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ raml-jaxrs-codegen-core ---
+[INFO] Building jar: C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target\raml-jaxrs-codegen-core-1.0-SNAPSHOT.jar
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ raml-jaxrs-codegen-core ---
+[INFO] Installing C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\target\raml-jaxrs-codegen-core-1.0-SNAPSHOT.jar to C:\Users\JAshe\.m2\repository\com\cvent\raml-jaxrs-codegen-core\1.0-SNAPSHOT\raml-jaxrs-codegen-core-1.0-SNAPSHOT.jar
+[INFO] Installing C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\core\pom.xml to C:\Users\JAshe\.m2\repository\com\cvent\raml-jaxrs-codegen-core\1.0-SNAPSHOT\raml-jaxrs-codegen-core-1.0-SNAPSHOT.pom
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building RAML JAX-RS Codegen 1.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ raml-jaxrs-codegen-parent ---
+[INFO] 
+[INFO] --- maven-license-plugin:1.9.0:check (default) @ raml-jaxrs-codegen-parent ---
+[INFO] Checking licenses...
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ raml-jaxrs-codegen-parent ---
+[INFO] Installing c:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\pom.xml to C:\Users\JAshe\.m2\repository\org\raml\raml-jaxrs-codegen-parent\1.0\raml-jaxrs-codegen-parent-1.0.pom
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building RAML JAX-RS Maven Plug-in 1.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ raml-jaxrs-maven-plugin ---
+[INFO] Deleting C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\target
+[INFO] 
+[INFO] --- maven-plugin-plugin:3.2:descriptor (default-descriptor) @ raml-jaxrs-maven-plugin ---
+[WARNING] 
+
+Goal prefix is specified as: 'raml'. Maven currently expects it to be 'raml-jaxrs'.
+
+[WARNING] Using platform encoding (Cp1252 actually) to read mojo metadata, i.e. build is platform dependent!
+[INFO] Applying mojo extractor for language: java-annotations
+[INFO] Mojo extractor for language: java-annotations found 0 mojo descriptors.
+[INFO] Applying mojo extractor for language: java
+[INFO] Mojo extractor for language: java found 0 mojo descriptors.
+[INFO] Applying mojo extractor for language: bsh
+[INFO] Mojo extractor for language: bsh found 0 mojo descriptors.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:resources (default-resources) @ raml-jaxrs-maven-plugin ---
+[WARNING] Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] Copying 1 resource
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:compile (default-compile) @ raml-jaxrs-maven-plugin ---
+[INFO] Changes detected - recompiling the module!
+[INFO] Compiling 1 source file to C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\target\classes
+[INFO] 
+[INFO] --- maven-plugin-plugin:3.2:descriptor (mojo-descriptor) @ raml-jaxrs-maven-plugin ---
+[WARNING] 
+
+Goal prefix is specified as: 'raml'. Maven currently expects it to be 'raml-jaxrs'.
+
+[WARNING] Using platform encoding (Cp1252 actually) to read mojo metadata, i.e. build is platform dependent!
+[INFO] Applying mojo extractor for language: java-annotations
+[INFO] Mojo extractor for language: java-annotations found 1 mojo descriptors.
+[INFO] Applying mojo extractor for language: java
+[INFO] Mojo extractor for language: java found 0 mojo descriptors.
+[INFO] Applying mojo extractor for language: bsh
+[INFO] Mojo extractor for language: bsh found 0 mojo descriptors.
+[INFO] 
+[INFO] --- maven-resources-plugin:2.6:testResources (default-testResources) @ raml-jaxrs-maven-plugin ---
+[WARNING] Using platform encoding (Cp1252 actually) to copy filtered resources, i.e. build is platform dependent!
+[INFO] skip non existing resourceDirectory C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\src\test\resources
+[INFO] 
+[INFO] --- maven-compiler-plugin:3.1:testCompile (default-testCompile) @ raml-jaxrs-maven-plugin ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] --- maven-surefire-plugin:2.12.4:test (default-test) @ raml-jaxrs-maven-plugin ---
+[INFO] No tests to run.
+[INFO] 
+[INFO] --- maven-jar-plugin:2.4:jar (default-jar) @ raml-jaxrs-maven-plugin ---
+[INFO] Building jar: C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\target\raml-jaxrs-maven-plugin-1.0.jar
+[INFO] 
+[INFO] --- maven-plugin-plugin:3.2:addPluginArtifactMetadata (default-addPluginArtifactMetadata) @ raml-jaxrs-maven-plugin ---
+[INFO] 
+[INFO] --- maven-license-plugin:1.9.0:check (default) @ raml-jaxrs-maven-plugin ---
+[INFO] Checking licenses...
+[INFO] 
+[INFO] --- maven-install-plugin:2.4:install (default-install) @ raml-jaxrs-maven-plugin ---
+[INFO] Installing C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\target\raml-jaxrs-maven-plugin-1.0.jar to C:\Users\JAshe\.m2\repository\org\raml\plugins\raml-jaxrs-maven-plugin\1.0\raml-jaxrs-maven-plugin-1.0.jar
+[INFO] Installing C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\maven-plugin\pom.xml to C:\Users\JAshe\.m2\repository\org\raml\plugins\raml-jaxrs-maven-plugin\1.0\raml-jaxrs-maven-plugin-1.0.pom
+[INFO]                                                                         
+[INFO] ------------------------------------------------------------------------
+[INFO] Building RAML JAX-RS Jersey Example 1.0
+[INFO] ------------------------------------------------------------------------
+[INFO] 
+[INFO] --- maven-clean-plugin:2.5:clean (default-clean) @ raml-jaxrs-jersey-example ---
+[INFO] Deleting C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\jersey-example\target
+[INFO] 
+[INFO] --- raml-jaxrs-maven-plugin:1.0:generate (default) @ raml-jaxrs-jersey-example ---
+[INFO] Looking for RAML files in and below: C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\jersey-example\src\main\resources\raml
+[INFO] Generating Java classes from: C:\Users\JAshe\Documents\NetBeansProjects\raml-jaxrs-codegen\jersey-example\src\main\resources\raml\sales-enablement-api.raml
+[INFO] ------------------------------------------------------------------------
+[INFO] Reactor Summary:
+[INFO] 
+[INFO] RAML JAX-RS Codegen Core .......................... SUCCESS [ 18.043 s]
+[INFO] RAML JAX-RS Codegen ............................... SUCCESS [  0.191 s]
+[INFO] RAML JAX-RS Maven Plug-in ......................... SUCCESS [  2.685 s]
+[INFO] RAML JAX-RS Jersey Example ........................ FAILURE [  0.811 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time: 21.858 s
+[INFO] Finished at: 2014-07-24T16:41:53-05:00
+[INFO] Final Memory: 50M/417M
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate (default) on project raml-jaxrs-jersey-example: Execution default of goal org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate failed: An API incompatibility was encountered while executing org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate: java.lang.NoSuchMethodError: org.jsonschema2pojo.SchemaMapper.generate(Lcom/sun/codemodel/JCodeModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sun/codemodel/JType;
+[ERROR] -----------------------------------------------------
+[ERROR] realm =    plugin>org.raml.plugins:raml-jaxrs-maven-plugin:1.0
+[ERROR] strategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy
+[ERROR] urls[0] = file:/C:/Users/JAshe/Documents/NetBeansProjects/raml-jaxrs-codegen/maven-plugin/target/raml-jaxrs-maven-plugin-1.0.jar
+[ERROR] urls[1] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-jaxrs-codegen-core/1.0/raml-jaxrs-codegen-core-1.0.jar
+[ERROR] urls[2] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-parser/0.9-SNAPSHOT/raml-parser-0.9-SNAPSHOT.jar
+[ERROR] urls[3] = file:/C:/Users/JAshe/.m2/repository/org/yaml/snakeyaml/1.13/snakeyaml-1.13.jar
+[ERROR] urls[4] = file:/C:/Users/JAshe/.m2/repository/commons-validator/commons-validator/1.3.1/commons-validator-1.3.1.jar
+[ERROR] urls[5] = file:/C:/Users/JAshe/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+[ERROR] urls[6] = file:/C:/Users/JAshe/.m2/repository/commons-digester/commons-digester/1.6/commons-digester-1.6.jar
+[ERROR] urls[7] = file:/C:/Users/JAshe/.m2/repository/commons-collections/commons-collections/2.1/commons-collections-2.1.jar
+[ERROR] urls[8] = file:/C:/Users/JAshe/.m2/repository/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar
+[ERROR] urls[9] = file:/C:/Users/JAshe/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar
+[ERROR] urls[10] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar
+[ERROR] urls[11] = file:/C:/Users/JAshe/.m2/repository/org/kitchen-eel/json-schema-validator/1.2.2/json-schema-validator-1.2.2.jar
+[ERROR] urls[12] = file:/C:/Users/JAshe/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar
+[ERROR] urls[13] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.1/jackson-databind-2.1.1.jar
+[ERROR] urls[14] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.1/jackson-annotations-2.1.1.jar
+[ERROR] urls[15] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.1/jackson-core-2.1.1.jar
+[ERROR] urls[16] = file:/C:/Users/JAshe/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar
+[ERROR] urls[17] = file:/C:/Users/JAshe/.m2/repository/javax/mail/mailapi/1.4.3/mailapi-1.4.3.jar
+[ERROR] urls[18] = file:/C:/Users/JAshe/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar
+[ERROR] urls[19] = file:/C:/Users/JAshe/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar
+[ERROR] urls[20] = file:/C:/Users/JAshe/.m2/repository/com/sun/codemodel/codemodel/2.6/codemodel-2.6.jar
+[ERROR] urls[21] = file:/C:/Users/JAshe/.m2/repository/org/jsonschema2pojo/jsonschema2pojo-core/0.4.5-SNAPSHOT/jsonschema2pojo-core-0.4.5-SNAPSHOT.jar
+[ERROR] urls[22] = file:/C:/Users/JAshe/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar
+[ERROR] urls[23] = file:/C:/Users/JAshe/.m2/repository/joda-time/joda-time/2.2/joda-time-2.2.jar
+[ERROR] urls[24] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.11/jackson-mapper-asl-1.9.11.jar
+[ERROR] urls[25] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.11/jackson-core-asl-1.9.11.jar
+[ERROR] urls[26] = file:/C:/Users/JAshe/.m2/repository/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1.jar
+[ERROR] urls[27] = file:/C:/Users/JAshe/.m2/repository/com/google/code/findbugs/annotations/1.3.9/annotations-1.3.9.jar
+[ERROR] urls[28] = file:/C:/Users/JAshe/.m2/repository/org/apache/httpcomponents/httpcore/4.3/httpcore-4.3.jar
+[ERROR] urls[29] = file:/C:/Users/JAshe/.m2/repository/com/google/guava/guava/15.0/guava-15.0.jar
+[ERROR] urls[30] = file:/C:/Users/JAshe/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+[ERROR] urls[31] = file:/C:/Users/JAshe/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar
+[ERROR] urls[32] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar
+[ERROR] urls[33] = file:/C:/Users/JAshe/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+[ERROR] urls[34] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-api/3.2/maven-plugin-tools-api-3.2.jar
+[ERROR] urls[35] = file:/C:/Users/JAshe/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar
+[ERROR] urls[36] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar
+[ERROR] urls[37] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-utils/3.0/plexus-utils-3.0.jar
+[ERROR] urls[38] = file:/C:/Users/JAshe/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+[ERROR] urls[39] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-annotations/3.2/maven-plugin-tools-annotations-3.2.jar
+[ERROR] urls[40] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar
+[ERROR] urls[41] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar
+[ERROR] urls[42] = file:/C:/Users/JAshe/.m2/repository/asm/asm/3.3.1/asm-3.3.1.jar
+[ERROR] urls[43] = file:/C:/Users/JAshe/.m2/repository/asm/asm-commons/3.3.1/asm-commons-3.3.1.jar
+[ERROR] urls[44] = file:/C:/Users/JAshe/.m2/repository/asm/asm-tree/3.3.1/asm-tree-3.3.1.jar
+[ERROR] urls[45] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-archiver/2.1.1/plexus-archiver-2.1.1.jar
+[ERROR] urls[46] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-io/2.0.3/plexus-io-2.0.3.jar
+[ERROR] urls[47] = file:/C:/Users/JAshe/.m2/repository/com/thoughtworks/qdox/qdox/1.12.1/qdox-1.12.1.jar
+[ERROR] Number of foreign imports: 1
+[ERROR] import: Entry[import  from realm ClassRealm[maven.api, parent: null]]
+[ERROR] 
+[ERROR] -----------------------------------------------------
+[ERROR] -> [Help 1]
+org.apache.maven.lifecycle.LifecycleExecutionException: Failed to execute goal org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate (default) on project raml-jaxrs-jersey-example: Execution default of goal org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate failed: An API incompatibility was encountered while executing org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate: java.lang.NoSuchMethodError: org.jsonschema2pojo.SchemaMapper.generate(Lcom/sun/codemodel/JCodeModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sun/codemodel/JType;
+-----------------------------------------------------
+realm =    plugin>org.raml.plugins:raml-jaxrs-maven-plugin:1.0
+strategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy
+urls[0] = file:/C:/Users/JAshe/Documents/NetBeansProjects/raml-jaxrs-codegen/maven-plugin/target/raml-jaxrs-maven-plugin-1.0.jar
+urls[1] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-jaxrs-codegen-core/1.0/raml-jaxrs-codegen-core-1.0.jar
+urls[2] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-parser/0.9-SNAPSHOT/raml-parser-0.9-SNAPSHOT.jar
+urls[3] = file:/C:/Users/JAshe/.m2/repository/org/yaml/snakeyaml/1.13/snakeyaml-1.13.jar
+urls[4] = file:/C:/Users/JAshe/.m2/repository/commons-validator/commons-validator/1.3.1/commons-validator-1.3.1.jar
+urls[5] = file:/C:/Users/JAshe/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+urls[6] = file:/C:/Users/JAshe/.m2/repository/commons-digester/commons-digester/1.6/commons-digester-1.6.jar
+urls[7] = file:/C:/Users/JAshe/.m2/repository/commons-collections/commons-collections/2.1/commons-collections-2.1.jar
+urls[8] = file:/C:/Users/JAshe/.m2/repository/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar
+urls[9] = file:/C:/Users/JAshe/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar
+urls[10] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar
+urls[11] = file:/C:/Users/JAshe/.m2/repository/org/kitchen-eel/json-schema-validator/1.2.2/json-schema-validator-1.2.2.jar
+urls[12] = file:/C:/Users/JAshe/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar
+urls[13] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.1/jackson-databind-2.1.1.jar
+urls[14] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.1/jackson-annotations-2.1.1.jar
+urls[15] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.1/jackson-core-2.1.1.jar
+urls[16] = file:/C:/Users/JAshe/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar
+urls[17] = file:/C:/Users/JAshe/.m2/repository/javax/mail/mailapi/1.4.3/mailapi-1.4.3.jar
+urls[18] = file:/C:/Users/JAshe/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar
+urls[19] = file:/C:/Users/JAshe/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar
+urls[20] = file:/C:/Users/JAshe/.m2/repository/com/sun/codemodel/codemodel/2.6/codemodel-2.6.jar
+urls[21] = file:/C:/Users/JAshe/.m2/repository/org/jsonschema2pojo/jsonschema2pojo-core/0.4.5-SNAPSHOT/jsonschema2pojo-core-0.4.5-SNAPSHOT.jar
+urls[22] = file:/C:/Users/JAshe/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar
+urls[23] = file:/C:/Users/JAshe/.m2/repository/joda-time/joda-time/2.2/joda-time-2.2.jar
+urls[24] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.11/jackson-mapper-asl-1.9.11.jar
+urls[25] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.11/jackson-core-asl-1.9.11.jar
+urls[26] = file:/C:/Users/JAshe/.m2/repository/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1.jar
+urls[27] = file:/C:/Users/JAshe/.m2/repository/com/google/code/findbugs/annotations/1.3.9/annotations-1.3.9.jar
+urls[28] = file:/C:/Users/JAshe/.m2/repository/org/apache/httpcomponents/httpcore/4.3/httpcore-4.3.jar
+urls[29] = file:/C:/Users/JAshe/.m2/repository/com/google/guava/guava/15.0/guava-15.0.jar
+urls[30] = file:/C:/Users/JAshe/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+urls[31] = file:/C:/Users/JAshe/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar
+urls[32] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar
+urls[33] = file:/C:/Users/JAshe/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+urls[34] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-api/3.2/maven-plugin-tools-api-3.2.jar
+urls[35] = file:/C:/Users/JAshe/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar
+urls[36] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar
+urls[37] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-utils/3.0/plexus-utils-3.0.jar
+urls[38] = file:/C:/Users/JAshe/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+urls[39] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-annotations/3.2/maven-plugin-tools-annotations-3.2.jar
+urls[40] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar
+urls[41] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar
+urls[42] = file:/C:/Users/JAshe/.m2/repository/asm/asm/3.3.1/asm-3.3.1.jar
+urls[43] = file:/C:/Users/JAshe/.m2/repository/asm/asm-commons/3.3.1/asm-commons-3.3.1.jar
+urls[44] = file:/C:/Users/JAshe/.m2/repository/asm/asm-tree/3.3.1/asm-tree-3.3.1.jar
+urls[45] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-archiver/2.1.1/plexus-archiver-2.1.1.jar
+urls[46] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-io/2.0.3/plexus-io-2.0.3.jar
+urls[47] = file:/C:/Users/JAshe/.m2/repository/com/thoughtworks/qdox/qdox/1.12.1/qdox-1.12.1.jar
+Number of foreign imports: 1
+import: Entry[import  from realm ClassRealm[maven.api, parent: null]]
+
+-----------------------------------------------------
+
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:224)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:153)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:145)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:108)
+	at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject(LifecycleModuleBuilder.java:76)
+	at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build(SingleThreadedBuilder.java:51)
+	at org.apache.maven.lifecycle.internal.LifecycleStarter.execute(LifecycleStarter.java:116)
+	at org.apache.maven.DefaultMaven.doExecute(DefaultMaven.java:361)
+	at org.apache.maven.DefaultMaven.execute(DefaultMaven.java:155)
+	at org.apache.maven.cli.MavenCli.execute(MavenCli.java:584)
+	at org.apache.maven.cli.MavenCli.doMain(MavenCli.java:213)
+	at org.apache.maven.cli.MavenCli.main(MavenCli.java:157)
+	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)
+	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.lang.reflect.Method.invoke(Method.java:606)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced(Launcher.java:289)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.launch(Launcher.java:229)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode(Launcher.java:415)
+	at org.codehaus.plexus.classworlds.launcher.Launcher.main(Launcher.java:356)
+Caused by: org.apache.maven.plugin.PluginExecutionException: Execution default of goal org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate failed: An API incompatibility was encountered while executing org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate: java.lang.NoSuchMethodError: org.jsonschema2pojo.SchemaMapper.generate(Lcom/sun/codemodel/JCodeModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sun/codemodel/JType;
+-----------------------------------------------------
+realm =    plugin>org.raml.plugins:raml-jaxrs-maven-plugin:1.0
+strategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy
+urls[0] = file:/C:/Users/JAshe/Documents/NetBeansProjects/raml-jaxrs-codegen/maven-plugin/target/raml-jaxrs-maven-plugin-1.0.jar
+urls[1] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-jaxrs-codegen-core/1.0/raml-jaxrs-codegen-core-1.0.jar
+urls[2] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-parser/0.9-SNAPSHOT/raml-parser-0.9-SNAPSHOT.jar
+urls[3] = file:/C:/Users/JAshe/.m2/repository/org/yaml/snakeyaml/1.13/snakeyaml-1.13.jar
+urls[4] = file:/C:/Users/JAshe/.m2/repository/commons-validator/commons-validator/1.3.1/commons-validator-1.3.1.jar
+urls[5] = file:/C:/Users/JAshe/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+urls[6] = file:/C:/Users/JAshe/.m2/repository/commons-digester/commons-digester/1.6/commons-digester-1.6.jar
+urls[7] = file:/C:/Users/JAshe/.m2/repository/commons-collections/commons-collections/2.1/commons-collections-2.1.jar
+urls[8] = file:/C:/Users/JAshe/.m2/repository/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar
+urls[9] = file:/C:/Users/JAshe/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar
+urls[10] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar
+urls[11] = file:/C:/Users/JAshe/.m2/repository/org/kitchen-eel/json-schema-validator/1.2.2/json-schema-validator-1.2.2.jar
+urls[12] = file:/C:/Users/JAshe/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar
+urls[13] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.1/jackson-databind-2.1.1.jar
+urls[14] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.1/jackson-annotations-2.1.1.jar
+urls[15] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.1/jackson-core-2.1.1.jar
+urls[16] = file:/C:/Users/JAshe/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar
+urls[17] = file:/C:/Users/JAshe/.m2/repository/javax/mail/mailapi/1.4.3/mailapi-1.4.3.jar
+urls[18] = file:/C:/Users/JAshe/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar
+urls[19] = file:/C:/Users/JAshe/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar
+urls[20] = file:/C:/Users/JAshe/.m2/repository/com/sun/codemodel/codemodel/2.6/codemodel-2.6.jar
+urls[21] = file:/C:/Users/JAshe/.m2/repository/org/jsonschema2pojo/jsonschema2pojo-core/0.4.5-SNAPSHOT/jsonschema2pojo-core-0.4.5-SNAPSHOT.jar
+urls[22] = file:/C:/Users/JAshe/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar
+urls[23] = file:/C:/Users/JAshe/.m2/repository/joda-time/joda-time/2.2/joda-time-2.2.jar
+urls[24] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.11/jackson-mapper-asl-1.9.11.jar
+urls[25] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.11/jackson-core-asl-1.9.11.jar
+urls[26] = file:/C:/Users/JAshe/.m2/repository/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1.jar
+urls[27] = file:/C:/Users/JAshe/.m2/repository/com/google/code/findbugs/annotations/1.3.9/annotations-1.3.9.jar
+urls[28] = file:/C:/Users/JAshe/.m2/repository/org/apache/httpcomponents/httpcore/4.3/httpcore-4.3.jar
+urls[29] = file:/C:/Users/JAshe/.m2/repository/com/google/guava/guava/15.0/guava-15.0.jar
+urls[30] = file:/C:/Users/JAshe/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+urls[31] = file:/C:/Users/JAshe/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar
+urls[32] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar
+urls[33] = file:/C:/Users/JAshe/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+urls[34] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-api/3.2/maven-plugin-tools-api-3.2.jar
+urls[35] = file:/C:/Users/JAshe/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar
+urls[36] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar
+urls[37] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-utils/3.0/plexus-utils-3.0.jar
+urls[38] = file:/C:/Users/JAshe/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+urls[39] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-annotations/3.2/maven-plugin-tools-annotations-3.2.jar
+urls[40] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar
+urls[41] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar
+urls[42] = file:/C:/Users/JAshe/.m2/repository/asm/asm/3.3.1/asm-3.3.1.jar
+urls[43] = file:/C:/Users/JAshe/.m2/repository/asm/asm-commons/3.3.1/asm-commons-3.3.1.jar
+urls[44] = file:/C:/Users/JAshe/.m2/repository/asm/asm-tree/3.3.1/asm-tree-3.3.1.jar
+urls[45] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-archiver/2.1.1/plexus-archiver-2.1.1.jar
+urls[46] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-io/2.0.3/plexus-io-2.0.3.jar
+urls[47] = file:/C:/Users/JAshe/.m2/repository/com/thoughtworks/qdox/qdox/1.12.1/qdox-1.12.1.jar
+Number of foreign imports: 1
+import: Entry[import  from realm ClassRealm[maven.api, parent: null]]
+
+-----------------------------------------------------
+
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:182)
+	at org.apache.maven.lifecycle.internal.MojoExecutor.execute(MojoExecutor.java:208)
+	... 19 more
+Caused by: org.apache.maven.plugin.PluginContainerException: An API incompatibility was encountered while executing org.raml.plugins:raml-jaxrs-maven-plugin:1.0:generate: java.lang.NoSuchMethodError: org.jsonschema2pojo.SchemaMapper.generate(Lcom/sun/codemodel/JCodeModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sun/codemodel/JType;
+-----------------------------------------------------
+realm =    plugin>org.raml.plugins:raml-jaxrs-maven-plugin:1.0
+strategy = org.codehaus.plexus.classworlds.strategy.SelfFirstStrategy
+urls[0] = file:/C:/Users/JAshe/Documents/NetBeansProjects/raml-jaxrs-codegen/maven-plugin/target/raml-jaxrs-maven-plugin-1.0.jar
+urls[1] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-jaxrs-codegen-core/1.0/raml-jaxrs-codegen-core-1.0.jar
+urls[2] = file:/C:/Users/JAshe/.m2/repository/org/raml/raml-parser/0.9-SNAPSHOT/raml-parser-0.9-SNAPSHOT.jar
+urls[3] = file:/C:/Users/JAshe/.m2/repository/org/yaml/snakeyaml/1.13/snakeyaml-1.13.jar
+urls[4] = file:/C:/Users/JAshe/.m2/repository/commons-validator/commons-validator/1.3.1/commons-validator-1.3.1.jar
+urls[5] = file:/C:/Users/JAshe/.m2/repository/commons-beanutils/commons-beanutils/1.7.0/commons-beanutils-1.7.0.jar
+urls[6] = file:/C:/Users/JAshe/.m2/repository/commons-digester/commons-digester/1.6/commons-digester-1.6.jar
+urls[7] = file:/C:/Users/JAshe/.m2/repository/commons-collections/commons-collections/2.1/commons-collections-2.1.jar
+urls[8] = file:/C:/Users/JAshe/.m2/repository/xml-apis/xml-apis/1.0.b2/xml-apis-1.0.b2.jar
+urls[9] = file:/C:/Users/JAshe/.m2/repository/commons-logging/commons-logging/1.0.4/commons-logging-1.0.4.jar
+urls[10] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-api/1.7.5/slf4j-api-1.7.5.jar
+urls[11] = file:/C:/Users/JAshe/.m2/repository/org/kitchen-eel/json-schema-validator/1.2.2/json-schema-validator-1.2.2.jar
+urls[12] = file:/C:/Users/JAshe/.m2/repository/org/mozilla/rhino/1.7R4/rhino-1.7R4.jar
+urls[13] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.1.1/jackson-databind-2.1.1.jar
+urls[14] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.1.1/jackson-annotations-2.1.1.jar
+urls[15] = file:/C:/Users/JAshe/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.1.1/jackson-core-2.1.1.jar
+urls[16] = file:/C:/Users/JAshe/.m2/repository/javax/ws/rs/jsr311-api/1.1.1/jsr311-api-1.1.1.jar
+urls[17] = file:/C:/Users/JAshe/.m2/repository/javax/mail/mailapi/1.4.3/mailapi-1.4.3.jar
+urls[18] = file:/C:/Users/JAshe/.m2/repository/javax/activation/activation/1.1/activation-1.1.jar
+urls[19] = file:/C:/Users/JAshe/.m2/repository/javax/validation/validation-api/1.1.0.Final/validation-api-1.1.0.Final.jar
+urls[20] = file:/C:/Users/JAshe/.m2/repository/com/sun/codemodel/codemodel/2.6/codemodel-2.6.jar
+urls[21] = file:/C:/Users/JAshe/.m2/repository/org/jsonschema2pojo/jsonschema2pojo-core/0.4.5-SNAPSHOT/jsonschema2pojo-core-0.4.5-SNAPSHOT.jar
+urls[22] = file:/C:/Users/JAshe/.m2/repository/com/google/code/gson/gson/2.2.4/gson-2.2.4.jar
+urls[23] = file:/C:/Users/JAshe/.m2/repository/joda-time/joda-time/2.2/joda-time-2.2.jar
+urls[24] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-mapper-asl/1.9.11/jackson-mapper-asl-1.9.11.jar
+urls[25] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/jackson/jackson-core-asl/1.9.11/jackson-core-asl-1.9.11.jar
+urls[26] = file:/C:/Users/JAshe/.m2/repository/org/apache/commons/commons-lang3/3.2.1/commons-lang3-3.2.1.jar
+urls[27] = file:/C:/Users/JAshe/.m2/repository/com/google/code/findbugs/annotations/1.3.9/annotations-1.3.9.jar
+urls[28] = file:/C:/Users/JAshe/.m2/repository/org/apache/httpcomponents/httpcore/4.3/httpcore-4.3.jar
+urls[29] = file:/C:/Users/JAshe/.m2/repository/com/google/guava/guava/15.0/guava-15.0.jar
+urls[30] = file:/C:/Users/JAshe/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+urls[31] = file:/C:/Users/JAshe/.m2/repository/commons-io/commons-io/2.4/commons-io-2.4.jar
+urls[32] = file:/C:/Users/JAshe/.m2/repository/org/slf4j/slf4j-log4j12/1.7.5/slf4j-log4j12-1.7.5.jar
+urls[33] = file:/C:/Users/JAshe/.m2/repository/log4j/log4j/1.2.17/log4j-1.2.17.jar
+urls[34] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-api/3.2/maven-plugin-tools-api-3.2.jar
+urls[35] = file:/C:/Users/JAshe/.m2/repository/backport-util-concurrent/backport-util-concurrent/3.1/backport-util-concurrent-3.1.jar
+urls[36] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-interpolation/1.11/plexus-interpolation-1.11.jar
+urls[37] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-utils/3.0/plexus-utils-3.0.jar
+urls[38] = file:/C:/Users/JAshe/.m2/repository/junit/junit/3.8.1/junit-3.8.1.jar
+urls[39] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-tools-annotations/3.2/maven-plugin-tools-annotations-3.2.jar
+urls[40] = file:/C:/Users/JAshe/.m2/repository/org/apache/maven/plugin-tools/maven-plugin-annotations/3.2/maven-plugin-annotations-3.2.jar
+urls[41] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-component-annotations/1.5.5/plexus-component-annotations-1.5.5.jar
+urls[42] = file:/C:/Users/JAshe/.m2/repository/asm/asm/3.3.1/asm-3.3.1.jar
+urls[43] = file:/C:/Users/JAshe/.m2/repository/asm/asm-commons/3.3.1/asm-commons-3.3.1.jar
+urls[44] = file:/C:/Users/JAshe/.m2/repository/asm/asm-tree/3.3.1/asm-tree-3.3.1.jar
+urls[45] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-archiver/2.1.1/plexus-archiver-2.1.1.jar
+urls[46] = file:/C:/Users/JAshe/.m2/repository/org/codehaus/plexus/plexus-io/2.0.3/plexus-io-2.0.3.jar
+urls[47] = file:/C:/Users/JAshe/.m2/repository/com/thoughtworks/qdox/qdox/1.12.1/qdox-1.12.1.jar
+Number of foreign imports: 1
+import: Entry[import  from realm ClassRealm[maven.api, parent: null]]
+
+-----------------------------------------------------
+
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:180)
+	... 20 more
+Caused by: java.lang.NoSuchMethodError: org.jsonschema2pojo.SchemaMapper.generate(Lcom/sun/codemodel/JCodeModel;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)Lcom/sun/codemodel/JType;
+	at org.raml.jaxrs.codegen.core.Context.generateClassFromJsonSchema(Context.java:308)
+	at org.raml.jaxrs.codegen.core.Types.getSchemaClass(Types.java:169)
+	at org.raml.jaxrs.codegen.core.Types.getResponseEntityClass(Types.java:107)
+	at org.raml.jaxrs.codegen.core.Generator.createResponseBuilderInResourceMethodReturnType(Generator.java:367)
+	at org.raml.jaxrs.codegen.core.Generator.createResponseBuilderInResourceMethodReturnType(Generator.java:280)
+	at org.raml.jaxrs.codegen.core.Generator.createResourceMethodReturnType(Generator.java:256)
+	at org.raml.jaxrs.codegen.core.Generator.getResourceMethodReturnType(Generator.java:238)
+	at org.raml.jaxrs.codegen.core.Generator.addResourceMethod(Generator.java:204)
+	at org.raml.jaxrs.codegen.core.Generator.addResourceMethods(Generator.java:190)
+	at org.raml.jaxrs.codegen.core.Generator.addResourceMethods(Generator.java:160)
+	at org.raml.jaxrs.codegen.core.Generator.createResourceInterface(Generator.java:149)
+	at org.raml.jaxrs.codegen.core.Generator.run(Generator.java:128)
+	at org.raml.jaxrs.codegen.core.Generator.run(Generator.java:81)
+	at org.raml.jaxrs.codegen.maven.RamlJaxrsCodegenMojo.execute(RamlJaxrsCodegenMojo.java:167)
+	at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo(DefaultBuildPluginManager.java:133)
+	... 20 more
+[ERROR] 
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/PluginContainerException
+[ERROR] 
+[ERROR] After correcting the problems, you can resume the build with the command
+[ERROR]   mvn <goals> -rf :raml-jaxrs-jersey-example

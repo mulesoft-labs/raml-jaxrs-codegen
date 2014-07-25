@@ -24,34 +24,37 @@ import org.jsonschema2pojo.AnnotationStyle;
 import org.jsonschema2pojo.DefaultGenerationConfig;
 import org.jsonschema2pojo.GenerationConfig;
 
-public class Configuration
-{
-    public enum JaxrsVersion
-    {
+/**
+ * Configuration information associated with creating java classes
+ * @author JAshe
+ */
+public class Configuration {
+
+    /**
+     * defines JAXRS version capabilities
+     */
+    public enum JaxrsVersion {
+
         JAXRS_1_1("1.1"), JAXRS_2_0("2.0");
 
         private final String alias;
 
-        private JaxrsVersion(final String alias)
-        {
+        private JaxrsVersion(final String alias) {
             this.alias = alias;
         }
 
-        public static JaxrsVersion fromAlias(final String alias)
-        {
+        public static JaxrsVersion fromAlias(final String alias) {
             final List<String> supportedAliases = new ArrayList<String>();
 
-            for (final JaxrsVersion jaxrsVersion : JaxrsVersion.values())
-            {
-                if (jaxrsVersion.alias.equals(alias))
-                {
+            for (final JaxrsVersion jaxrsVersion : JaxrsVersion.values()) {
+                if (jaxrsVersion.alias.equals(alias)) {
                     return jaxrsVersion;
                 }
                 supportedAliases.add(jaxrsVersion.alias);
             }
 
             throw new IllegalArgumentException(alias + " is not a supported JAX-RS version ("
-                                               + StringUtils.join(supportedAliases, ',') + ")");
+                    + StringUtils.join(supportedAliases, ',') + ")");
         }
     };
 
@@ -60,90 +63,82 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
-
-    public GenerationConfig createJsonSchemaGenerationConfig()
-    {
-        return new DefaultGenerationConfig()
-        {
+    private File schemaLocation;
+    
+    public GenerationConfig createJsonSchemaGenerationConfig() {
+        return new DefaultGenerationConfig() {
             @Override
-            public AnnotationStyle getAnnotationStyle()
-            {
+            public AnnotationStyle getAnnotationStyle() {
                 return super.getAnnotationStyle();
             }
 
             @Override
-            public boolean isIncludeJsr303Annotations()
-            {
+            public boolean isIncludeJsr303Annotations() {
                 return useJsr303Annotations;
             }
 
             @Override
-            public boolean isGenerateBuilders()
-            {
+            public boolean isGenerateBuilders() {
                 return true;
             }
 
             @Override
-            public boolean isIncludeHashcodeAndEquals()
-            {
+            public boolean isIncludeHashcodeAndEquals() {
                 return false;
             }
 
             @Override
-            public boolean isIncludeToString()
-            {
+            public boolean isIncludeToString() {
                 return false;
             }
         };
     }
 
-    public File getOutputDirectory()
-    {
+    public File getOutputDirectory() {
         return outputDirectory;
     }
 
-    public void setOutputDirectory(final File outputDirectory)
-    {
+    public void setOutputDirectory(final File outputDirectory) {
         this.outputDirectory = outputDirectory;
     }
 
-    public JaxrsVersion getJaxrsVersion()
-    {
+    public JaxrsVersion getJaxrsVersion() {
         return jaxrsVersion;
     }
 
-    public void setJaxrsVersion(final JaxrsVersion jaxrsVersion)
-    {
+    public void setJaxrsVersion(final JaxrsVersion jaxrsVersion) {
         this.jaxrsVersion = jaxrsVersion;
     }
 
-    public String getBasePackageName()
-    {
+    public String getBasePackageName() {
         return basePackageName;
     }
 
-    public void setBasePackageName(final String basePackageName)
-    {
+    public void setBasePackageName(final String basePackageName) {
         this.basePackageName = basePackageName;
     }
 
-    public boolean isUseJsr303Annotations()
-    {
+    public boolean isUseJsr303Annotations() {
         return useJsr303Annotations;
     }
 
-    public void setUseJsr303Annotations(final boolean useJsr303Annotations)
-    {
+    public void setUseJsr303Annotations(final boolean useJsr303Annotations) {
         this.useJsr303Annotations = useJsr303Annotations;
     }
 
-    public AnnotationStyle getJsonMapper()
-    {
+    public AnnotationStyle getJsonMapper() {
         return jsonMapper;
     }
 
-    public void setJsonMapper(final AnnotationStyle jsonMapper)
-    {
+    public void setJsonMapper(final AnnotationStyle jsonMapper) {
         this.jsonMapper = jsonMapper;
+    }
+    
+    public File getSchemaLocation() {
+        return schemaLocation;
+    }
+    
+    public void setSchemaLocation(File dir) {
+        schemaLocation = dir;
     }
 }

@@ -30,82 +30,81 @@ import org.raml.model.Action;
 import org.raml.model.MimeType;
 import org.raml.model.Resource;
 
-public class Names
-{
+/**
+ * names classes and methods
+ * @author JAshe
+ */
+public final class Names {
+
     public static final String GENERIC_PAYLOAD_ARGUMENT_NAME = "entity";
     public static final String MULTIPLE_RESPONSE_HEADERS_ARGUMENT_NAME = "headers";
     public static final String EXAMPLE_PREFIX = " e.g. ";
 
-    public static String buildResourceInterfaceName(final Resource resource)
-    {
+    public static String buildResourceInterfaceName(final Resource resource) {
         final String resourceInterfaceName = buildJavaFriendlyName(defaultIfBlank(resource.getDisplayName(),
-            resource.getRelativeUri()));
+                resource.getRelativeUri()));
 
         return isBlank(resourceInterfaceName) ? "Root" : resourceInterfaceName;
     }
 
-    public static String buildVariableName(final String source)
-    {
+    public static String buildVariableName(final String source) {
         final String name = uncapitalize(buildJavaFriendlyName(source));
 
         return Constants.JAVA_KEYWORDS.contains(name) ? "$" + name : name;
     }
 
-    public static String buildJavaFriendlyName(final String source)
-    {
+    public static String buildJavaFriendlyName(final String source) {
         final String baseName = source.replaceAll("[\\W_]", " ");
 
         String friendlyName = capitalize(baseName).replaceAll("[\\W_]", "");
 
-        if (isDigits(left(friendlyName, 1)))
-        {
+        if (isDigits(left(friendlyName, 1))) {
             friendlyName = "_" + friendlyName;
         }
 
         return friendlyName;
     }
 
-    public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType)
-    {
+    public static String buildResourceMethodName(final Action action, final MimeType bodyMimeType) {
         final String methodBaseName = buildJavaFriendlyName(action.getResource()
-            .getUri()
-            .replace("{", " By "));
+                .getUri()
+                .replace("{", " By "));
 
         return action.getType().toString().toLowerCase() + buildMimeTypeInfix(bodyMimeType) + methodBaseName;
     }
 
-    public static String buildResponseMethodName(final int statusCode, final MimeType mimeType)
-    {
+    public static String buildResponseMethodName(final int statusCode, final MimeType mimeType) {
         final String status = EnglishReasonPhraseCatalog.INSTANCE.getReason(statusCode, DEFAULT_LOCALE);
         return uncapitalize(getShortMimeType(mimeType)
-                            + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
+                + buildJavaFriendlyName(defaultIfBlank(status, "_" + statusCode)));
     }
 
-    public static String buildNestedSchemaName(final MimeType mimeType)
-    {
+    public static String buildNestedSchemaName(final MimeType mimeType) {
         // TODO improve naming strategy for nested schemas
         return getShortMimeType(mimeType)
-               + (isBlank(mimeType.getSchema()) ? mimeType.hashCode() : mimeType.getSchema().hashCode());
+                + (isBlank(mimeType.getSchema()) ? mimeType.hashCode() : mimeType.getSchema().hashCode());
     }
 
-    private static String buildMimeTypeInfix(final MimeType bodyMimeType)
-    {
+    private static String buildMimeTypeInfix(final MimeType bodyMimeType) {
         return bodyMimeType != null ? buildJavaFriendlyName(getShortMimeType(bodyMimeType)) : "";
     }
 
-    public static String getShortMimeType(final MimeType mimeType)
-    {
-        if (mimeType == null)
-        {
-            return "";
+    public static String getShortMimeType(final MimeType mimeType) {
+        if (mimeType == null) {
+            return "Response";
         }
 
-        return remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
-            "x-www-");
+        String result = mimeType.getType();
+        
+        if (result.equals("*")) {
+            result = "all";
+        }
+        
+        return remove(StringUtils.substringAfter(result.toLowerCase(DEFAULT_LOCALE), "/"),
+                "x-www-");
     }
 
-    private Names()
-    {
+    private Names() {
         throw new UnsupportedOperationException();
     }
 }

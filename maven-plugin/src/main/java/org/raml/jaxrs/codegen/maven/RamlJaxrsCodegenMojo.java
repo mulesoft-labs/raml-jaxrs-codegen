@@ -53,6 +53,11 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     private boolean skip;
 
     /**
+     * Location that schemas are contained in
+     */
+    @Parameter(property="schemaLocation", defaultValue = "./schema/")
+    private String schemaLocation;
+    /**
      * Target directory for generated Java source files.
      */
     @Parameter(property = "outputDirectory", defaultValue = "${project.build.directory}/generated-sources/raml-jaxrs")
@@ -164,6 +169,8 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             {
                 getLog().info("Generating Java classes from: " + ramlFile);
                 currentSourcePath = ramlFile;
+                File schemaDir = new File(ramlFile.getParentFile(), schemaLocation);
+                configuration.setSchemaLocation(schemaDir);
                 generator.run(ramlFile.toURI().toURL(), configuration);
             }
         }
