@@ -23,6 +23,7 @@ import static org.junit.Assert.assertThat;
 import static org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion.JAXRS_1_1;
 import static org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion.JAXRS_2_0;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -93,6 +94,8 @@ public class GeneratorTestCase
         configuration.setOutputDirectory(codegenOutputFolder.getRoot());
 
         configuration.setBasePackageName(TEST_BASE_PACKAGE);
+        String dirPath = getClass().getResource("/org/raml").getPath();
+        configuration.setSourceDirectory( new File(dirPath) );
         generatedSources.addAll(new Generator().run(
             new InputStreamReader(getClass().getResourceAsStream("/org/raml/full-config-with-patch.yaml")),
             configuration));
