@@ -1,11 +1,10 @@
 *~
 *.iml
-.classpath
 .idea
-.project
-.settings
 .springBeans
 target
 Ddo*
 ddo*
 nogit/
+/.settings
+/.project
