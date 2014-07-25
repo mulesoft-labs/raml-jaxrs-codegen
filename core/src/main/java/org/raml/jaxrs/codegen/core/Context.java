@@ -69,7 +69,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author JAshe
  */
-class Context {
+public class Context {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Context.class);
 
@@ -179,11 +179,7 @@ class Context {
         final File supportPackageOutputDirectory = new File(configuration.getOutputDirectory(),
                 getSupportPackage().replace('.', File.separatorChar));
 
-        boolean mkdirsSuccess = supportPackageOutputDirectory.mkdirs();
         FileUtils.forceMkdir(supportPackageOutputDirectory);
-//        if (!mkdirsSuccess) {
-//            throw new IOException();
-//        }
 
         final File sourceOutputFile = new File(supportPackageOutputDirectory, "ResponseWrapper.java");
         final String source = template.replace("${codegen.support.package}", getSupportPackage());

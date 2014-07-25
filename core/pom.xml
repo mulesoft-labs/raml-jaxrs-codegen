@@ -124,21 +124,5 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.cvent.auth-service</groupId>
-            <artifactId>auth-service-core</artifactId>
-            <version>2.6</version>
-            <type>jar</type>
-            <exclusions>
-                <exclusion>
-                    <groupId>com.cvent</groupId>
-                    <artifactId>dropwizard-common</artifactId>
-                </exclusion>
-                <exclusion>
-                    <groupId>io.dropwizard</groupId>
-                    <artifactId>dropwizard-auth</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
     </dependencies>
 </project>

@@ -15,9 +15,6 @@
  */
 package org.raml.jaxrs.codegen.core;
 
-import com.cvent.auth.AuthenticatorMethod;
-import com.cvent.auth.Authority;
-import com.cvent.auth.GrantedAPIKey;
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
 import com.sun.codemodel.JAnnotationArrayMember;
@@ -100,8 +97,8 @@ import org.slf4j.LoggerFactory;
  */
 public class Generator {
 
-    private static final String DEFAULT_ANNOTATION_PARAMETER = "value";
-    private static final String GENERIC_RESPONSE_METHOD_NAME = "respond";
+    protected static final String DEFAULT_ANNOTATION_PARAMETER = "value";
+    protected static final String GENERIC_RESPONSE_METHOD_NAME = "respond";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
@@ -558,43 +555,6 @@ public class Generator {
 
         argumentVariable.annotate(annotationClass).param(DEFAULT_ANNOTATION_PARAMETER, name);
 
-        if (parameter.getDefaultValue() != null) {
-            argumentVariable.annotate(DefaultValue.class).param(DEFAULT_ANNOTATION_PARAMETER,
-                    parameter.getDefaultValue());
-        }
-
-        if (context.getConfiguration().isUseJsr303Annotations()) {
-            addJsr303Annotations(parameter, argumentVariable);
-        }
-
-        addParameterJavaDoc(parameter, argumentVariable.name(), javadoc);
-    }
-
-    protected void addAuthParameter(final String name,
-            final AbstractParam parameter,
-            final List<String> authMethods,
-            final JMethod method,
-            final JDocComment javadoc) throws Exception {
-        final String argumentName = Names.buildVariableName(name);
-
-        final JVar argumentVariable = method.param(context.getGeneratorType(GrantedAPIKey.class),
-                argumentName);
-
-        JAnnotationArrayMember array = argumentVariable.annotate(Authority.class).paramArray("methods");
-        for (String mixIn : authMethods) {
-            String authMethod = StringUtils.substringAfter(mixIn, "secured_");
-            if (authMethod.equals("BEARER")) {
-                array.param(AuthenticatorMethod.BEARER);
-            } else if (authMethod.equals("API_KEY")) {
-                array.param(AuthenticatorMethod.API_KEY);
-            } else if (authMethod.equals("SECURE")) {
-                array.param(AuthenticatorMethod.SECURE);
-            } else if (authMethod.equals("LDAP")) {
-                array.param(AuthenticatorMethod.LDAP);
-            } else {
-                array.param("YOURAUTHCLASS." + authMethod);
-            }
-        }
         if (parameter.getDefaultValue() != null) {
             argumentVariable.annotate(DefaultValue.class).param(DEFAULT_ANNOTATION_PARAMETER,
                     parameter.getDefaultValue());
