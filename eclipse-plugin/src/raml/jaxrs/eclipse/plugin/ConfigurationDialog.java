@@ -50,7 +50,7 @@ public class ConfigurationDialog extends TitleAreaDialog {
 		
 		createTextField(hBox, "Base package name", this.uiConfig.basePackageName);
 		
-		createResourceSelectionGroup(hBox,"Raml file", this.uiConfig.ramlFile, "file");
+		createResourceSelectionGroup(hBox,"RAML file", this.uiConfig.ramlFile, "file");
 		createResourceSelectionGroup(hBox,"Source folder", this.uiConfig.srcFolder, "folder");
 		createResourceSelectionGroup(hBox,"Destination folder", this.uiConfig.dstFolder, "folder");
 		
