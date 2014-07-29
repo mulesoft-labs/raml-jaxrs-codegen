@@ -33,6 +33,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -76,6 +78,7 @@ import org.raml.model.parameter.UriParameter;
 import org.raml.parser.loader.ClassPathResourceLoader;
 import org.raml.parser.loader.CompositeResourceLoader;
 import org.raml.parser.loader.FileResourceLoader;
+import org.raml.parser.loader.ResourceLoader;
 import org.raml.parser.loader.UrlResourceLoader;
 import org.raml.parser.rule.ValidationResult;
 import org.raml.parser.visitor.RamlDocumentBuilder;
@@ -110,22 +113,15 @@ public class Generator
     public Set<String> run(final Reader ramlReader, final Configuration configuration) throws Exception
     {
         final String ramlBuffer = IOUtils.toString(ramlReader);
-        String sourceDirAbsPath = configuration.getSourceDirectory().getAbsolutePath();
         
-        final List<ValidationResult> results = RamlValidationService.createDefault(new CompositeResourceLoader(
-                    new UrlResourceLoader(),
-                    new ClassPathResourceLoader(),
-                    new FileResourceLoader(sourceDirAbsPath))
-            ).validate(ramlBuffer, "");
-                  
-
+        ResourceLoader[] loaderArray = prepareResourceLoaders(configuration);
+        
+        final List<ValidationResult> results = RamlValidationService.createDefault(
+                new CompositeResourceLoader(loaderArray)).validate(ramlBuffer, "");
         if (ValidationResult.areValid(results))
         {
             return run(new RamlDocumentBuilder(new CompositeResourceLoader(
-                        new UrlResourceLoader(),
-                        new ClassPathResourceLoader(),
-                        new FileResourceLoader(sourceDirAbsPath))
-                ).build(ramlBuffer, ""), configuration);            
+                     loaderArray)).build(ramlBuffer, ""), configuration);
         }
         else
         {
@@ -142,6 +138,20 @@ public class Generator
             throw new IllegalArgumentException("Invalid RAML definition:\n" + join(validationErrors, "\n"));
         }
     }
+
+	private ResourceLoader[] prepareResourceLoaders(final Configuration configuration)
+	{
+		String sourceDirAbsPath = configuration.getSourceDirectory().getAbsolutePath();        
+        ArrayList<ResourceLoader> loaderList = new ArrayList<ResourceLoader>(Arrays.asList(
+        	new UrlResourceLoader(),
+            new ClassPathResourceLoader()
+        )); 
+        if(sourceDirAbsPath!=null){
+            loaderList.add(new FileResourceLoader(sourceDirAbsPath));
+        }
+        ResourceLoader[] loaderArray = loaderList.toArray(new ResourceLoader[loaderList.size()]);
+        return loaderArray;
+	}
 
     private void validate(final Configuration configuration)
     {

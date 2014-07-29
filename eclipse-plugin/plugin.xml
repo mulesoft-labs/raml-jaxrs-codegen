@@ -7,7 +7,7 @@
         
           <command
               commandId="raml-jaxrs-eclipse-plugin.generate"
-              label="RANL to JAXRS"
+              label="RAML to JAXRS"
               style="push">
             <!-- icon="icons/new_rest_wizard.gif" -->  
                   <visibleWhen>
