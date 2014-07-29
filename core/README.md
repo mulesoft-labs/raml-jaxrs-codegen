@@ -12,6 +12,7 @@ Example:
 
     Configuration configuration = new Configuration();
     configuration.setOutputDirectory(outputDirectory);
+    configuration.setSourceDirectory(inputDirectory)
     configuration.setBasePackageName("org.raml.jaxrs.test");
 
     InputStreamReader ramlReader = new InputStreamReader(getClass().getResourceAsStream("/org/raml/full-config-with-patch.yaml"));
