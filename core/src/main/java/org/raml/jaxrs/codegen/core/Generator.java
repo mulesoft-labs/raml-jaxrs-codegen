@@ -141,12 +141,13 @@ public class Generator
 
 	private ResourceLoader[] prepareResourceLoaders(final Configuration configuration)
 	{
-		String sourceDirAbsPath = configuration.getSourceDirectory().getAbsolutePath();        
+		File sourceDirectory = configuration.getSourceDirectory();		        
         ArrayList<ResourceLoader> loaderList = new ArrayList<ResourceLoader>(Arrays.asList(
         	new UrlResourceLoader(),
             new ClassPathResourceLoader()
         )); 
-        if(sourceDirAbsPath!=null){
+        if(sourceDirectory!=null){
+        	String sourceDirAbsPath = sourceDirectory.getAbsolutePath();
             loaderList.add(new FileResourceLoader(sourceDirAbsPath));
         }
         ResourceLoader[] loaderArray = loaderList.toArray(new ResourceLoader[loaderList.size()]);
