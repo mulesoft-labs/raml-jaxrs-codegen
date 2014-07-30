@@ -30,6 +30,7 @@ import static org.raml.jaxrs.codegen.core.Names.MULTIPLE_RESPONSE_HEADERS_ARGUME
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.annotation.Annotation;
 import java.math.BigDecimal;
@@ -256,6 +257,7 @@ public class Generator
                                    final boolean addBodyMimeTypeInMethodName,
                                    final Collection<MimeType> uniqueResponseMimeTypes) throws Exception
     {
+    	// bodyMimeType: {type='application/octet-stream'}
         final String methodName = Names.buildResourceMethodName(action,
             addBodyMimeTypeInMethodName ? bodyMimeType : null);
 
