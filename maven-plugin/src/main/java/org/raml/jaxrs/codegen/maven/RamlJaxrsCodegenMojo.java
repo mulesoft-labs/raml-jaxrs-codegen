@@ -13,6 +13,7 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+
 package org.raml.jaxrs.codegen.maven;
 
 import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_RUNTIME;
@@ -23,6 +24,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.maven.plugin.AbstractMojo;
@@ -102,12 +104,19 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
-    
+
     /**
-    * Throw exception on Resource Method
-    */
-    //@Parameter(property = "methodThrowException")
-    //private String methodThrowException;
+     * Optional extra configuration provided to the JSON mapper. Supported keys are:
+     * "generateBuilders", "includeHashcodeAndEquals", "includeToString", "useLongIntegers"
+     */
+    @Parameter(property = "jsonMapperConfiguration")
+    private Map<String, String> jsonMapperConfiguration;
+
+    /**
+     * Throw exception on Resource Method
+     */
+    // @Parameter(property = "methodThrowException")
+    // private String methodThrowException;
 
     @Override
     public void execute() throws MojoExecutionException, MojoFailureException
@@ -153,12 +162,12 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
+            configuration.setJsonMapperConfiguration(jsonMapperConfiguration);
             configuration.setSourceDirectory(sourceDirectory);
             /*
-            if (methodThrowException != null) {
-                configuration.setMethodThrowException(Class.forName(methodThrowException));
-            }
-            */
+             * if (methodThrowException != null) {
+             * configuration.setMethodThrowException(Class.forName(methodThrowException)); }
+             */
         }
         catch (final Exception e)
         {
@@ -188,13 +197,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 
     private Collection<File> getRamlFiles() throws MojoExecutionException
     {
-				if (sourcePaths != null && sourcePaths.length > 0 )
-				{
+        if (sourcePaths != null && sourcePaths.length > 0)
+        {
             final List<File> sourceFiles = Arrays.asList(sourcePaths);
             getLog().info("Using RAML files: " + sourceFiles);
             return sourceFiles;
-				}
-				else
+        }
+        else
         {
             if (!sourceDirectory.isDirectory())
             {

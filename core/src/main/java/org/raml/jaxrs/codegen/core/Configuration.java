@@ -16,9 +16,13 @@
 
 package org.raml.jaxrs.codegen.core;
 
+import static org.apache.commons.lang3.BooleanUtils.toBooleanDefaultIfNull;
+import static org.apache.commons.lang3.BooleanUtils.toBooleanObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang.StringUtils;
 import org.jsonschema2pojo.AnnotationStyle;
@@ -61,6 +65,7 @@ public class Configuration
     private String basePackageName;
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
+    private Map<String, String> jsonMapperConfiguration;
     private File sourceDirectory;
     private Class<? extends Exception> methodThrowException = Exception.class;
 
@@ -83,19 +88,36 @@ public class Configuration
             @Override
             public boolean isGenerateBuilders()
             {
-                return true;
+                return getConfiguredValue("generateBuilders", true);
             }
 
             @Override
             public boolean isIncludeHashcodeAndEquals()
             {
-                return false;
+                return getConfiguredValue("includeHashcodeAndEquals", false);
             }
 
             @Override
             public boolean isIncludeToString()
             {
-                return false;
+                return getConfiguredValue("includeToString", false);
+            }
+
+            @Override
+            public boolean isUseLongIntegers()
+            {
+                return getConfiguredValue("useLongIntegers", false);
+            }
+
+            private boolean getConfiguredValue(final String key, final boolean def)
+            {
+                if (jsonMapperConfiguration == null || jsonMapperConfiguration.isEmpty())
+                {
+                    return def;
+                }
+
+                final String val = jsonMapperConfiguration.get(key);
+                return toBooleanDefaultIfNull(toBooleanObject(val), def);
             }
         };
     }
@@ -148,6 +170,11 @@ public class Configuration
     public void setJsonMapper(final AnnotationStyle jsonMapper)
     {
         this.jsonMapper = jsonMapper;
+    }
+
+    public void setJsonMapperConfiguration(final Map<String, String> jsonMapperConfiguration)
+    {
+        this.jsonMapperConfiguration = jsonMapperConfiguration;
     }
 
     public Class<? extends Exception> getMethodThrowException()

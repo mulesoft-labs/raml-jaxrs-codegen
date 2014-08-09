@@ -6,5 +6,6 @@ target
 Ddo*
 ddo*
 nogit/
-/.settings
-/.project
+.settings
+.project
+.classpath
