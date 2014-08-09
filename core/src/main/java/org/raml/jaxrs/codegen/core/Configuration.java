@@ -13,6 +13,7 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
+
 package org.raml.jaxrs.codegen.core;
 
 import java.io.File;
@@ -61,7 +62,7 @@ public class Configuration
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
     private File sourceDirectory;
-    private Class methodThrowException = Exception.class;    
+    private Class<? extends Exception> methodThrowException = Exception.class;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -148,20 +149,24 @@ public class Configuration
     {
         this.jsonMapper = jsonMapper;
     }
-    
-    public Class getMethodThrowException() {
+
+    public Class<? extends Exception> getMethodThrowException()
+    {
         return methodThrowException;
     }
-    
-    public void setMethodThrowException(Class methodThrowException) {
+
+    public void setMethodThrowException(final Class<? extends Exception> methodThrowException)
+    {
         this.methodThrowException = methodThrowException;
     }
 
-    public File getSourceDirectory() {
+    public File getSourceDirectory()
+    {
         return sourceDirectory;
     }
 
-    public void setSourceDirectory(File sourceDirectory) {
+    public void setSourceDirectory(final File sourceDirectory)
+    {
         this.sourceDirectory = sourceDirectory;
     }
 }
