@@ -47,7 +47,7 @@ import com.sun.codemodel.JVar;
 public class HateoasVisitor extends TemplateResourceVisitor {
 
   private final static String PACKAGE_NAME = "link";
-  private final static String LINK_BUILDER_NAME = "LinkBuilder";
+  private final static String LINK_BUILDER_NAME = "LinkHelper";
 
   /*
    * (non-Javadoc)
@@ -76,14 +76,14 @@ public class HateoasVisitor extends TemplateResourceVisitor {
       JVar argument = jMethod.param(argumentType, name);
 
       switch (parameter.getArgumentType().getType()) {
-        case QUERY:
-          jMethod.body().invoke(JExpr.ref("queryArgs"), "put").
-          arg(JExpr.lit(name)).arg(argument);
-          break;
-        default:
-          jMethod.body().invoke(JExpr.ref("pathArgs"), "put").
-          arg(JExpr.lit(name)).arg(argument);
-          break;
+      case QUERY:
+        jMethod.body().invoke(JExpr.ref("queryArgs"), "put").
+            arg(JExpr.lit(name)).arg(argument);
+        break;
+      default:
+        jMethod.body().invoke(JExpr.ref("pathArgs"), "put").
+            arg(JExpr.lit(name)).arg(argument);
+        break;
       }
 
       jMethod.body()._return(JExpr._this());
@@ -113,31 +113,24 @@ public class HateoasVisitor extends TemplateResourceVisitor {
       String resourceMethodName = responseClass.getResourceMethod().getGeneratedObject().name();
       JDefinedClass linkClass = pkg._class(getLinkBuilderName(responseClass));
       linkClass.field(
-        PRIVATE + FINAL,
-        getCodeModel().ref(Map.class).narrow(String.class, Object.class),
-        "pathArgs", JExpr._new(getCodeModel().ref(HashMap.class).narrow(String.class, Object.class)));
+          PRIVATE + FINAL,
+          getCodeModel().ref(Map.class).narrow(String.class, Object.class),
+          "pathArgs", JExpr._new(getCodeModel().ref(HashMap.class).narrow(String.class, Object.class)));
       linkClass.field(
-        PRIVATE + FINAL,
-        getCodeModel().ref(Map.class).narrow(String.class, Object.class),
-        "queryArgs", JExpr._new(getCodeModel().ref(HashMap.class).narrow(String.class, Object.class)));
+          PRIVATE + FINAL,
+          getCodeModel().ref(Map.class).narrow(String.class, Object.class),
+          "queryArgs", JExpr._new(getCodeModel().ref(HashMap.class).narrow(String.class, Object.class)));
 
-      linkClass.field(PRIVATE, String.class, "rel");
-      JMethod jMethodRel = linkClass.method(PUBLIC, linkClass, "rel");
-      jMethodRel.body().assign(JExpr._this().ref("rel"), jMethodRel.param(String.class, "rel"));
-      jMethodRel.body()._return(JExpr._this());
-
-      JClass jClassLink = getCodeModel().ref("javax.ws.rs.core.Link");
+      JClass jClassLink = getCodeModel().ref("javax.ws.rs.core.Link.Builder");
       JMethod jMethod = linkClass.method(PUBLIC, jClassLink, "build");
 
       jMethod.body()._return(
-        getCodeModel().ref(getConfiguration().getSupportPackage() + "." + LINK_BUILDER_NAME).
-        staticInvoke("start").
-        arg(JExpr.dotclass(resourceInterface.getGeneratedObject())).
-        arg(JExpr.lit(resourceMethodName)).
-        arg(JExpr.ref("queryArgs")).
-        arg(JExpr.ref("pathArgs")).
-        invoke("rel").arg(JExpr.ref("rel")).
-        invoke("build"));
+          getCodeModel().ref(getConfiguration().getSupportPackage() + "." + LINK_BUILDER_NAME).
+              staticInvoke("start").
+              arg(JExpr.dotclass(resourceInterface.getGeneratedObject())).
+              arg(JExpr.lit(resourceMethodName)).
+              arg(JExpr.ref("queryArgs")).
+              arg(JExpr.ref("pathArgs")));
     } catch (JClassAlreadyExistsException e) {
       throw new RuntimeException(e.getMessage(), e);
     }
@@ -146,7 +139,7 @@ public class HateoasVisitor extends TemplateResourceVisitor {
     try {
       String supportPackage = getConfiguration().getSupportPackage();
       String template = IOUtils.toString(getClass().getResourceAsStream(
-          "/org/raml/templates/LinkBuilder.template"));
+          "/org/raml/templates/LinkHelper.template"));
 
       File supportPackageOutputDirectory = new File(getConfiguration().getOutputDirectory(), supportPackage.replace('.', File.separatorChar));
       File sourceOutputFile = new File(supportPackageOutputDirectory, LINK_BUILDER_NAME +".java");

@@ -21,6 +21,7 @@ import static org.apache.commons.lang.StringUtils.isNotBlank;
 import static org.apache.commons.lang.StringUtils.strip;
 import static org.raml.jaxrs.codegen.core.Names.EXAMPLE_PREFIX;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -37,6 +38,11 @@ import org.raml.model.Resource;
 import org.raml.model.Response;
 import org.raml.model.parameter.AbstractParam;
 import org.raml.model.parameter.FormParameter;
+import org.raml.parser.loader.ClassPathResourceLoader;
+import org.raml.parser.loader.CompositeResourceLoader;
+import org.raml.parser.loader.FileResourceLoader;
+import org.raml.parser.loader.ResourceLoader;
+import org.raml.parser.loader.UrlResourceLoader;
 
 public class RamlHelper {
 
@@ -139,5 +145,9 @@ public class RamlHelper {
       resourceInterfaceName = resourceInterfaceName.substring(0, resourceInterfaceName.length() - resourcePostfix.length());
     }
     return resourceInterfaceName;
+  }
+
+  public static final ResourceLoader getResourceLoader() {
+    return new CompositeResourceLoader(new UrlResourceLoader(), new ClassPathResourceLoader(), new FileResourceLoader("."), new FileResourceLoader((File) null));
   }
 }

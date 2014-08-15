@@ -18,7 +18,6 @@ package org.raml.jaxrs.codegen.maven;
 import static org.apache.maven.plugins.annotations.ResolutionScope.COMPILE_PLUS_RUNTIME;
 
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
@@ -111,18 +110,29 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 	private boolean responseWrapperAsInnerClass;
 
 	/**
-	 * Extension class names separated by ";". 
+	 * Extension class names separated by ";".
 	 * Base class: org.raml.jaxrs.codegen.core.visitors.TemplateResourceVisitor.
 	 */
 	@Parameter(property = "externalVisitors")
 	private String externalVisitors;
-	
+
 	/**
 	 * Adds extensions from hateoas org.springframework.hateoas.ResourceSupport.
 	 */
 	@Parameter(property = "hateoasResourceSupport", defaultValue = "false")
 	private boolean hateoasResourceSupport;
 
+	/**
+	 * Adds postfix to all resource classes.
+	 */
+	@Parameter(property = "resourcePostfix")
+	private String resourcePostfix;
+
+	/**
+	 * Adds dates as joda.
+	 */
+	@Parameter(property = "jodaDate", defaultValue = "false")
+	private boolean jodaDate;
 
 	@Override
 	public void execute() throws MojoExecutionException, MojoFailureException
@@ -133,7 +143,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 			return;
 		}
 
-		if ((sourceDirectory == null) && (sourcePaths == null))
+		if (sourceDirectory == null && sourcePaths == null)
 		{
 			throw new MojoExecutionException("One of sourceDirectory or sourcePaths must be provided");
 		}
@@ -171,6 +181,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 				}
 			}
 
+			configuration.setJodaDate(jodaDate);
 			configuration.setBasePackageName(basePackageName);
 			configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
 			configuration.setOutputDirectory(outputDirectory);
@@ -178,6 +189,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 			configuration.setResponseWrapperAsInnerClass(responseWrapperAsInnerClass);
 			configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
 			configuration.setHateoasResourceSupport(hateoasResourceSupport);
+			configuration.setResourcePostfix(resourcePostfix);
 		}
 		catch (final Exception e)
 		{
@@ -192,11 +204,11 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
 		{
 			final Generator generator = new Generator();
 
-			for (final File ramlFile : getRamlFiles())
+			for(final File ramlFile : getRamlFiles())
 			{
 				getLog().info("Generating Java classes from: " + ramlFile);
 				currentSourcePath = ramlFile;
-				generator.run(new FileReader(ramlFile), configuration);
+				generator.run(ramlFile, configuration);
 			}
 		}
 		catch (final Exception e)

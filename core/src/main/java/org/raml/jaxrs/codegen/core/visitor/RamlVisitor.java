@@ -16,8 +16,9 @@
 
 package org.raml.jaxrs.codegen.core.visitor;
 
+
 public interface RamlVisitor {
 	RamlVisitor start();
-	RamlVisitor visit(String ramlAsString);
+  RamlVisitor visit(String ramlAsString, String resourceLocation);
 	RamlVisitor end();
 }

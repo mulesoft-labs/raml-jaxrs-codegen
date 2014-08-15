@@ -18,7 +18,6 @@ package org.raml.jaxrs.codegen.core.visitors;
 
 import static org.raml.jaxrs.codegen.core.Constants.RESPONSE_HEADER_WILDCARD_SYMBOL;
 
-import java.io.File;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map.Entry;
@@ -74,8 +73,9 @@ public class GenericRamlVisitor implements RamlVisitor {
    * @see org.raml.jaxrs.codegen.core.visitor.RamlVisitor#visit(java.lang.String)
    */
   @Override
-  public RamlVisitor visit(String ramlAsString) {
-    Raml raml = new RamlDocumentBuilder().build(ramlAsString, new File("").getPath());
+  public RamlVisitor visit(String ramlDefinition, String resourceLocation) {
+    Raml raml = new RamlDocumentBuilder(RamlHelper.getResourceLoader()).
+        build(ramlDefinition, resourceLocation);
 
     // Create consolidated schemas
     for(Entry<String, String> nameAndSchema : raml.getConsolidatedSchemas().entrySet()) {
@@ -97,6 +97,8 @@ public class GenericRamlVisitor implements RamlVisitor {
     for(ResourceMethod method : ramlRepository.find(ResourceMethod.class)) {
 
       if(!RamlHelper.getUniqueResponseMimeTypes(method.getAction()).isEmpty()) {
+        ramlRepository.save(new ResponseClass(method));
+      } else if(!method.getAction().getResponses().isEmpty()) {
         ramlRepository.save(new ResponseClass(method));
       }
     }

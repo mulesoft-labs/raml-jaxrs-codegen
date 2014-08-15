@@ -99,6 +99,7 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
   private final Set<String> schemaEntities = new HashSet<String>();
   private final Map<String, Set<String>> resourcesMethods = new HashMap<String, Set<String>>();
   private final Map<String, JClass> schemaClasses = new HashMap<String, JClass>();
+  private final Map<String, JDefinedClass> resourceEnums = new HashMap<String, JDefinedClass>();
 
   /**
    * Constants.
@@ -507,9 +508,15 @@ public class CodeModelVisitor extends TemplateResourceVisitor {
           String argumentName = Names.buildVariableName(methodArgumentType.getArgument().getHeaderName());
           argumentName = capitalize(argumentName);
           JDefinedClass resourceInterface = methodArgumentType.getArgument().getResourceMethod().getResourceInterface().getGeneratedObject();
-          JDefinedClass enumType = resourceInterface._enum(argumentName);
-          for (String value : param.getEnumeration()) {
-            enumType.enumConstant(value.toUpperCase());
+
+          String enumQualifiedName = resourceInterface.fullName() + "." + argumentName;
+          JDefinedClass enumType = resourceEnums.get(enumQualifiedName);
+          if(enumType == null) {
+            enumType = resourceInterface._enum(argumentName);
+            resourceEnums.put(enumQualifiedName, enumType);
+            for(String value : param.getEnumeration()) {
+              enumType.enumConstant(value.toUpperCase());
+            }
           }
           codegenType = enumType;
         } else if (param.isRepeat()) {

@@ -18,6 +18,7 @@ package org.raml.jaxrs.codegen.core;
 import static org.apache.commons.lang.StringUtils.join;
 
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
@@ -47,6 +48,7 @@ import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethod;
 import org.raml.jaxrs.codegen.core.dataobjects.ResponseClassMethodArgument;
 import org.raml.jaxrs.codegen.core.repositories.RamlRepository;
 import org.raml.jaxrs.codegen.core.repositories.SchemaRepository;
+import org.raml.jaxrs.codegen.core.support.RamlHelper;
 import org.raml.jaxrs.codegen.core.visitor.RamlVisitor;
 import org.raml.jaxrs.codegen.core.visitor.ResourceVisitor;
 import org.raml.jaxrs.codegen.core.visitors.VisitorFactory;
@@ -63,18 +65,27 @@ public class Generator {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Generator.class);
 
-
-	public Set<String> run(final Reader ramlReader, final Configuration configuration) throws Exception {
-
-		final String ramlBuffer = IOUtils.toString(ramlReader);
-
-		validateRaml(ramlBuffer);
+	public Set<String> run(Reader reader, final Configuration configuration) throws Exception {
+		String ramlDefinition = IOUtils.toString(reader);
+		validateRaml(ramlDefinition, null);
 		validateConfiguration(configuration);
 
-		return generate(configuration, ramlBuffer);
+		return generate(configuration, ramlDefinition, "");
 	}
 
-	public Set<String> generate(Configuration configuration, String ramlAsString) throws IOException {
+	public Set<String> run(File file, final Configuration configuration) throws Exception {
+
+		FileReader fileReader = new FileReader(file);
+		String ramlDefinition = IOUtils.toString(fileReader);
+		String resourceLocation = file.getPath().replace("\\", "/");
+
+		validateRaml(ramlDefinition, resourceLocation);
+		validateConfiguration(configuration);
+
+		return generate(configuration, ramlDefinition, resourceLocation);
+	}
+
+	public Set<String> generate(Configuration configuration, String ramlAsString, String resourceLocation) throws IOException {
 
 		GenerationConfig jsonSchemaGenerationConfig = configuration.createJsonSchemaGenerationConfig();
 		SchemaMapper schemaMapper = new SchemaMapper(new RuleFactory(jsonSchemaGenerationConfig,
@@ -88,7 +99,7 @@ public class Generator {
 		for(RamlVisitor ramlVisitor : VisitorFactory.getInstance().createRamlVisitors(ramlRepository)) {
 			ramlVisitor.
 			start().
-			visit(ramlAsString).
+			visit(ramlAsString, resourceLocation).
 			end();
 		}
 
@@ -130,7 +141,7 @@ public class Generator {
 			// Response class method arguments
 			for(ResponseClassMethodArgument visitable : ramlRepository.find(ResponseClassMethodArgument.class)) {
 				visitor.visit(visitable);
-			}				
+			}
 
 			// Resource methods
 			for(ResourceMethod visitable : ramlRepository.find(ResourceMethod.class)) {
@@ -156,30 +167,42 @@ public class Generator {
 		generatedFiles.addAll(Arrays.asList(StringUtils.split(baos.toString())));
 
 		schemaRepository.deleteGlobal();
-		
+
 		Set<String> result = new HashSet<String>();
 		for(String generatedFile : generatedFiles) {
 			result.add(generatedFile.replace("\\", "/"));
 		}
-		
+
 		return result;
 	}
-	
-	public void validateRaml(String ramlAsString) {
-		final List<ValidationResult> results = RamlValidationService.createDefault().validate(ramlAsString, new File("").getPath());
+
+	public void validateRaml(String ramlDefinition, final String resourceLocation) {
+
+		List<ValidationResult> results = null;
+		if(resourceLocation == null) {
+			results = RamlValidationService.createDefault().validate(ramlDefinition, resourceLocation);
+		} else {
+			results = RamlValidationService.createDefault(RamlHelper.getResourceLoader()).validate(resourceLocation);
+		}
 
 		if (!ValidationResult.areValid(results)) {
 
 			List<String> validationErrors = Lists.transform(results, new Function<ValidationResult, String>() {
 				@Override
 				public String apply(final ValidationResult vr) {
-					return String.format("%s %s", vr.getStartColumn(), vr.getMessage());
+
+					return String.format("Line: %s, column: %s, message: %s, resource location %s",
+							vr.getLine(),
+							vr.getStartColumn(),
+							vr.getMessage(),
+							resourceLocation);
 				}
 			});
 
 			throw new IllegalArgumentException("Invalid RAML definition:\n" + join(validationErrors, "\n"));
 		}
 	}
+
 
 	public void validateConfiguration(Configuration configuration) {
 		// Validate RAML configuration
@@ -194,6 +217,6 @@ public class Generator {
 					+ outputDirectory
 					+ " is not empty, generation will work but pre-existing files may remain and produce unexpected results");
 		}
-		Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");		
+		Validate.notEmpty(configuration.getBasePackageName(), "base package name can't be empty");
 	}
 }
