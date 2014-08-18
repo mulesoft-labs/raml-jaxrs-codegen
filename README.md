@@ -45,6 +45,7 @@ and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraint
 ## Usage
 
 - [Using the Maven Plug-in](maven-plugin/README.md)
+- [Using the Eclipse Plug-in](eclipse-plugin/README.md)
 - [Using the Core Generator](core/README.md)
 
 ## Examples
