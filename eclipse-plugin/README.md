@@ -8,10 +8,16 @@ _NB. The following documentation will soon be superseded by the Maven-generated 
 
 ## Usage
 
-Select your RAML file in the Package Explorer. Invoke the context menu and click the "RAML to JAX-RS" item to open the  configuration dialog.
+Select your RAML file in the Package Explorer. Invoke the context menu and click the "RAML to JAX-RS" item to open the configuration dialog.
 
 ![](/eclipse-plugin/doc/popup.png)
 
 Use the dialog to configure parameters and launch the generation process.
 
 ![](/eclipse-plugin/doc/dialog.png)
+
+| Option      | Description   |
+| -------------- |-------------| 
+| JAX-RS version | Version of JAX-RS framework to be used during generation |
+| JSON Mapper    | Annotation framework used to map JSON      |
+| Use JSR 303 Annotations   | Enable or not JSR 303 Java Bean validation    |

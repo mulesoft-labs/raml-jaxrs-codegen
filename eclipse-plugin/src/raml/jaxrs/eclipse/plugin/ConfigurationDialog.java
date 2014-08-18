@@ -79,8 +79,8 @@ public class ConfigurationDialog extends TitleAreaDialog {
 		createResourceSelectionGroup(hBox,"Source folder", this.uiConfig.srcFolder, "folder");
 		createResourceSelectionGroup(hBox,"Destination folder", this.uiConfig.dstFolder, "folder");
 		
-		createCombo(hBox, "JAXRS Version", getJaxrsVersionRealm(), this.uiConfig.jaxrsVersion);
-		createCombo(hBox, "Annotation Style", getAnnotationStyleRealm(), this.uiConfig.jsonMapper);
+		createCombo(hBox, "JAX-RS Version", getJaxrsVersionRealm(), this.uiConfig.jaxrsVersion);
+		createCombo(hBox, "JSON Mapper", getAnnotationStyleRealm(), this.uiConfig.jsonMapper);
 		
 		createCheckBox(hBox, "Use JSR 303 Annotations", this.uiConfig.useJsr303Annotations);
 		
