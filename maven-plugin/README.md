@@ -25,6 +25,7 @@ In your `pom.xml`, add the following build plug-in:
             <!-- Valid values: 1.1 2.0 -->
             <jaxrsVersion>2.0</jaxrsVersion>
             <useJsr303Annotations>false</useJsr303Annotations>
+            <useLongIntegers>false</useLongIntegers>
             <!-- Valid values: jackson1 jackson2 gson none -->
             <jsonMapper>jackson2</jsonMapper>
             <removeOldOutput>true</removeOldOutput>

@@ -59,6 +59,7 @@ public class Configuration
     private JaxrsVersion jaxrsVersion = JaxrsVersion.JAXRS_1_1;
     private String basePackageName;
     private boolean useJsr303Annotations = false;
+    private boolean useLongIntegers = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
     private File sourceDirectory;
     private Class methodThrowException = Exception.class;    
@@ -95,6 +96,11 @@ public class Configuration
             public boolean isIncludeToString()
             {
                 return false;
+            }
+            
+            @Override
+            public boolean isUseLongIntegers() {
+            	return useLongIntegers;
             }
         };
     }
@@ -137,6 +143,16 @@ public class Configuration
     public void setUseJsr303Annotations(final boolean useJsr303Annotations)
     {
         this.useJsr303Annotations = useJsr303Annotations;
+    }
+    
+    public boolean isUseLongIntegers()
+    {
+        return useLongIntegers;
+    }
+
+    public void setUseLongIntegers(final boolean useLongIntegers)
+    {
+        this.useLongIntegers = useLongIntegers;
     }
 
     public AnnotationStyle getJsonMapper()

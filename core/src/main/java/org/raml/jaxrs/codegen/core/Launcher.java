@@ -102,6 +102,7 @@ public class Launcher {
 		String basePackageName = null;
 		String jaxrsVersion = "1.1";
 		boolean useJsr303Annotations = false;		
+		boolean useLongIntegers = false;
 		String jsonMapper = "jackson1";
 		
 		
@@ -128,6 +129,9 @@ public class Launcher {
 			else if(argName.equals("jsonMapper")){
 				jsonMapper = argValue;
 			}
+			else if(argName.equals("useLongIntegers")){
+				useLongIntegers = Boolean.parseBoolean(argValue);
+			}
 		}
 		if(basePackageName==null){
 			throw new RuntimeException("Base package must be specified.");
@@ -140,6 +144,7 @@ public class Launcher {
         configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
         configuration.setOutputDirectory(outputDirectory);
         configuration.setUseJsr303Annotations(useJsr303Annotations);
+        configuration.setUseLongIntegers(useLongIntegers);
         configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
         configuration.setSourceDirectory(sourceDirectory);
         

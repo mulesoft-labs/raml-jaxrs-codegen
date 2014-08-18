@@ -6,11 +6,9 @@ baseUri: http://example.com/{version}
 /something:
   /file:
     post:
-      description: Uploads a Bunya client apk to register it with the server.
       body:
         application/octet-stream:
       responses:
         200:
-          description: The Bunya client apk file has been uploaded successfully
           body:
             text/plain:
