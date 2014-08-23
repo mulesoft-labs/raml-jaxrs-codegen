@@ -51,7 +51,7 @@ public class Configuration
             }
 
             throw new IllegalArgumentException(alias + " is not a supported JAX-RS version ("
-                                               + StringUtils.join(supportedAliases, ',') + ")");
+                            + StringUtils.join(supportedAliases, ',') + ")");
         }
     };
 
@@ -61,7 +61,8 @@ public class Configuration
     private boolean useJsr303Annotations = false;
     private AnnotationStyle jsonMapper = AnnotationStyle.JACKSON1;
     private File sourceDirectory;
-    private Class methodThrowException = Exception.class;    
+    private Class methodThrowException = Exception.class;
+    private String asyncResourceTrait;
 
     public GenerationConfig createJsonSchemaGenerationConfig()
     {
@@ -148,12 +149,12 @@ public class Configuration
     {
         this.jsonMapper = jsonMapper;
     }
-    
+
     public Class getMethodThrowException() {
         return methodThrowException;
     }
-    
-    public void setMethodThrowException(Class methodThrowException) {
+
+    public void setMethodThrowException(final Class methodThrowException) {
         this.methodThrowException = methodThrowException;
     }
 
@@ -161,7 +162,17 @@ public class Configuration
         return sourceDirectory;
     }
 
-    public void setSourceDirectory(File sourceDirectory) {
+    public void setSourceDirectory(final File sourceDirectory) {
         this.sourceDirectory = sourceDirectory;
+    }
+
+    public String getAsyncResourceTrait()
+    {
+        return asyncResourceTrait;
+    }
+
+    public void setAsyncResourceTrait(final String asyncResourceTrait)
+    {
+        this.asyncResourceTrait = asyncResourceTrait;
     }
 }

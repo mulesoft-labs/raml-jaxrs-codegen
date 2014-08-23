@@ -134,6 +134,11 @@ public class Types
         return (JClass) context.getGeneratorType(clazz);
     }
 
+    public JClass getGeneratorClass(final String classFQN)
+    {
+        return context.getGeneratorClass(classFQN);
+    }
+
     private JClass getSchemaClass(final MimeType mimeType) throws IOException
     {
         final String schemaNameOrContent = mimeType.getSchema();

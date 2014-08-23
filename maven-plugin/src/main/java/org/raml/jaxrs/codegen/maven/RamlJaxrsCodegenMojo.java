@@ -102,7 +102,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
      */
     @Parameter(property = "jsonMapper", defaultValue = "jackson1")
     private String jsonMapper;
-    
+
+    /**
+     * The name of the trait used to identify resources that support asynchronous responses (optional, JAX-RS 2.0 only).
+     */
+    @Parameter(property = "asyncResourceTrait")
+    private String asyncResourceTrait;
+
     /**
     * Throw exception on Resource Method
     */
@@ -154,6 +160,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setUseJsr303Annotations(useJsr303Annotations);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
             configuration.setSourceDirectory(sourceDirectory);
+            configuration.setAsyncResourceTrait(asyncResourceTrait);
             /*
             if (methodThrowException != null) {
                 configuration.setMethodThrowException(Class.forName(methodThrowException));

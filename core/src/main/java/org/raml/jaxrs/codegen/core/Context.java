@@ -289,6 +289,11 @@ class Context
         return clazz.isPrimitive() ? JType.parse(codeModel, clazz.getSimpleName()) : codeModel.ref(clazz);
     }
 
+    public JClass getGeneratorClass(final String clazzFQN)
+    {
+        return codeModel.ref(clazzFQN);
+    }
+
     public JClass generateClassFromJsonSchema(final String className, final URL schemaUrl) throws IOException
     {
     	return schemaMapper.generate(codeModel, className, getModelPackage(), schemaUrl).boxify();
