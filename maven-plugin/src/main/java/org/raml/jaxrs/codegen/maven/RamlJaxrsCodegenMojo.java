@@ -90,6 +90,13 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
     private boolean useJsr303Annotations;
 
     /**
+     * Whether to use the java type long (or Long) instead of int (or Integer) 
+     * when representing the JSON Schema type 'integer'.
+     */
+    @Parameter(property = "useLongIntegers", defaultValue = "false")
+    private boolean useLongIntegers;
+
+    /**
      * Whether to empty the output directory before generation occurs, to clear out all source files
      * that have been generated previously.
      */
@@ -152,6 +159,7 @@ public class RamlJaxrsCodegenMojo extends AbstractMojo
             configuration.setJaxrsVersion(JaxrsVersion.fromAlias(jaxrsVersion));
             configuration.setOutputDirectory(outputDirectory);
             configuration.setUseJsr303Annotations(useJsr303Annotations);
+            configuration.setUseLongIntegers(useLongIntegers);
             configuration.setJsonMapper(AnnotationStyle.valueOf(jsonMapper.toUpperCase()));
             configuration.setSourceDirectory(sourceDirectory);
             /*
