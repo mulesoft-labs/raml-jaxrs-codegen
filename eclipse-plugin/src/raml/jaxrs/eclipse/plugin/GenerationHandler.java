@@ -32,7 +32,9 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.internal.Workbench;
+import org.jsonschema2pojo.AnnotationStyle;
 import org.raml.jaxrs.codegen.core.Configuration;
+import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 import org.raml.jaxrs.codegen.core.Generator;
 
 public class GenerationHandler extends AbstractHandler{
@@ -94,6 +96,19 @@ public class GenerationHandler extends AbstractHandler{
 		configuration.setOutputDirectory(dstOSFolder);
 		configuration.setSourceDirectory(srcOSFolder);
 		configuration.setBasePackageName(uiConfig.getBasePackageName());
+		
+		JaxrsVersion jaxrsVersion = JaxrsVersion.valueOf(uiConfig.getJaxrsVersion());
+		if(jaxrsVersion!=null){
+			configuration.setJaxrsVersion(jaxrsVersion);
+		}
+		
+		AnnotationStyle jsonMapper = AnnotationStyle.valueOf(uiConfig.getJsonMapper());
+		if(jsonMapper!=null){
+			configuration.setJsonMapper(jsonMapper);
+		}
+		
+		configuration.setUseJsr303Annotations(uiConfig.getUseJsr303Annotations());
+		
 		return configuration;
 	}
 
@@ -104,6 +119,12 @@ public class GenerationHandler extends AbstractHandler{
 		uiConfig.setSrcFolder(file.getParent());
 		uiConfig.setDstFolder(null);
 		uiConfig.setBasePackageName("org.raml.jaxrs.test");
+		
+		Configuration config = new Configuration();
+		uiConfig.setJaxrsVersion(config.getJaxrsVersion().name());
+		uiConfig.setJsonMapper(config.getJsonMapper().name());
+		uiConfig.setUseJsr303Annotations(config.isUseJsr303Annotations());
+		
 		return uiConfig;
 	}
 }

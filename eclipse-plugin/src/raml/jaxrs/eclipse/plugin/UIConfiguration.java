@@ -18,6 +18,8 @@ package raml.jaxrs.eclipse.plugin;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.jsonschema2pojo.AnnotationStyle;
+import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 
 public class UIConfiguration {
 	
@@ -28,6 +30,12 @@ public class UIConfiguration {
 	ObjectReference<IResource> srcFolder = new ObjectReference<IResource>();
 	
 	ObjectReference<IResource> dstFolder = new ObjectReference<IResource>();
+	
+	ObjectReference<String> jaxrsVersion = new ObjectReference<String>();
+	
+    ObjectReference<Boolean> useJsr303Annotations = new ObjectReference<Boolean>();
+    
+    ObjectReference<String> jsonMapper = new ObjectReference<String>();
 	
 	public String getBasePackageName() {		
 		return basePackageName.get();
@@ -59,6 +67,30 @@ public class UIConfiguration {
 
 	public IContainer getDstFolder() {
 		return (IContainer) dstFolder.get();
+	}
+
+	public String getJaxrsVersion() {
+		return jaxrsVersion.get();
+	}
+
+	public void setJaxrsVersion(String jaxrsVersion) {
+		this.jaxrsVersion.set(jaxrsVersion);
+	}
+
+	public Boolean getUseJsr303Annotations() {
+		return useJsr303Annotations.get();
+	}
+
+	public void setUseJsr303Annotations(Boolean useJsr303Annotations){
+		this.useJsr303Annotations.set(useJsr303Annotations);
+	}
+
+	public String getJsonMapper() {
+		return jsonMapper.get();
+	}
+
+	public void setJsonMapper(String jsonMapper) {
+		this.jsonMapper.set(jsonMapper);
 	}
 
 	public boolean isValid() {

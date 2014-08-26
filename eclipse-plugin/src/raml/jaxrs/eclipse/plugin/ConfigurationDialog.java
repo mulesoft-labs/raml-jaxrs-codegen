@@ -15,6 +15,11 @@
  */
 package raml.jaxrs.eclipse.plugin;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -31,13 +36,17 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+import org.jsonschema2pojo.AnnotationStyle;
+import org.raml.jaxrs.codegen.core.Configuration.JaxrsVersion;
 
 public class ConfigurationDialog extends TitleAreaDialog {	
 	
@@ -54,12 +63,13 @@ public class ConfigurationDialog extends TitleAreaDialog {
 	
 	protected Composite createDialogArea( Composite parent ){
 		
-		this.setTitle("Convert RAML to JAXRS");	
+		this.setTitle("Convert RAML to JAX-RS");
+		this.setMessage("Please, adjust convertation parameters.");
 		parent.setLayout( new GridLayout(1,false) );
 		Group hBox = new Group(parent,SWT.NONE);
 		GridData hBoxData = new GridData( GridData.FILL_BOTH);
 		hBoxData.widthHint = 300 ;
-		hBoxData.heightHint = 300 ;
+		hBoxData.heightHint = 400 ;
 		hBox.setLayoutData( hBoxData ) ;
 		hBox.setLayout( new GridLayout(1,false)) ;
 		
@@ -68,6 +78,11 @@ public class ConfigurationDialog extends TitleAreaDialog {
 		createResourceSelectionGroup(hBox,"RAML file", this.uiConfig.ramlFile, "file");
 		createResourceSelectionGroup(hBox,"Source folder", this.uiConfig.srcFolder, "folder");
 		createResourceSelectionGroup(hBox,"Destination folder", this.uiConfig.dstFolder, "folder");
+		
+		createCombo(hBox, "JAX-RS Version", getJaxrsVersionRealm(), this.uiConfig.jaxrsVersion);
+		createCombo(hBox, "JSON Mapper", getAnnotationStyleRealm(), this.uiConfig.jsonMapper);
+		
+		createCheckBox(hBox, "Use JSR 303 Annotations", this.uiConfig.useJsr303Annotations);
 		
 		return parent;	
 	}
@@ -189,5 +204,99 @@ public class ConfigurationDialog extends TitleAreaDialog {
 				}
 			});
 		}
-	}	
+	}
+	
+	private void createCombo(
+			Composite parent,
+			String title,
+			final List<String> values,
+			final ObjectReference<String> container ) {
+		
+		Composite group = new Composite(parent, SWT.NONE);		
+		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		group.setLayout(new GridLayout(3,false));
+		
+		Label l = new Label(group, SWT.NONE);		
+		l.setText(title);
+		GridData lData = new GridData();
+		l.setLayoutData(lData);		
+		
+		final Combo combo = new Combo(group, SWT.NONE);
+		GridData comboData = new GridData();
+		comboData.horizontalSpan = 1;
+		combo.setLayoutData(comboData);
+		
+		combo.setItems(values.toArray(new String[values.size()]));
+		
+		Object currentValue = container.get();
+		if( currentValue != null ){
+			int indexOf = values.indexOf(currentValue);
+			if(indexOf>=0){
+				combo.select(indexOf);
+			}
+		}
+		
+		combo.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				int selectionIndex = combo.getSelectionIndex();				
+				container.set(values.get(selectionIndex));
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+	}
+	
+	private void createCheckBox(
+			Composite parent,
+			String title,
+			final ObjectReference<Boolean> container ) {
+
+		final Button button = new Button(parent, SWT.CHECK);
+		button.setText(title);
+		GridData data = new GridData();
+		button.setLayoutData(data);
+		
+		Boolean currentValue = container.get();
+		if( currentValue != null ){
+			button.setSelection(currentValue);
+		}
+		
+		button.addSelectionListener(new SelectionListener() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				container.set(button.getSelection());
+			}
+			
+			@Override
+			public void widgetDefaultSelected(SelectionEvent e) {}
+		});
+	}
+	
+	private List<String> getJaxrsVersionRealm(){
+		
+		ArrayList<String> result=  new ArrayList<String>(Arrays.asList(			
+			JaxrsVersion.JAXRS_1_1.name(),
+			JaxrsVersion.JAXRS_2_0.name()
+		)); 
+				
+		return result;
+	}
+	
+	private List<String> getAnnotationStyleRealm(){
+		
+		ArrayList<String> result=  new ArrayList<String>(Arrays.asList(
+				
+			AnnotationStyle.GSON.name(),
+			AnnotationStyle.JACKSON.name(),
+			AnnotationStyle.JACKSON1.name(),
+			AnnotationStyle.JACKSON2.name(),
+			AnnotationStyle.NONE.name()
+		)); 
+				
+		return result;
+	}
 }
