@@ -2,6 +2,13 @@
 
 # RAML JAX-RS Codegen
 
+**This project will be removed soon. Please read**: We have been working in a big refactor and merge of this project with a related one (JAX-RS to RAML).
+This last one was finally renamed to RAML for JAX-RS and contains all the features of both projects. The project will be stored and updated in that
+repository which you can find [here](https://github.com/mulesoft/raml-for-jax-rs). We will keep this repository alive for a few more weeks to give some time to the
+current users to realize about the other one, but this will no longer be maintained.
+
+All issues, Pull Requests and other activities should be done in [the other repository](https://github.com/mulesoft/raml-for-jax-rs).
+
 ## Objective
 
 The goal of this project is to support a RAML-first approach for JAX-RS enabled API projects.
@@ -33,7 +40,7 @@ and with `@Min`/`@Max` support limited to non decimal minimum/maximum constraint
 
 - Generation of JAXB annotated classes based on XML Schemas
 
-## TO-DO's 
+## TO-DO's
 
 - Documentation needs a lot of improvements, completion and examples. Most developers will be able to figure the missing gaps by themselves and looking at the Jersey example, but we will enhance documentation soon.
 - There is no hosting of Maven artifacts yet, so users need to download from git and install in the local repo for now.
