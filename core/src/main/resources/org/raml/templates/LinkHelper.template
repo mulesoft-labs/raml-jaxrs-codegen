@@ -1,0 +1,56 @@
+package ${codegen.support.package};
+
+import java.net.URI;
+import java.util.Map;
+
+import javax.ws.rs.core.Link;
+import javax.ws.rs.core.UriBuilder;
+
+public class LinkHelper {
+
+  public static Link.Builder start(Class<?> resourceClass, String methodName, Map<String, Object> queryArgs, Map<String, Object> pathArgs) {
+
+    UriBuilder uriBuilder = UriBuilder.fromResource(resourceClass).path(resourceClass, methodName);
+
+    for(Map.Entry<String, Object> entry : queryArgs.entrySet()) {
+      if(entry.getValue() == null) {
+        uriBuilder.queryParam(entry.getKey(), "{" + entry.getKey() + "}");
+      } else {
+        uriBuilder.queryParam(entry.getKey(), entry.getValue());
+      }
+    }
+
+    String template = uriBuilder.toTemplate();
+
+    // unresolved template params
+    for(Map.Entry<String, Object> entry : pathArgs.entrySet()) {
+      if(entry.getValue() != null) {
+        template = template.replace("{" + entry.getKey() + "}", entry.getValue().toString());
+      }
+    }
+
+    String uriTemplate = encodeTemplateNames(template);
+    URI uri = UriBuilder.fromUri(uriTemplate).build();
+    return Link.fromUri(uri);
+  }
+
+  /**
+   * Encodes a string with template parameters names present, specifically the
+   * characters '{' and '}' will be percent-encoded.
+   *
+   * @param s the string with zero or more template parameters names
+   * @return the string with encoded template parameters names.
+   */
+  private static String encodeTemplateNames(String s) {
+    int i = s.indexOf('{');
+    if (i != -1) {
+      s = s.replace("{", "%7B");
+    }
+    i = s.indexOf('}');
+    if (i != -1) {
+      s = s.replace("}", "%7D");
+    }
+
+    return s;
+  }
+}

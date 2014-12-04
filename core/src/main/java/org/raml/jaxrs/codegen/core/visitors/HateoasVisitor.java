@@ -138,8 +138,7 @@ public class HateoasVisitor extends TemplateResourceVisitor {
 
     try {
       String supportPackage = getConfiguration().getSupportPackage();
-      String template = IOUtils.toString(getClass().getResourceAsStream(
-          "/org/raml/templates/LinkHelper.template"));
+      String template = IOUtils.toString(getClass().getResourceAsStream("/org/raml/templates/LinkHelper.template"));
 
       File supportPackageOutputDirectory = new File(getConfiguration().getOutputDirectory(), supportPackage.replace('.', File.separatorChar));
       File sourceOutputFile = new File(supportPackageOutputDirectory, LINK_BUILDER_NAME +".java");
