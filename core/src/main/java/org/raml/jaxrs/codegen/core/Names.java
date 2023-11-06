@@ -104,9 +104,11 @@ public class Names
         {
             return "";
         }
-
-        return remove(remove(StringUtils.substringAfter(mimeType.getType().toLowerCase(DEFAULT_LOCALE), "/"),
-            "x-www-"),"+");
+        String lowerMimeType = mimeType.getType().toLowerCase(DEFAULT_LOCALE);
+        String shortMimeType = StringUtils.substringAfter(lowerMimeType, "/");
+        String wwwRemoved = remove(shortMimeType, "x-www-");
+        String dashRemoved = remove(wwwRemoved, "-");
+        return dashRemoved;
     }
 
     private Names()
